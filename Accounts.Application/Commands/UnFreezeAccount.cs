@@ -1,16 +1,20 @@
 ﻿using System;
 using FluentValidation;
+using Infrastructure.Messaging;
 using MediatR;
 
 namespace Accounts.Application.Commands
 {
-    public sealed class UnFreezeAccount : IRequest
+    public sealed class UnFreezeAccount : ICommand, IRequest
     {
+        public Guid Id { get; }
         public Guid AccountId { get; }
 
         public UnFreezeAccount(
+            Guid id,
             Guid accountId)
         {
+            Id = id;
             AccountId = accountId;
         }
 

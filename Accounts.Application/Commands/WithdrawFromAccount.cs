@@ -1,18 +1,22 @@
 ﻿using System;
 using FluentValidation;
+using Infrastructure.Messaging;
 using MediatR;
 
 namespace Accounts.Application.Commands
 {
-    public sealed class WithdrawFromAccount : IRequest
+    public sealed class WithdrawFromAccount : ICommand, IRequest
     {
+        public Guid Id { get; }
         public Guid AccountId { get; }
         public decimal Amount { get; }
 
         public WithdrawFromAccount(
+            Guid id,
             Guid accountId,
             decimal amount)
         {
+            Id = id;
             AccountId = accountId;
             Amount = amount;
         }

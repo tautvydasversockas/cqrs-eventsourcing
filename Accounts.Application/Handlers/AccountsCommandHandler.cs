@@ -27,37 +27,37 @@ namespace Accounts.Application.Handlers
         public async Task<Guid> Handle(OpenAccount cmd, CancellationToken token)
         {
             var account = Account.Open(Guid.NewGuid(), cmd.ClientId, cmd.InterestRate, cmd.Balance);
-            await _repository.AddAsync(account);
+            await _repository.SaveAsync(account, cmd.Id.ToString());
             return account.Id;
         }
 
         public async Task<Unit> Handle(DepositToAccount cmd, CancellationToken token)
         {
-            await _repository.ExecuteAsync(cmd.AccountId, account => account.Deposit(cmd.Amount));
+            await _repository.ExecuteAsync(cmd.AccountId, account => account.Deposit(cmd.Amount), cmd.Id.ToString());
             return Unit.Value;
         }
 
         public async Task<Unit> Handle(WithdrawFromAccount cmd, CancellationToken token)
         {
-            await _repository.ExecuteAsync(cmd.AccountId, account => account.Withdraw(cmd.Amount));
+            await _repository.ExecuteAsync(cmd.AccountId, account => account.Withdraw(cmd.Amount), cmd.Id.ToString());
             return Unit.Value;
         }
 
         public async Task<Unit> Handle(AddInterestsToAccount cmd, CancellationToken token)
         {
-            await _repository.ExecuteAsync(cmd.AccountId, account => account.AddInterests());
+            await _repository.ExecuteAsync(cmd.AccountId, account => account.AddInterests(), cmd.Id.ToString());
             return Unit.Value;
         }
 
         public async Task<Unit> Handle(FreezeAccount cmd, CancellationToken token)
         {
-            await _repository.ExecuteAsync(cmd.AccountId, account => account.Freeze());
+            await _repository.ExecuteAsync(cmd.AccountId, account => account.Freeze(), cmd.Id.ToString());
             return Unit.Value;
         }
 
         public async Task<Unit> Handle(UnFreezeAccount cmd, CancellationToken token)
         {
-            await _repository.ExecuteAsync(cmd.AccountId, account => account.Unfreeze());
+            await _repository.ExecuteAsync(cmd.AccountId, account => account.Unfreeze(), cmd.Id.ToString());
             return Unit.Value;
         }
     }

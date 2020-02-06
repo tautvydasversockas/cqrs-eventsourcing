@@ -1,18 +1,22 @@
 ﻿using System;
 using FluentValidation;
+using Infrastructure.Messaging;
 using MediatR;
 
 namespace Accounts.Application.Commands
 {
-    public sealed class DepositToAccount : IRequest
+    public sealed class DepositToAccount : ICommand, IRequest
     {
+        public Guid Id { get; }
         public Guid AccountId { get; }
         public decimal Amount { get; }
 
         public DepositToAccount(
+            Guid id,
             Guid accountId,
             decimal amount)
         {
+            Id = id;
             AccountId = accountId;
             Amount = amount;
         }
