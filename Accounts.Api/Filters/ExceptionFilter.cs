@@ -1,5 +1,5 @@
 ﻿using System.Web.Http;
-using Accounts.Application.Common.Exceptions;
+using Accounts.Application.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 

@@ -1,11 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using ReflectionMagic;
 
 namespace Infrastructure.Domain
 {
     public abstract class EventSourcedAggregate<TId> : Entity<TId>
     {
+        private readonly HashSet<Guid> _operationIds = new HashSet<Guid>();
         private readonly List<IVersionedEvent<TId>> _events = new List<IVersionedEvent<TId>>();
+        private Guid _currentOperationId = Guid.NewGuid();
 
         protected EventSourcedAggregate(TId id) 
             : base(id)
@@ -30,8 +33,17 @@ namespace Infrastructure.Domain
             _events.Clear();
         }
 
+        public void SetOperation(Guid operationId)
+        {
+            if (_operationIds.Contains(operationId))
+                throw new InvalidOperationException("Duplicate Operation.");
+
+            _currentOperationId = operationId;
+        }
+
         protected void Raise(VersionedEvent<TId> evt)
         {
+            evt.OperationId = _currentOperationId;
             evt.SourceId = Id;
             evt.Version = Version + 1;
             _events.Add(evt);
@@ -42,6 +54,8 @@ namespace Infrastructure.Domain
         {
             this.AsDynamic().Apply(evt);
             Version = evt.Version;
+            if (!_operationIds.Contains(evt.OperationId))
+                _operationIds.Add(evt.OperationId);
         }
     }
 }

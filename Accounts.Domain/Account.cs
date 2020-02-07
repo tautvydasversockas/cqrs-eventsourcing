@@ -73,7 +73,7 @@ namespace Accounts.Domain
         public void Freeze()
         {
             if (_status == Frozen)
-                throw new InvalidOperationException("Cannot freeze frozen account");
+                return;
 
             Raise(new AccountFrozen());
         }
@@ -81,7 +81,7 @@ namespace Accounts.Domain
         public void Unfreeze()
         {
             if (_status != Frozen)
-                throw new InvalidOperationException("Cannot unfreeze not frozen account");
+                return;
 
             Raise(new AccountUnFrozen());
         }
