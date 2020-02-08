@@ -5,6 +5,7 @@ using Accounts.Api.BackgroundWorkers;
 using Accounts.Api.Filters;
 using Accounts.Application.Commands;
 using Accounts.Application.Handlers;
+using Accounts.Domain.Events;
 using Accounts.ReadModel;
 using EventStore.ClientAPI;
 using FluentValidation.AspNetCore;
@@ -80,6 +81,11 @@ namespace Accounts.Api
                     var connection = EventStoreConnection.Create(eventStoreConnectionString);
                     connection.ConnectAsync().GetAwaiter().GetResult();
                     return connection;
+                })
+                .AddSingleton(_ =>
+                {
+                    var typeInfo = typeof(AccountOpened).GetTypeInfo();
+                    return new EventStoreSerializer(typeInfo.Assembly, typeInfo.Namespace);
                 })
                 .AddSingleton(typeof(IEventSourcedRepository<,>), typeof(EventStoreRepository<,>))
                 .AddSingleton<AccountReadModelGenerator>()

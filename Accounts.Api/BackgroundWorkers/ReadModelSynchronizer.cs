@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Accounts.Domain.Events;
@@ -13,14 +12,17 @@ namespace Accounts.Api.BackgroundWorkers
     public sealed class ReadModelSynchronizer : BackgroundService
     {
         private readonly IEventStoreConnection _connection;
+        private readonly EventStoreSerializer _serializer;
         private readonly AccountReadModelGenerator _readModelGenerator;
         private EventStorePersistentSubscriptionBase _subscription;
 
         public ReadModelSynchronizer(
-            IEventStoreConnection connection, 
+            IEventStoreConnection connection,
+            EventStoreSerializer serializer,
             AccountReadModelGenerator readModelGenerator)
         {
             _connection = connection;
+            _serializer = serializer;
             _readModelGenerator = readModelGenerator;
         }
 
@@ -36,10 +38,11 @@ namespace Accounts.Api.BackgroundWorkers
 
         private Task EventAppeared(EventStorePersistentSubscriptionBase subscription, ResolvedEvent resolvedEvent)
         {
-            var recordedEvt = resolvedEvent.Event;
-            var metadata = EventStoreSerializer.Deserialize<Dictionary<string, object>>(recordedEvt.Metadata);
-            var evtType = Type.GetType(metadata[EventStoreMetadataKeys.EventClrType].ToString());
-            var evt = EventStoreSerializer.Deserialize(recordedEvt.Data, evtType);
+            if (IsSystemEvent(resolvedEvent))
+                return Task.CompletedTask;
+
+            var (evt, _) = _serializer.Deserialize(resolvedEvent);
+
             return evt switch
             {
                 AccountOpened accountOpened => _readModelGenerator.Handle(accountOpened),
@@ -50,6 +53,12 @@ namespace Accounts.Api.BackgroundWorkers
                 AccountUnFrozen depositedToAccount => _readModelGenerator.Handle(depositedToAccount),
                 _ => Task.CompletedTask
             };
+        }
+
+        private static bool IsSystemEvent(ResolvedEvent resolvedEvent)
+        {
+            var recordedEvt = resolvedEvent.Event;
+            return recordedEvt.Data.Length <= 0 || !recordedEvt.IsJson || recordedEvt.EventType.StartsWith("$");
         }
 
         private void SubscriptionDropped(EventStorePersistentSubscriptionBase subscription, SubscriptionDropReason reason, Exception e)

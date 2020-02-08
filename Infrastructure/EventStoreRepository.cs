@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using EventStore.ClientAPI;
@@ -13,11 +12,16 @@ namespace Infrastructure
         where TEventSourcedAggregate : EventSourcedAggregate<TId>
     {
         private readonly IEventStoreConnection _connection;
+        private readonly EventStoreSerializer _serializer;
         private readonly EventSourcedAggregateFactory _aggregateFactory;
 
-        public EventStoreRepository(IEventStoreConnection connection, EventSourcedAggregateFactory aggregateFactory)
+        public EventStoreRepository(
+            IEventStoreConnection connection,
+            EventStoreSerializer serializer,
+            EventSourcedAggregateFactory aggregateFactory)
         {
             _connection = connection;
+            _serializer = serializer;
             _aggregateFactory = aggregateFactory;
         }
 
@@ -34,21 +38,9 @@ namespace Infrastructure
                 : originalVersion - 1;
             var commitMetadata = new Dictionary<string, object>
             {
-                {EventStoreMetadataKeys.CorrelationId, correlationId},
-                {EventStoreMetadataKeys.AggregateClrType, aggregate.GetType().AssemblyQualifiedName}
+                {EventStoreMetadataKeys.CorrelationId, correlationId}
             };
-            var eventsToSave = events.Select(e =>
-            {
-                var evtId = Guid.NewGuid();
-                var evtType = e.GetType();
-                var serializedEvt = EventStoreSerializer.Serialize(e);
-                var metadata = new Dictionary<string, object>(commitMetadata)
-                {
-                    { EventStoreMetadataKeys.EventClrType, evtType.AssemblyQualifiedName}
-                };
-                var serializedMetadata = EventStoreSerializer.Serialize(metadata);
-                return new EventData(evtId, evtType.Name, true, serializedEvt, serializedMetadata);
-            });
+            var eventsToSave = events.Select(e => _serializer.Serialize(e, commitMetadata));
 
             try
             {
@@ -71,15 +63,9 @@ namespace Infrastructure
 
             do
             {
-                currentSlice = await _connection.ReadStreamEventsForwardAsync(streamName, nextSliceStart, count: 10, resolveLinkTos: false);
+                currentSlice = await _connection.ReadStreamEventsForwardAsync(streamName, nextSliceStart, 10, false);
                 nextSliceStart = currentSlice.NextEventNumber;
-                events.AddRange(currentSlice.Events.Select(e =>
-                {
-                    var recordedEvt = e.Event;
-                    var metadata = EventStoreSerializer.Deserialize<Dictionary<string, object>>(recordedEvt.Metadata);
-                    var evtType = Type.GetType(metadata[EventStoreMetadataKeys.EventClrType].ToString());
-                    return (IVersionedEvent<TId>)EventStoreSerializer.Deserialize(recordedEvt.Data, evtType);
-                }));
+                events.AddRange(currentSlice.Events.Select(e => (IVersionedEvent<TId>)_serializer.Deserialize(e).Item1));
             } while (!currentSlice.IsEndOfStream);
 
             if (!events.Any())
