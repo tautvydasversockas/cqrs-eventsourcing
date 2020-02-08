@@ -2,13 +2,19 @@
 using System.Collections.Generic;
 using Accounts.Domain.Events;
 using Infrastructure.Domain;
-using static Accounts.Domain.AccountStatus;
+using static Accounts.Domain.Account.Status;
 
 namespace Accounts.Domain
 {
     public sealed class Account : EventSourcedAggregate<Guid>
     {
-        private AccountStatus _status;
+        public enum Status
+        {
+            Active,
+            Frozen
+        }
+
+        private Status _status;
         private decimal _balance;
         private decimal _interestRate;
 
