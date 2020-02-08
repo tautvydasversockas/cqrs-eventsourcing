@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Accounts.Application.Exceptions;
 using Accounts.Domain.Events;
+using Infrastructure.Domain.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Accounts.ReadModel

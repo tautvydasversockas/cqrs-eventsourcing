@@ -27,11 +27,8 @@ namespace Accounts.Api.Controllers
 
         [HttpGet]
         [ProducesResponseType(typeof(List<ActiveAccount>), (int)HttpStatusCode.OK)]
-        public async Task<IActionResult> GetAll(CancellationToken token)
-        {
-            var accounts = await _readModel.Accounts.ToListAsync(token);
-            return Ok(accounts);
-        }
+        public async Task<IActionResult> GetAll(CancellationToken token) =>
+            Ok(await _readModel.Accounts.ToListAsync(token));
 
         [HttpGet("{id}", Name = nameof(Get))]
         [ProducesResponseType(typeof(ActiveAccount), (int)HttpStatusCode.OK)]
@@ -43,45 +40,36 @@ namespace Accounts.Api.Controllers
         }
 
         [HttpPost("open")]
-        [ProducesResponseType(typeof(Guid), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(Guid), (int)HttpStatusCode.Created)]
         public async Task<IActionResult> Open([Required]OpenAccount cmd, CancellationToken token)
         {
-            return Ok(await _mediator.Send(cmd, token));
+            var id = await _mediator.Send(cmd, token);
+            return CreatedAtRoute(nameof(Get), new { id }, id);
         }
 
         [HttpPost("deposit")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
-        public async Task<IActionResult> Deposit([Required]DepositToAccount cmd, CancellationToken token)
-        {
-            return Ok(await _mediator.Send(cmd, token));
-        }
+        public async Task<IActionResult> Deposit([Required]DepositToAccount cmd, CancellationToken token) =>
+            Ok(await _mediator.Send(cmd, token));
 
         [HttpPost("withdraw")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
-        public async Task<IActionResult> Withdraw([Required]WithdrawFromAccount cmd, CancellationToken token)
-        {
-            return Ok(await _mediator.Send(cmd, token));
-        }
+        public async Task<IActionResult> Withdraw([Required]WithdrawFromAccount cmd, CancellationToken token) =>
+            Ok(await _mediator.Send(cmd, token));
 
         [HttpPost("add-interests")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
-        public async Task<IActionResult> AddInterests([Required]AddInterestsToAccount cmd, CancellationToken token)
-        {
-            return Ok(await _mediator.Send(cmd, token));
-        }
+        public async Task<IActionResult> AddInterests([Required]AddInterestsToAccount cmd, CancellationToken token) =>
+            Ok(await _mediator.Send(cmd, token));
 
         [HttpPost("freeze")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
-        public async Task<IActionResult> Freeze([Required]FreezeAccount cmd, CancellationToken token)
-        {
-            return Ok(await _mediator.Send(cmd, token));
-        }
+        public async Task<IActionResult> Freeze([Required]FreezeAccount cmd, CancellationToken token) =>
+            Ok(await _mediator.Send(cmd, token));
 
         [HttpPost("unfreeze")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
-        public async Task<IActionResult> Unfreeze([Required]UnFreezeAccount cmd, CancellationToken token)
-        {
-            return Ok(await _mediator.Send(cmd, token));
-        }
+        public async Task<IActionResult> Unfreeze([Required]UnFreezeAccount cmd, CancellationToken token) =>
+            Ok(await _mediator.Send(cmd, token));
     }
 }

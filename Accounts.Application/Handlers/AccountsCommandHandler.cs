@@ -2,8 +2,9 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Accounts.Application.Commands;
-using Accounts.Application.Exceptions;
+using Accounts.Application.Common;
 using Accounts.Domain;
+using Infrastructure;
 using Infrastructure.Domain;
 using MediatR;
 
@@ -26,94 +27,39 @@ namespace Accounts.Application.Handlers
 
         public async Task<Guid> Handle(OpenAccount cmd, CancellationToken token)
         {
-            var account = await _repository.GetAsync(cmd.Id);
-            if (account != null)
-                return account.Id;
-
-            account = Account.Open(cmd.Id, cmd.ClientId, cmd.InterestRate, cmd.Balance);
-            await _repository.SaveAsync(account, cmd.Id.ToString());
-            return account.Id;
+            var id = DeterministicGuid.Create(cmd.Id);
+            var account = Account.Open(id, cmd.ClientId, cmd.InterestRate, cmd.Balance);
+            await _repository.CreateAsync(account, cmd.Id.ToString());
+            return id;
         }
 
         public async Task<Unit> Handle(DepositToAccount cmd, CancellationToken token)
         {
-            var account = await _repository.GetAsync(cmd.AccountId) ??
-                            throw new EntityNotFoundException(typeof(Account).Name, cmd.AccountId);
-
-            try
-            {
-                account.SetOperation(cmd.Id);
-            }
-            catch (InvalidOperationException)
-            {
-                return Unit.Value;
-            }
-
-            account.Deposit(cmd.Amount);
-
-            await _repository.SaveAsync(account, cmd.Id.ToString());
+            await _repository.ExecuteAsync(cmd.AccountId, account => account.Deposit(cmd.Amount), cmd.Id.ToString(), cmd.Id);
             return Unit.Value;
         }
 
         public async Task<Unit> Handle(WithdrawFromAccount cmd, CancellationToken token)
         {
-            var account = await _repository.GetAsync(cmd.AccountId) ??
-                          throw new EntityNotFoundException(typeof(Account).Name, cmd.AccountId);
-
-            try
-            {
-                account.SetOperation(cmd.Id);
-            }
-            catch (InvalidOperationException)
-            {
-                return Unit.Value;
-            }
-
-            account.Withdraw(cmd.Amount);
-
-            await _repository.SaveAsync(account, cmd.Id.ToString());
+            await _repository.ExecuteAsync(cmd.AccountId, account => account.Withdraw(cmd.Amount), cmd.Id.ToString(), cmd.Id);
             return Unit.Value;
         }
 
         public async Task<Unit> Handle(AddInterestsToAccount cmd, CancellationToken token)
         {
-            var account = await _repository.GetAsync(cmd.AccountId) ??
-                          throw new EntityNotFoundException(typeof(Account).Name, cmd.AccountId);
-
-            try
-            {
-                account.SetOperation(cmd.Id);
-            }
-            catch (InvalidOperationException)
-            {
-                return Unit.Value;
-            }
-
-            account.AddInterests();
-
-            await _repository.SaveAsync(account, cmd.Id.ToString());
+            await _repository.ExecuteAsync(cmd.AccountId, account => account.AddInterests(), cmd.Id.ToString(), cmd.Id);
             return Unit.Value;
         }
 
         public async Task<Unit> Handle(FreezeAccount cmd, CancellationToken token)
         {
-            var account = await _repository.GetAsync(cmd.AccountId) ??
-                          throw new EntityNotFoundException(typeof(Account).Name, cmd.AccountId);
-
-            account.Freeze();
-
-            await _repository.SaveAsync(account, cmd.Id.ToString());
+            await _repository.ExecuteAsync(cmd.AccountId, account => account.Freeze(), cmd.Id.ToString());
             return Unit.Value;
         }
 
         public async Task<Unit> Handle(UnFreezeAccount cmd, CancellationToken token)
         {
-            var account = await _repository.GetAsync(cmd.AccountId) ??
-                          throw new EntityNotFoundException(typeof(Account).Name, cmd.AccountId);
-
-            account.Unfreeze();
-
-            await _repository.SaveAsync(account, cmd.Id.ToString());
+            await _repository.ExecuteAsync(cmd.AccountId, account => account.Unfreeze(), cmd.Id.ToString());
             return Unit.Value;
         }
     }

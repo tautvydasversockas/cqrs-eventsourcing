@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using EventStore.ClientAPI;
+using EventStore.ClientAPI.Exceptions;
 using Infrastructure.Domain;
+using Infrastructure.Domain.Exceptions;
 
 namespace Infrastructure
 {
@@ -48,7 +50,14 @@ namespace Infrastructure
                 return new EventData(evtId, evtType.Name, true, serializedEvt, serializedMetadata);
             });
 
-            await _connection.AppendToStreamAsync(streamName, expectedVersion, eventsToSave);
+            try
+            {
+                await _connection.AppendToStreamAsync(streamName, expectedVersion, eventsToSave);
+            }
+            catch (WrongExpectedVersionException e) when (e.ExpectedVersion == ExpectedVersion.NoStream)
+            {
+                throw new DuplicateKeyException(aggregate.Id);
+            }
 
             aggregate.MarkEventsAsCommitted();
         }
@@ -73,9 +82,10 @@ namespace Infrastructure
                 }));
             } while (!currentSlice.IsEndOfStream);
 
-            return events.Any()
-                ? _aggregateFactory.Create<TEventSourcedAggregate, TId>(id, events)
-                : null;
+            if (!events.Any())
+                throw new EntityNotFoundException(typeof(TEventSourcedAggregate).Name, id);
+
+            return _aggregateFactory.Create<TEventSourcedAggregate, TId>(id, events);
         }
 
         private static string GetStreamName(TId id)

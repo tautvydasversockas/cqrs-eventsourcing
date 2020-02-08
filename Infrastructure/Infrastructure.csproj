@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
@@ -7,6 +7,7 @@
   <ItemGroup>
     <PackageReference Include="EventStore.Client" Version="5.0.5" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="Vlingo.UUID" Version="0.6.4.6" />
   </ItemGroup>
 
   <ItemGroup>
