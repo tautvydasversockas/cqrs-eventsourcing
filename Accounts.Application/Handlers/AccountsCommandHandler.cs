@@ -36,31 +36,31 @@ namespace Accounts.Application.Handlers
         public async Task<Unit> Handle(DepositToAccount cmd, CancellationToken token)
         {
             await _repository.ExecuteAsync(cmd.AccountId, account => account.Deposit(cmd.Amount), cmd.Id.ToString(), cmd.Id);
-            return default;
+            return Unit.Value;
         }
 
         public async Task<Unit> Handle(WithdrawFromAccount cmd, CancellationToken token)
         {
             await _repository.ExecuteAsync(cmd.AccountId, account => account.Withdraw(cmd.Amount), cmd.Id.ToString(), cmd.Id);
-            return default;
+            return Unit.Value;
         }
 
         public async Task<Unit> Handle(AddInterestsToAccount cmd, CancellationToken token)
         {
             await _repository.ExecuteAsync(cmd.AccountId, account => account.AddInterests(), cmd.Id.ToString(), cmd.Id);
-            return default;
+            return Unit.Value;
         }
 
         public async Task<Unit> Handle(FreezeAccount cmd, CancellationToken token)
         {
             await _repository.ExecuteAsync(cmd.AccountId, account => account.Freeze(), cmd.Id.ToString());
-            return default;
+            return Unit.Value;
         }
 
         public async Task<Unit> Handle(UnFreezeAccount cmd, CancellationToken token)
         {
             await _repository.ExecuteAsync(cmd.AccountId, account => account.Unfreeze(), cmd.Id.ToString());
-            return default;
+            return Unit.Value;
         }
     }
 }
