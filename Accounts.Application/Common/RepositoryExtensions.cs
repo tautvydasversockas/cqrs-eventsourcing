@@ -8,30 +8,30 @@ namespace Accounts.Application.Common
     public static class RepositoryExtensions
     {
         public static async Task CreateAsync<TEventSourcedAggregate, TId>(
-            this IEventSourcedRepository<TEventSourcedAggregate, TId> repository, TEventSourcedAggregate aggregate, string correlationId)
+            this IEventSourcedRepository<TEventSourcedAggregate, TId> repository, TEventSourcedAggregate aggregate, Guid correlationId)
             where TEventSourcedAggregate : EventSourcedAggregate<TId>
         {
             try
             {
-                await repository.SaveAsync(aggregate, correlationId);
+                await repository.SaveAsync(aggregate, correlationId.ToString());
             }
             catch (DuplicateKeyException)
             {
-                //Ignoring idempotent operation
+                //Ignore idempotent operation
             }
         }
 
         public static async Task ExecuteAsync<TEventSourcedAggregate, TId>(
-            this IEventSourcedRepository<TEventSourcedAggregate, TId> repository, TId id, Action<TEventSourcedAggregate> action, string correlationId)
+            this IEventSourcedRepository<TEventSourcedAggregate, TId> repository, TId id, Action<TEventSourcedAggregate> action, Guid correlationId)
             where TEventSourcedAggregate : EventSourcedAggregate<TId>
         {
             var aggregate = await repository.GetAsync(id);
             action(aggregate);
-            await repository.SaveAsync(aggregate, correlationId);
+            await repository.SaveAsync(aggregate, correlationId.ToString());
         }
 
         public static async Task ExecuteAsync<TEventSourcedAggregate, TId>(
-            this IEventSourcedRepository<TEventSourcedAggregate, TId> repository, TId id, Action<TEventSourcedAggregate> action, string correlationId, Guid operationId)
+            this IEventSourcedRepository<TEventSourcedAggregate, TId> repository, TId id, Action<TEventSourcedAggregate> action, Guid correlationId, Guid operationId)
             where TEventSourcedAggregate : EventSourcedAggregate<TId>
         {
             var aggregate = await repository.GetAsync(id);
@@ -41,11 +41,11 @@ namespace Accounts.Application.Common
             }
             catch (InvalidOperationException)
             {
-                //Ignoring idempotent operation
+                //Ignore idempotent operation
                 return;
             }
             action(aggregate);
-            await repository.SaveAsync(aggregate, correlationId);
+            await repository.SaveAsync(aggregate, correlationId.ToString());
         }
     }
 }

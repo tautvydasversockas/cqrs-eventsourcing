@@ -82,7 +82,7 @@ namespace Accounts.ReadModel
                 token);
         }
 
-        private async Task UpdateAsync(Guid id, int version, Action<ActiveAccount> action, CancellationToken token = default)
+        private async Task UpdateAsync(Guid id, int version, Action<ActiveAccount> action, CancellationToken token)
         {
             await using var ctx = new AccountDbContext(_ctxOptions);
             var account = await ctx.Accounts.FindAsync(new object[] { id }, token) ??

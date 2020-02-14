@@ -76,7 +76,7 @@ namespace Infrastructure
 
         private static string GetStreamName(TId id)
         {
-            return $"{typeof(TEventSourcedAggregate).Name}-{id.ToString()}";
+            return $"{typeof(TEventSourcedAggregate).Name}-{id}";
         }
     }
 }

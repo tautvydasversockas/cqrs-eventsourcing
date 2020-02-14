@@ -8,7 +8,7 @@ namespace Infrastructure.Domain
     {
         private readonly HashSet<Guid> _operationIds = new HashSet<Guid>();
         private readonly List<IVersionedEvent<TId>> _events = new List<IVersionedEvent<TId>>();
-        private Guid _currentOperationId = Guid.NewGuid();
+        private Guid _operationId = Guid.NewGuid();
 
         protected EventSourcedAggregate(TId id) 
             : base(id)
@@ -38,12 +38,12 @@ namespace Infrastructure.Domain
             if (_operationIds.Contains(operationId))
                 throw new InvalidOperationException("Duplicate Operation.");
 
-            _currentOperationId = operationId;
+            _operationId = operationId;
         }
 
         protected void Raise(VersionedEvent<TId> evt)
         {
-            evt.OperationId = _currentOperationId;
+            evt.OperationId = _operationId;
             evt.SourceId = Id;
             evt.Version = Version + 1;
             _events.Add(evt);

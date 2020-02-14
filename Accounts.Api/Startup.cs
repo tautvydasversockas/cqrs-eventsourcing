@@ -56,7 +56,7 @@ namespace Accounts.Api
 
             services
                 .AddDbContext<AccountDbContext>(
-                    options => options.UseSqlServer(sqlServerConnectionString),
+                    opt => opt.UseSqlServer(sqlServerConnectionString),
                     optionsLifetime: ServiceLifetime.Singleton)
                 .AddSwaggerGen(opt =>
                 {
@@ -69,14 +69,13 @@ namespace Accounts.Api
                             Name = "Accounts Team"
                         }
                     });
-
                     opt.SchemaFilter<FluentValidationRules>();
                     opt.SchemaFilter<IgnoreReadOnlySchemaFilter>();
                     opt.OperationFilter<FluentValidationOperationFilter>();
                 })
                 .AddMediatR(typeof(AccountsCommandHandler).GetTypeInfo().Assembly)
                 .AddSingleton<EventSourcedAggregateFactory>()
-                .AddSingleton(provider =>
+                .AddSingleton(_ =>
                 {
                     var connection = EventStoreConnection.Create(eventStoreConnectionString);
                     connection.ConnectAsync().GetAwaiter().GetResult();
@@ -104,9 +103,9 @@ namespace Accounts.Api
                 })
                 .UseRouting()
                 .UseAuthorization()
-                .UseEndpoints(endpoints => endpoints.MapControllers())
+                .UseEndpoints(erb => erb.MapControllers())
                 .UseSwagger()
-                .UseSwaggerUI(options => options.SwaggerEndpoint("/swagger/v1/swagger.json", "Accounts"));
+                .UseSwaggerUI(opt => opt.SwaggerEndpoint("/swagger/v1/swagger.json", "Accounts"));
         }
     }
 }
