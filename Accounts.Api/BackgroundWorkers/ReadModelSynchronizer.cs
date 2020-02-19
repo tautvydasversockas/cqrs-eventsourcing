@@ -12,8 +12,6 @@ namespace Accounts.Api.BackgroundWorkers
 {
     public sealed class ReadModelSynchronizer : BackgroundService
     {
-        private const string Stream = "$ce-Account";
-        private const string Group = "Account-ReadModel";
         private readonly IEventStoreConnection _connection;
         private readonly EventStoreSerializer _serializer;
         private readonly AccountReadModelGenerator _readModelGenerator;
@@ -36,7 +34,7 @@ namespace Accounts.Api.BackgroundWorkers
 
         private async Task SubscribeAsync()
         {
-            _subscription = await _connection.ConnectToPersistentSubscriptionAsync(Stream, Group, EventAppeared, SubscriptionDropped);
+            _subscription = await _connection.ConnectToPersistentSubscriptionAsync("$ce-Account", "Account-ReadModel", EventAppeared, SubscriptionDropped);
         }
 
         private Task EventAppeared(EventStorePersistentSubscriptionBase subscription, ResolvedEvent resolvedEvt)
