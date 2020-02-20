@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Accounts.Domain.Events;
 using Infrastructure.Domain.Exceptions;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace Accounts.ReadModel
@@ -19,11 +20,8 @@ namespace Accounts.ReadModel
         public async Task Handle(AccountOpened evt, CancellationToken token = default)
         {
             await using var ctx = new AccountDbContext(_ctxOptions);
-            var account = await ctx.Accounts.FindAsync(new object[] { evt.SourceId }, token);
-            if (account != null)
-                return;
 
-            account = new ActiveAccount
+            ctx.Accounts.Add(new ActiveAccount
             {
                 Id = evt.SourceId,
                 Version = evt.Version,
@@ -31,10 +29,17 @@ namespace Accounts.ReadModel
                 Balance = evt.Balance,
                 InterestRate = evt.InterestRate,
                 IsFrozen = false
-            };
+            });
 
-            ctx.Accounts.Add(account);
-            await ctx.SaveChangesAsync(token);
+            try
+            {
+                await ctx.SaveChangesAsync(token);
+            }
+            catch (DbUpdateException e) 
+                when (e.GetBaseException() is SqlException sqlEx && (sqlEx.Number == 2627 || sqlEx.Number == 2601))
+            {
+                //Ignore duplicate key
+            }
         }
 
         public async Task Handle(WithdrawnFromAccount evt, CancellationToken token = default)
