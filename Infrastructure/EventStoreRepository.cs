@@ -38,7 +38,7 @@ namespace Infrastructure
                 : originalVersion - 1;
             var commitMetadata = new Dictionary<string, object>
             {
-                {EventStoreMetadataKeys.CorrelationId, correlationId}
+                [EventStoreMetadataKeys.CorrelationId] = correlationId
             };
             var eventsToSave = events.Select(e => _serializer.Serialize(e, commitMetadata));
 
