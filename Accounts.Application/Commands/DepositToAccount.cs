@@ -25,6 +25,7 @@ namespace Accounts.Application.Commands
         {
             public Validator()
             {
+                RuleFor(v => v.Id).NotEmpty();
                 RuleFor(v => v.AccountId).NotEmpty();
                 RuleFor(v => v.Amount).GreaterThan(0);
             }

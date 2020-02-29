@@ -15,8 +15,8 @@ namespace Accounts.Domain
         }
 
         private Status _status;
-        private decimal _balance;
-        private decimal _interestRate;
+        private Money _balance;
+        private InterestRate _interestRate;
 
         private Account(Guid id)
             : base(id) { }
@@ -27,39 +27,45 @@ namespace Accounts.Domain
         public static Account Open(
             Guid id,
             Guid clientId,
-            decimal interestRate,
-            decimal balance)
+            InterestRate interestRate,
+            Money balance)
         {
             if (id == null)
-                throw new InvalidOperationException("Account id must be provided");
+                throw new ArgumentNullException(nameof(id), "Account id is required");
 
             if (clientId == null)
-                throw new InvalidOperationException("Client id must be provided");
+                throw new ArgumentNullException(nameof(clientId), "Client id is required");
 
-            if (interestRate < 0 || interestRate > 1)
-                throw new InvalidOperationException("Interest rate must be between 0 and 1");
+            if (interestRate == null)
+                throw new ArgumentNullException(nameof(interestRate), "Interest rate is required");
 
-            if (balance < 0)
-                throw new InvalidOperationException("Balance cannot be negative");
+            if (balance == null)
+                throw new ArgumentNullException(nameof(balance), "Balance is required");
 
             var account = new Account(id);
             account.Raise(new AccountOpened(clientId, interestRate, balance));
             return account;
         }
 
-        public void Withdraw(decimal amount)
+        public void Withdraw(Money amount)
         {
+            if (amount == null)
+                throw new ArgumentNullException(nameof(amount), "Amount is required");
+
             if (_status == Frozen)
                 throw new InvalidOperationException("Cannot withdraw from frozen account");
 
             if (amount > _balance)
-                throw new InvalidOperationException("Cannot withdraw more than existing balance");
+                throw new InvalidOperationException("Cannot withdraw more than balance");
 
             Raise(new WithdrawnFromAccount(amount));
         }
 
-        public void Deposit(decimal amount)
+        public void Deposit(Money amount)
         {
+            if (amount == null)
+                throw new ArgumentNullException(nameof(amount), "Amount is required");
+
             if (_status == Frozen)
                 throw new InvalidOperationException("Cannot deposit to frozen account");
 
@@ -95,23 +101,23 @@ namespace Accounts.Domain
         private void Apply(AccountOpened evt)
         {
             _status = Active;
-            _balance = evt.Balance;
-            _interestRate = evt.InterestRate;
+            _balance = (Money)evt.Balance;
+            _interestRate = (InterestRate)evt.InterestRate;
         }
 
         private void Apply(WithdrawnFromAccount evt)
         {
-            _balance -= evt.Amount;
+            _balance -= (Money)evt.Amount;
         }
 
         private void Apply(DepositedToAccount evt)
         {
-            _balance += evt.Amount;
+            _balance += (Money)evt.Amount;
         }
 
         private void Apply(AddedInterestsToAccount evt)
         {
-            _balance += evt.Interests;
+            _balance += (Money)evt.Interests;
         }
 
         private void Apply(AccountFrozen evt)

@@ -28,8 +28,9 @@ namespace Accounts.Application.Commands
         {
             public Validator()
             {
+                RuleFor(v => v.Id).NotEmpty();
                 RuleFor(v => v.ClientId).NotEmpty();
-                RuleFor(v => v.InterestRate).GreaterThanOrEqualTo(0);
+                RuleFor(v => v.InterestRate).InclusiveBetween(0, 1);
                 RuleFor(v => v.Balance).GreaterThanOrEqualTo(0);
             }
         }

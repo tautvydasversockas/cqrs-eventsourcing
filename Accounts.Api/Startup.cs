@@ -3,13 +3,13 @@ using System.Reflection;
 using System.Text.Json.Serialization;
 using Accounts.Api.BackgroundWorkers;
 using Accounts.Api.Filters;
+using Accounts.Api.HealthChecks;
 using Accounts.Application.Commands;
 using Accounts.Application.Handlers;
 using Accounts.Domain.Events;
 using Accounts.ReadModel;
 using EventStore.ClientAPI;
 using FluentValidation.AspNetCore;
-using HealthChecks.UI.Client;
 using Infrastructure;
 using Infrastructure.Domain;
 using MediatR;
@@ -99,7 +99,7 @@ namespace Accounts.Api
                 .UseHealthChecks("/health", new HealthCheckOptions
                 {
                     Predicate = _ => true,
-                    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+                    ResponseWriter = HealthCheckResponseWriter.WriteAsync
                 })
                 .UseRouting()
                 .UseAuthorization()

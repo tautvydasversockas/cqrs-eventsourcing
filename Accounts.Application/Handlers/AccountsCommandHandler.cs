@@ -28,20 +28,20 @@ namespace Accounts.Application.Handlers
         public async Task<Guid> Handle(OpenAccount cmd, CancellationToken token)
         {
             var id = DeterministicGuid.Create(cmd.Id);
-            var account = Account.Open(id, cmd.ClientId, cmd.InterestRate, cmd.Balance);
+            var account = Account.Open(id, cmd.ClientId, (InterestRate)cmd.InterestRate, (Money)cmd.Balance);
             await _repository.CreateAsync(account, cmd.Id);
             return id;
         }
 
         public async Task<Unit> Handle(DepositToAccount cmd, CancellationToken token)
         {
-            await _repository.ExecuteAsync(cmd.AccountId, account => account.Deposit(cmd.Amount), cmd.Id, cmd.Id);
+            await _repository.ExecuteAsync(cmd.AccountId, account => account.Deposit((Money)cmd.Amount), cmd.Id, cmd.Id);
             return default;
         }
 
         public async Task<Unit> Handle(WithdrawFromAccount cmd, CancellationToken token)
         {
-            await _repository.ExecuteAsync(cmd.AccountId, account => account.Withdraw(cmd.Amount), cmd.Id, cmd.Id);
+            await _repository.ExecuteAsync(cmd.AccountId, account => account.Withdraw((Money)cmd.Amount), cmd.Id, cmd.Id);
             return default;
         }
 
