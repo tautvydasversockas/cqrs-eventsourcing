@@ -13,7 +13,7 @@ namespace Accounts.ReadModel
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.ApplyConfiguration(new OpenAccountConfiguration());
+            modelBuilder.ApplyConfiguration(new AccountConfig());
         }
     }
 }
