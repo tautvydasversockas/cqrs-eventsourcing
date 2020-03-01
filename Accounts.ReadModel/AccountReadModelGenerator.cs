@@ -99,7 +99,6 @@ namespace Accounts.ReadModel
             action(account);
             account.Version = version;
 
-            ctx.Update(account);
             await ctx.SaveChangesAsync(token);
         }
     }
