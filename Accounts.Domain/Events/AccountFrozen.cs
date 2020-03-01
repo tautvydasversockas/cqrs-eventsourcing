@@ -1,9 +1,6 @@
-﻿using System;
-using Infrastructure.Domain;
+﻿using Infrastructure.Domain;
 
 namespace Accounts.Domain.Events
 {
-    public sealed class AccountFrozen : VersionedEvent<Guid>
-    {
-    }
+    public sealed class AccountFrozen : VersionedEvent { }
 }

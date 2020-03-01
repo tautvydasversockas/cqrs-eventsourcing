@@ -1,9 +1,8 @@
-﻿using System;
-using Infrastructure.Domain;
+﻿using Infrastructure.Domain;
 
 namespace Accounts.Domain.Events
 {
-    public sealed class AddedInterestsToAccount : VersionedEvent<Guid>
+    public sealed class AddedInterestsToAccount : VersionedEvent
     {
         public decimal Interests { get; }
 

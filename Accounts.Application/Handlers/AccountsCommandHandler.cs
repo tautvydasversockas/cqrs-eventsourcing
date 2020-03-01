@@ -18,9 +18,9 @@ namespace Accounts.Application.Handlers
         IRequestHandler<FreezeAccount>,
         IRequestHandler<UnFreezeAccount>
     {
-        private readonly IEventSourcedRepository<Account, Guid> _repository;
+        private readonly IEventSourcedRepository<Account> _repository;
 
-        public AccountsCommandHandler(IEventSourcedRepository<Account, Guid> repository)
+        public AccountsCommandHandler(IEventSourcedRepository<Account> repository)
         {
             _repository = repository;
         }

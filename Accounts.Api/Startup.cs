@@ -86,7 +86,7 @@ namespace Accounts.Api
                     var typeInfo = typeof(AccountOpened).GetTypeInfo();
                     return new EventStoreSerializer(typeInfo.Assembly, typeInfo.Namespace);
                 })
-                .AddSingleton(typeof(IEventSourcedRepository<,>), typeof(EventStoreRepository<,>))
+                .AddSingleton(typeof(IEventSourcedRepository<>), typeof(EventStoreRepository<>))
                 .AddSingleton<AccountReadModelGenerator>()
                 .AddScoped<IAccountReadModel, AccountDbContext>()
                 .AddHostedService<ReadModelSynchronizer>();

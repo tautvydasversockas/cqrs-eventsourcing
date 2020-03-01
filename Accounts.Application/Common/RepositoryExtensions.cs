@@ -7,9 +7,8 @@ namespace Accounts.Application.Common
 {
     public static class RepositoryExtensions
     {
-        public static async Task CreateAsync<TEventSourcedAggregate, TId>(
-            this IEventSourcedRepository<TEventSourcedAggregate, TId> repository, TEventSourcedAggregate aggregate, Guid correlationId)
-            where TEventSourcedAggregate : EventSourcedAggregate<TId>
+        public static async Task CreateAsync<TEventSourcedAggregate>(this IEventSourcedRepository<TEventSourcedAggregate> repository, TEventSourcedAggregate aggregate, Guid correlationId)
+            where TEventSourcedAggregate : EventSourcedAggregate
         {
             try
             {
@@ -21,18 +20,16 @@ namespace Accounts.Application.Common
             }
         }
 
-        public static async Task ExecuteAsync<TEventSourcedAggregate, TId>(
-            this IEventSourcedRepository<TEventSourcedAggregate, TId> repository, TId id, Action<TEventSourcedAggregate> action, Guid correlationId)
-            where TEventSourcedAggregate : EventSourcedAggregate<TId>
+        public static async Task ExecuteAsync<TEventSourcedAggregate>(this IEventSourcedRepository<TEventSourcedAggregate> repository, Guid id, Action<TEventSourcedAggregate> action, Guid correlationId)
+            where TEventSourcedAggregate : EventSourcedAggregate
         {
             var aggregate = await repository.GetAsync(id);
             action(aggregate);
             await repository.SaveAsync(aggregate, correlationId.ToString());
         }
 
-        public static async Task ExecuteAsync<TEventSourcedAggregate, TId>(
-            this IEventSourcedRepository<TEventSourcedAggregate, TId> repository, TId id, Action<TEventSourcedAggregate> action, Guid correlationId, Guid operationId)
-            where TEventSourcedAggregate : EventSourcedAggregate<TId>
+        public static async Task ExecuteAsync<TEventSourcedAggregate>(this IEventSourcedRepository<TEventSourcedAggregate> repository, Guid id, Action<TEventSourcedAggregate> action, Guid correlationId, Guid operationId)
+            where TEventSourcedAggregate : EventSourcedAggregate
         {
             var aggregate = await repository.GetAsync(id);
             try

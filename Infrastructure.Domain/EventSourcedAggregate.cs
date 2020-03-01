@@ -4,17 +4,16 @@ using ReflectionMagic;
 
 namespace Infrastructure.Domain
 {
-    public abstract class EventSourcedAggregate<TId> : Entity<TId>
+    public abstract class EventSourcedAggregate : Entity
     {
         private readonly HashSet<Guid> _operationIds = new HashSet<Guid>();
-        private readonly List<IVersionedEvent<TId>> _events = new List<IVersionedEvent<TId>>();
+        private readonly List<IVersionedEvent> _events = new List<IVersionedEvent>();
         private Guid _operationId = Guid.NewGuid();
 
-        protected EventSourcedAggregate(TId id) 
-            : base(id)
-        { }
+        protected EventSourcedAggregate(Guid id)
+            : base(id) { }
 
-        protected EventSourcedAggregate(TId id, IEnumerable<IVersionedEvent<TId>> events)
+        protected EventSourcedAggregate(Guid id, IEnumerable<IVersionedEvent> events)
             : this(id)
         {
             foreach (var evt in events)
@@ -23,7 +22,7 @@ namespace Infrastructure.Domain
 
         public int Version { get; private set; }
 
-        public IReadOnlyList<IVersionedEvent<TId>> GetUncommittedEvents()
+        public IReadOnlyList<IVersionedEvent> GetUncommittedEvents()
         {
             return _events;
         }
@@ -41,7 +40,7 @@ namespace Infrastructure.Domain
             _operationId = operationId;
         }
 
-        protected void Raise(VersionedEvent<TId> evt)
+        protected void Raise(VersionedEvent evt)
         {
             evt.OperationId = _operationId;
             evt.SourceId = Id;
@@ -50,7 +49,7 @@ namespace Infrastructure.Domain
             ApplyEvent(evt);
         }
 
-        private void ApplyEvent(IVersionedEvent<TId> evt)
+        private void ApplyEvent(IVersionedEvent evt)
         {
             this.AsDynamic().Apply(evt);
             Version = evt.Version;

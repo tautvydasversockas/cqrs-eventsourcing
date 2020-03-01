@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using EventStore.ClientAPI;
@@ -8,8 +9,8 @@ using Infrastructure.Domain.Exceptions;
 
 namespace Infrastructure
 {
-    public sealed class EventStoreRepository<TEventSourcedAggregate, TId> : IEventSourcedRepository<TEventSourcedAggregate, TId>
-        where TEventSourcedAggregate : EventSourcedAggregate<TId>
+    public sealed class EventStoreRepository<TEventSourcedAggregate> : IEventSourcedRepository<TEventSourcedAggregate>
+        where TEventSourcedAggregate : EventSourcedAggregate
     {
         private readonly IEventStoreConnection _connection;
         private readonly EventStoreSerializer _serializer;
@@ -54,9 +55,9 @@ namespace Infrastructure
             aggregate.MarkEventsAsCommitted();
         }
 
-        public async Task<TEventSourcedAggregate> GetAsync(TId id)
+        public async Task<TEventSourcedAggregate> GetAsync(Guid id)
         {
-            var events = new List<IVersionedEvent<TId>>();
+            var events = new List<IVersionedEvent>();
             StreamEventsSlice currentSlice;
             long nextSliceStart = StreamPosition.Start;
             var streamName = GetStreamName(id);
@@ -65,16 +66,16 @@ namespace Infrastructure
             {
                 currentSlice = await _connection.ReadStreamEventsForwardAsync(streamName, nextSliceStart, 10, false);
                 nextSliceStart = currentSlice.NextEventNumber;
-                events.AddRange(currentSlice.Events.Select(e => (IVersionedEvent<TId>)_serializer.Deserialize(e).Item1));
+                events.AddRange(currentSlice.Events.Select(e => (IVersionedEvent)_serializer.Deserialize(e).Item1));
             } while (!currentSlice.IsEndOfStream);
 
             if (!events.Any())
                 throw new EntityNotFoundException(typeof(TEventSourcedAggregate).Name, id);
 
-            return _aggregateFactory.Create<TEventSourcedAggregate, TId>(id, events);
+            return _aggregateFactory.Create<TEventSourcedAggregate>(id, events);
         }
 
-        private static string GetStreamName(TId id)
+        private static string GetStreamName(Guid id)
         {
             return $"{typeof(TEventSourcedAggregate).Name}-{id}";
         }

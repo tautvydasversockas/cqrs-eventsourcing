@@ -5,15 +5,12 @@ namespace Infrastructure.Domain
 {
     public sealed class EventSourcedAggregateFactory
     {
-        public TEventSourcedAggregate Create<TEventSourcedAggregate, TId>(TId id, IEnumerable<IVersionedEvent<TId>> events)
-            where TEventSourcedAggregate : EventSourcedAggregate<TId>
+        public TEventSourcedAggregate Create<TEventSourcedAggregate>(Guid id, IEnumerable<IVersionedEvent> events)
+            where TEventSourcedAggregate : EventSourcedAggregate
         {
             var aggregateType = typeof(TEventSourcedAggregate);
-            var idType = typeof(TId);
-
-            var constructor = aggregateType.GetConstructor(new[] { idType, typeof(IEnumerable<IVersionedEvent<TId>>) }) ??
-                              throw new InvalidCastException($"Type {aggregateType.Name} must have a constructor with the following signature: .ctor({idType.Name}, IEnumerable<IVersionedEvent<{idType.Name}>>)");
-
+            var constructor = aggregateType.GetConstructor(new[] { typeof(Guid), typeof(IEnumerable<IVersionedEvent>) }) ??
+                              throw new InvalidCastException($"Type {aggregateType.Name} must have a constructor with the following signature: .ctor(Guid, IEnumerable<IVersionedEvent>)");
             return (TEventSourcedAggregate)constructor.Invoke(new object[] { id, events });
         }
     }

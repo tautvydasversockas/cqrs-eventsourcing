@@ -3,7 +3,7 @@ using Infrastructure.Domain;
 
 namespace Accounts.Domain.Events
 {
-    public sealed class AccountOpened : VersionedEvent<Guid>
+    public sealed class AccountOpened : VersionedEvent
     {
         public Guid ClientId { get; }
         public decimal InterestRate { get; }

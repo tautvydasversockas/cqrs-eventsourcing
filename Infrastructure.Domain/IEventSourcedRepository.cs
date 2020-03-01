@@ -1,10 +1,11 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace Infrastructure.Domain
 {
-    public interface IEventSourcedRepository<TEventSourcedAggregate, in TId> where TEventSourcedAggregate : EventSourcedAggregate<TId>
+    public interface IEventSourcedRepository<TEventSourcedAggregate> where TEventSourcedAggregate : EventSourcedAggregate
     {
         Task SaveAsync(TEventSourcedAggregate aggregate, string correlationId);
-        Task<TEventSourcedAggregate> GetAsync(TId id);
+        Task<TEventSourcedAggregate> GetAsync(Guid id);
     }
 }

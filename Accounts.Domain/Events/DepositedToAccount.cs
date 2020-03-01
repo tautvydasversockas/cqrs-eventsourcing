@@ -1,9 +1,8 @@
-﻿using System;
-using Infrastructure.Domain;
+﻿using Infrastructure.Domain;
 
 namespace Accounts.Domain.Events
 {
-    public sealed class DepositedToAccount : VersionedEvent<Guid>
+    public sealed class DepositedToAccount : VersionedEvent
     {
         public decimal Amount { get; }
 

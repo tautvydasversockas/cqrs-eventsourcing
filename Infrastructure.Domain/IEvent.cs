@@ -1,7 +1,9 @@
-﻿namespace Infrastructure.Domain
+﻿using System;
+
+namespace Infrastructure.Domain
 {
-    public interface IEvent<out TSourceId>
+    public interface IEvent
     {
-        TSourceId SourceId { get; }
+        Guid SourceId { get; }
     }
 }

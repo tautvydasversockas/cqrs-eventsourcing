@@ -2,7 +2,7 @@
 
 namespace Infrastructure.Domain
 {
-    public interface IVersionedEvent<out TSourceId> : IEvent<TSourceId>
+    public interface IVersionedEvent : IEvent
     {
         Guid OperationId { get; }
         int Version { get; }

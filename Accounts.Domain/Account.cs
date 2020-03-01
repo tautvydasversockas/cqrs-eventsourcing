@@ -6,7 +6,7 @@ using static Accounts.Domain.Account.Status;
 
 namespace Accounts.Domain
 {
-    public sealed class Account : EventSourcedAggregate<Guid>
+    public sealed class Account : EventSourcedAggregate
     {
         public enum Status
         {
@@ -21,7 +21,7 @@ namespace Accounts.Domain
         private Account(Guid id)
             : base(id) { }
 
-        public Account(Guid id, IEnumerable<IVersionedEvent<Guid>> events)
+        public Account(Guid id, IEnumerable<IVersionedEvent> events)
             : base(id, events) { }
 
         public static Account Open(
