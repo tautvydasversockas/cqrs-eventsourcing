@@ -11,7 +11,7 @@ namespace Accounts.Domain
         public Money(decimal value)
         {
             if (value < 0)
-                throw new ArgumentException("Value must be positive");
+                throw new ArgumentOutOfRangeException(nameof(value), "Value must be positive");
 
             _value = value;
         }
