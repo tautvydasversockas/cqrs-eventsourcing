@@ -11,7 +11,7 @@ namespace Accounts.Domain
         public InterestRate(decimal value)
         {
             if (value < 0 || value > 1)
-                throw new ArgumentException("Value must be between 0 and 1");
+                throw new ArgumentOutOfRangeException(nameof(value), "Value must be between 0 and 1");
 
             _value = value;
         }
