@@ -44,36 +44,41 @@ namespace Accounts.ReadModel
             }
         }
 
-        public async Task Handle(WithdrawnFromAccount evt, CancellationToken token = default)
+        public Task Handle(WithdrawnFromAccount evt, CancellationToken token = default)
         {
-            await UpdateAsync(evt.SourceId, evt.Version, $"{BalanceColumnName} -= {evt.Amount.ToString(_numberFormat)}", token);
+            return UpdateAsync(evt.SourceId, evt.Version, $"{BalanceColumnName} -= {evt.Amount.ToString(_numberFormat)}", token);
         }
 
-        public async Task Handle(DepositedToAccount evt, CancellationToken token = default)
+        public Task Handle(DepositedToAccount evt, CancellationToken token = default)
         {
-            await UpdateAsync(evt.SourceId, evt.Version, $"{BalanceColumnName} += {evt.Amount.ToString(_numberFormat)}", token);
+            return UpdateAsync(evt.SourceId, evt.Version, $"{BalanceColumnName} += {evt.Amount.ToString(_numberFormat)}", token);
         }
 
-        public async Task Handle(AddedInterestsToAccount evt, CancellationToken token = default)
+        public Task Handle(AddedInterestsToAccount evt, CancellationToken token = default)
         {
-            await UpdateAsync(evt.SourceId, evt.Version, $"{BalanceColumnName} += {evt.Interests.ToString(_numberFormat)}", token);
+            return UpdateAsync(evt.SourceId, evt.Version, $"{BalanceColumnName} += {evt.Interests.ToString(_numberFormat)}", token);
         }
 
-        public async Task Handle(AccountFrozen evt, CancellationToken token = default)
+        public Task Handle(AccountFrozen evt, CancellationToken token = default)
         {
-            await UpdateAsync(evt.SourceId, evt.Version, $"{IsFrozenColumnName} = 1", token);
+            return UpdateAsync(evt.SourceId, evt.Version, $"{IsFrozenColumnName} = 1", token);
         }
 
-        public async Task Handle(AccountUnFrozen evt, CancellationToken token = default)
+        public Task Handle(AccountUnFrozen evt, CancellationToken token = default)
         {
-            await UpdateAsync(evt.SourceId, evt.Version, $"{IsFrozenColumnName} = 0", token);
+            return UpdateAsync(evt.SourceId, evt.Version, $"{IsFrozenColumnName} = 0", token);
         }
 
         private async Task UpdateAsync(Guid id, int version, string updateSql, CancellationToken token)
         {
+            var sql = $@"
+                UPDATE {TableName} 
+                SET {updateSql} 
+                WHERE {IdColumnName} = '{id}' 
+                  AND {VersionColumnName} < {version}";
+
             await using var ctx = new AccountDbContext(_ctxOptions);
-            await ctx.Database.ExecuteSqlRawAsync($@"UPDATE {TableName} SET {updateSql} 
-                WHERE {IdColumnName} = '{id}' AND {VersionColumnName} < {version}", token);
+            await ctx.Database.ExecuteSqlRawAsync(sql, token);
         }
     }
 }

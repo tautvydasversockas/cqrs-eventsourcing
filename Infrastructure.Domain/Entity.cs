@@ -4,13 +4,12 @@ namespace Infrastructure.Domain
 {
     public abstract class Entity
     {
+        public Guid Id { get; }
+
         protected Entity(Guid id)
         {
             Id = id;
         }
-
-        public virtual Guid Id { get; }
-        protected virtual object Actual => this;
 
         public override bool Equals(object obj)
         {
@@ -20,7 +19,7 @@ namespace Infrastructure.Domain
             if (ReferenceEquals(this, other))
                 return true;
 
-            if (Actual.GetType() != other.Actual.GetType())
+            if (GetType() != other.GetType())
                 return false;
 
             return Id.Equals(other.Id);
@@ -44,7 +43,7 @@ namespace Infrastructure.Domain
 
         public override int GetHashCode()
         {
-            return (Actual.GetType() + Id.ToString()).GetHashCode();
+            return (GetType().ToString() + Id).GetHashCode();
         }
     }
 }

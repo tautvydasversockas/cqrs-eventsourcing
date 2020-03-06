@@ -9,20 +9,10 @@ namespace Infrastructure.Domain
 
         public override bool Equals(object obj)
         {
-            if (!(obj is T valueObject))
+            if (!(obj is T other))
                 return false;
 
-            return EqualsCore(valueObject);
-        }
-
-        private bool EqualsCore(ValueObject<T> other)
-        {
             return GetEqualityComponents().SequenceEqual(other.GetEqualityComponents());
-        }
-
-        public override int GetHashCode()
-        {
-            return GetEqualityComponents().Aggregate(1, (current, obj) => current * 23 + (obj?.GetHashCode() ?? 0));
         }
 
         public static bool operator ==(ValueObject<T> a, ValueObject<T> b)
@@ -39,6 +29,11 @@ namespace Infrastructure.Domain
         public static bool operator !=(ValueObject<T> a, ValueObject<T> b)
         {
             return !(a == b);
+        }
+
+        public override int GetHashCode()
+        {
+            return GetEqualityComponents().Aggregate(1, (current, obj) => current * 23 + (obj?.GetHashCode() ?? 0));
         }
     }
 }
