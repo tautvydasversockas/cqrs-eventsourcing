@@ -1,4 +1,5 @@
 ﻿using System;
+using Accounts.Application.Common;
 using FluentValidation;
 using Infrastructure.Messaging;
 using MediatR;
@@ -27,7 +28,7 @@ namespace Accounts.Application.Commands
             {
                 RuleFor(v => v.Id).NotEmpty();
                 RuleFor(v => v.AccountId).NotEmpty();
-                RuleFor(v => v.Amount).GreaterThan(0);
+                RuleFor(v => v.Amount).ValidMoney();
             }
         }
     }

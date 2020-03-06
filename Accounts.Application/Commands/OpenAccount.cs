@@ -1,4 +1,5 @@
 ﻿using System;
+using Accounts.Application.Common;
 using FluentValidation;
 using Infrastructure.Messaging;
 using MediatR;
@@ -30,8 +31,8 @@ namespace Accounts.Application.Commands
             {
                 RuleFor(v => v.Id).NotEmpty();
                 RuleFor(v => v.ClientId).NotEmpty();
-                RuleFor(v => v.InterestRate).InclusiveBetween(0, 1);
-                RuleFor(v => v.Balance).GreaterThanOrEqualTo(0);
+                RuleFor(v => v.InterestRate).ValidInterestRate();
+                RuleFor(v => v.Balance).ValidMoney();
             }
         }
     }
