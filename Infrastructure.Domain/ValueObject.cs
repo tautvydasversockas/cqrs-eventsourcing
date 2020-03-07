@@ -1,21 +1,27 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Infrastructure.Domain
 {
-    public abstract class ValueObject<T> where T : ValueObject<T>
+    public abstract class ValueObject
     {
         protected abstract IEnumerable<object> GetEqualityComponents();
 
         public override bool Equals(object obj)
         {
-            if (!(obj is T other))
+            if (obj is null)
                 return false;
+
+            if (GetType() != obj.GetType())
+                return false;
+
+            var other = (ValueObject)obj;
 
             return GetEqualityComponents().SequenceEqual(other.GetEqualityComponents());
         }
 
-        public static bool operator ==(ValueObject<T> a, ValueObject<T> b)
+        public static bool operator ==(ValueObject a, ValueObject b)
         {
             if (a is null && b is null)
                 return true;
@@ -26,14 +32,19 @@ namespace Infrastructure.Domain
             return a.Equals(b);
         }
 
-        public static bool operator !=(ValueObject<T> a, ValueObject<T> b)
+        public static bool operator !=(ValueObject a, ValueObject b)
         {
             return !(a == b);
         }
 
         public override int GetHashCode()
         {
-            return GetEqualityComponents().Aggregate(1, (current, obj) => current * 23 + (obj?.GetHashCode() ?? 0));
+            var hash = new HashCode();
+
+            foreach (var component in GetEqualityComponents())
+                hash.Add(component);
+
+            return hash.ToHashCode();
         }
     }
 }

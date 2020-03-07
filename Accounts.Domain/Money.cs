@@ -4,7 +4,7 @@ using Infrastructure.Domain;
 
 namespace Accounts.Domain
 {
-    public sealed class Money : ValueObject<Money>
+    public sealed class Money : ValueObject
     {
         private readonly decimal _value;
 

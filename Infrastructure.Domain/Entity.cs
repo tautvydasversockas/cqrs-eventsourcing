@@ -43,7 +43,7 @@ namespace Infrastructure.Domain
 
         public override int GetHashCode()
         {
-            return (GetType().ToString() + Id).GetHashCode();
+            return HashCode.Combine(GetType().ToString() + Id);
         }
     }
 }
