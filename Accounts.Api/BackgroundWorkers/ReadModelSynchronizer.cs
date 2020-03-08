@@ -15,7 +15,7 @@ namespace Accounts.Api.BackgroundWorkers
         private readonly IEventStoreConnection _connection;
         private readonly EventStoreSerializer _serializer;
         private readonly AccountReadModelGenerator _readModelGenerator;
-        private EventStorePersistentSubscriptionBase _subscription;
+        private EventStorePersistentSubscriptionBase? _subscription;
 
         public ReadModelSynchronizer(
             IEventStoreConnection connection,
@@ -69,7 +69,7 @@ namespace Accounts.Api.BackgroundWorkers
 
         public override Task StopAsync(CancellationToken token)
         {
-            _subscription.Stop(TimeSpan.FromSeconds(5));
+            _subscription?.Stop(TimeSpan.FromSeconds(5));
             return base.StopAsync(token);
         }
     }

@@ -30,17 +30,11 @@ namespace Accounts.Domain
             InterestRate interestRate,
             Money balance)
         {
-            if (id == null)
+            if (id == default)
                 throw new ArgumentNullException(nameof(id), "Account id is required");
 
-            if (clientId == null)
+            if (clientId == default)
                 throw new ArgumentNullException(nameof(clientId), "Client id is required");
-
-            if (interestRate == null)
-                throw new ArgumentNullException(nameof(interestRate), "Interest rate is required");
-
-            if (balance == null)
-                throw new ArgumentNullException(nameof(balance), "Balance is required");
 
             var account = new Account(id);
             account.Raise(new AccountOpened(clientId, interestRate, balance));
@@ -49,9 +43,6 @@ namespace Accounts.Domain
 
         public void Withdraw(Money amount)
         {
-            if (amount == null)
-                throw new ArgumentNullException(nameof(amount), "Amount is required");
-
             if (_status == Frozen)
                 throw new InvalidOperationException("Cannot withdraw from frozen account");
 
@@ -63,9 +54,6 @@ namespace Accounts.Domain
 
         public void Deposit(Money amount)
         {
-            if (amount == null)
-                throw new ArgumentNullException(nameof(amount), "Amount is required");
-
             if (_status == Frozen)
                 throw new InvalidOperationException("Cannot deposit to frozen account");
 

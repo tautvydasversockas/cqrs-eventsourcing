@@ -11,7 +11,7 @@ namespace Infrastructure.Domain
             Id = id;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (!(obj is Entity other))
                 return false;
