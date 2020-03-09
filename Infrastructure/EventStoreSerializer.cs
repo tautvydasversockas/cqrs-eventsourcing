@@ -27,7 +27,7 @@ namespace Infrastructure
         public EventData Serialize<TEvent>(TEvent evt, IDictionary<string, object> evtMetadata) where TEvent : IEvent
         {
             var evtId = Guid.NewGuid();
-            var type = evt.GetType().Name;
+            var type = typeof(TEvent).Name;
             var data = Serialize(evt);
             var metadata = Serialize(evtMetadata);
             return new EventData(evtId, type, true, data, metadata);
@@ -37,14 +37,14 @@ namespace Infrastructure
         {
             var recordedEvt = resolvedEvt.Event;
             var metadata = (Dictionary<string, object>?)Deserialize(recordedEvt.Metadata, typeof(Dictionary<string, object>)) ??
-                throw new InvalidOperationException("Cannot deserialize event metadata");
+                throw new InvalidOperationException("Cannot deserialize event metadata.");
             var evtTypeName = _eventNamespace == null
                 ? recordedEvt.EventType :
                 $"{_eventNamespace}.{recordedEvt.EventType}";
             var evtType = _eventAssembly.GetType(evtTypeName) ??
-                throw new InvalidOperationException($"Cannot find event type '{evtTypeName}'");
+                throw new InvalidOperationException($"Cannot find event type '{evtTypeName}'.");
             var evt = Deserialize(recordedEvt.Data, evtType) ??
-                throw new InvalidOperationException($"Cannot deserialize event '{evtTypeName}'");
+                throw new InvalidOperationException($"Cannot deserialize event '{evtTypeName}'.");
             return (evt, metadata);
         }
 

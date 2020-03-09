@@ -21,7 +21,7 @@ namespace Accounts.Application.Common
             }
             catch (ArgumentException e)
             {
-                ctx.AddFailure($"{e.Message}.");
+                ctx.AddFailure(e.Message);
             }
         }
     }

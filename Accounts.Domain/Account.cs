@@ -31,10 +31,10 @@ namespace Accounts.Domain
             Money balance)
         {
             if (id == default)
-                throw new ArgumentNullException(nameof(id), "Account id is required");
+                throw new ArgumentException("Account id is required.");
 
             if (clientId == default)
-                throw new ArgumentNullException(nameof(clientId), "Client id is required");
+                throw new ArgumentException("Client id is required.");
 
             var account = new Account(id);
             account.Raise(new AccountOpened(clientId, interestRate, balance));
@@ -44,10 +44,10 @@ namespace Accounts.Domain
         public void Withdraw(Money amount)
         {
             if (_status == Frozen)
-                throw new InvalidOperationException("Cannot withdraw from frozen account");
+                throw new InvalidOperationException("Cannot withdraw from frozen account.");
 
             if (amount > _balance)
-                throw new InvalidOperationException("Cannot withdraw more than balance");
+                throw new InvalidOperationException("Cannot withdraw more than balance.");
 
             Raise(new WithdrawnFromAccount(amount));
         }
@@ -55,7 +55,7 @@ namespace Accounts.Domain
         public void Deposit(Money amount)
         {
             if (_status == Frozen)
-                throw new InvalidOperationException("Cannot deposit to frozen account");
+                throw new InvalidOperationException("Cannot deposit to frozen account.");
 
             Raise(new DepositedToAccount(amount));
         }
@@ -63,7 +63,7 @@ namespace Accounts.Domain
         public void AddInterests()
         {
             if (_status == Frozen)
-                throw new InvalidOperationException("Cannot add interests to frozen account");
+                throw new InvalidOperationException("Cannot add interests to frozen account.");
 
             var interests = _balance * _interestRate;
 
