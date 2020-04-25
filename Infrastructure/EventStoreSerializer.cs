@@ -27,7 +27,7 @@ namespace Infrastructure
         public EventData Serialize<TEvent>(TEvent evt, IDictionary<string, object> evtMetadata) where TEvent : IEvent
         {
             var evtId = Guid.NewGuid();
-            var type = typeof(TEvent).Name;
+            var type = evt.GetType().Name;
             var data = Serialize(evt);
             var metadata = Serialize(evtMetadata);
             return new EventData(evtId, type, true, data, metadata);
