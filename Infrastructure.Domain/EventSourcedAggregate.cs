@@ -40,21 +40,21 @@ namespace Infrastructure.Domain
             _operationId = operationId;
         }
 
-        protected void Raise(VersionedEvent evt)
+        protected void Raise(VersionedEvent @event)
         {
-            evt.OperationId = _operationId;
-            evt.SourceId = Id;
-            evt.Version = Version + 1;
-            _events.Add(evt);
-            ApplyEvent(evt);
+            @event.OperationId = _operationId;
+            @event.SourceId = Id;
+            @event.Version = Version + 1;
+            _events.Add(@event);
+            ApplyEvent(@event);
         }
 
-        private void ApplyEvent(IVersionedEvent evt)
+        private void ApplyEvent(IVersionedEvent @event)
         {
-            this.AsDynamic().Apply(evt);
-            Version = evt.Version;
-            if (!_operationIds.Contains(evt.OperationId))
-                _operationIds.Add(evt.OperationId);
+            this.AsDynamic().Apply(@event);
+            Version = @event.Version;
+            if (!_operationIds.Contains(@event.OperationId))
+                _operationIds.Add(@event.OperationId);
         }
     }
 }

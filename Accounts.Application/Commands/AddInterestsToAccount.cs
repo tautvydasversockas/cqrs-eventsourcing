@@ -1,28 +1,23 @@
 ﻿using System;
 using FluentValidation;
-using Infrastructure.Messaging;
 using MediatR;
 
 namespace Accounts.Application.Commands
 {
-    public sealed class AddInterestsToAccount : ICommand, IRequest
+    public sealed class AddInterestsToAccount : Command, IRequest
     {
-        public Guid Id { get; }
         public Guid AccountId { get; }
 
-        public AddInterestsToAccount(
-            Guid id,
-            Guid accountId)
+        public AddInterestsToAccount(Guid id, Guid accountId) 
+            : base(id)
         {
-            Id = id;
             AccountId = accountId;
         }
 
-        public sealed class Validator : AbstractValidator<AddInterestsToAccount>
+        public sealed class Validator : CommandValidator<AddInterestsToAccount>
         {
             public Validator()
             {
-                RuleFor(v => v.Id).NotEmpty();
                 RuleFor(v => v.AccountId).NotEmpty();
             }
         }

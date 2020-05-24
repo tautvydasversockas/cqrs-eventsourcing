@@ -1,8 +1,8 @@
-﻿using System;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 using Accounts.Domain.Events;
+using Infrastructure.Domain;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using static Accounts.ReadModel.Configurations.AccountConfig;
@@ -12,73 +12,75 @@ namespace Accounts.ReadModel
     public sealed class AccountReadModelGenerator
     {
         private readonly NumberFormatInfo _numberFormat = new NumberFormatInfo { NumberDecimalSeparator = "." };
-        private readonly DbContextOptions<AccountDbContext> _ctxOptions;
+        private readonly DbContextOptions<AccountDbContext> _contextOptions;
 
-        public AccountReadModelGenerator(DbContextOptions<AccountDbContext> ctxOptions)
+        public AccountReadModelGenerator(DbContextOptions<AccountDbContext> contextOptions)
         {
-            _ctxOptions = ctxOptions;
+            _contextOptions = contextOptions;
         }
 
-        public async Task Handle(AccountOpened evt, CancellationToken token = default)
+        public async Task Handle(AccountOpened @event, CancellationToken token = default)
         {
-            await using var ctx = new AccountDbContext(_ctxOptions);
-
-            ctx.Accounts.Add(new ActiveAccount
+            var account = new ActiveAccount
             {
-                Id = evt.SourceId,
-                Version = evt.Version,
-                ClientId = evt.ClientId,
-                Balance = evt.Balance,
-                InterestRate = evt.InterestRate,
+                Id = @event.SourceId,
+                Version = @event.Version,
+                ClientId = @event.ClientId,
+                Balance = @event.Balance,
+                InterestRate = @event.InterestRate,
                 IsFrozen = false
-            });
+            };
+
+            await using var context = new AccountDbContext(_contextOptions);
+            context.Accounts.Add(account);
 
             try
             {
-                await ctx.SaveChangesAsync(token);
+                await context.SaveChangesAsync(token);
             }
             catch (DbUpdateException e)
                 when (e.GetBaseException() is SqlException sqlEx && (sqlEx.Number == 2627 || sqlEx.Number == 2601))
             {
-                //Ignore duplicate key
+                // Ignore duplicate key.
             }
         }
 
-        public Task Handle(WithdrawnFromAccount evt, CancellationToken token = default)
+        public async Task Handle(WithdrawnFromAccount @event, CancellationToken token = default)
         {
-            return UpdateAsync(evt.SourceId, evt.Version, $"{BalanceColumnName} -= {evt.Amount.ToString(_numberFormat)}", token);
+            await UpdateAsync(@event, $"{BalanceColumnName} -= {@event.Amount.ToString(_numberFormat)}", token);
         }
 
-        public Task Handle(DepositedToAccount evt, CancellationToken token = default)
+        public async Task Handle(DepositedToAccount @event, CancellationToken token = default)
         {
-            return UpdateAsync(evt.SourceId, evt.Version, $"{BalanceColumnName} += {evt.Amount.ToString(_numberFormat)}", token);
+            await UpdateAsync(@event, $"{BalanceColumnName} += {@event.Amount.ToString(_numberFormat)}", token);
         }
 
-        public Task Handle(AddedInterestsToAccount evt, CancellationToken token = default)
+        public async Task Handle(AddedInterestsToAccount @event, CancellationToken token = default)
         {
-            return UpdateAsync(evt.SourceId, evt.Version, $"{BalanceColumnName} += {evt.Interests.ToString(_numberFormat)}", token);
+            await UpdateAsync(@event, $"{BalanceColumnName} += {@event.Interests.ToString(_numberFormat)}", token);
         }
 
-        public Task Handle(AccountFrozen evt, CancellationToken token = default)
+        public async Task Handle(AccountFrozen @event, CancellationToken token = default)
         {
-            return UpdateAsync(evt.SourceId, evt.Version, $"{IsFrozenColumnName} = 1", token);
+            await UpdateAsync(@event, $"{IsFrozenColumnName} = 1", token);
         }
 
-        public Task Handle(AccountUnFrozen evt, CancellationToken token = default)
+        public async Task Handle(AccountUnFrozen @event, CancellationToken token = default)
         {
-            return UpdateAsync(evt.SourceId, evt.Version, $"{IsFrozenColumnName} = 0", token);
+            await UpdateAsync(@event, $"{IsFrozenColumnName} = 0", token);
         }
 
-        private async Task UpdateAsync(Guid id, int version, string updateSql, CancellationToken token)
+        private async Task UpdateAsync<TEvent>(TEvent @event, string updateSql, CancellationToken token)
+            where TEvent : IVersionedEvent
         {
             var sql = $@"
                 UPDATE {TableName} 
                 SET {updateSql} 
-                WHERE {IdColumnName} = '{id}' 
-                  AND {VersionColumnName} < {version}";
+                WHERE {IdColumnName} = '{@event.SourceId}' 
+                  AND {VersionColumnName} < {@event.Version}";
 
-            await using var ctx = new AccountDbContext(_ctxOptions);
-            await ctx.Database.ExecuteSqlRawAsync(sql, token);
+            await using var context = new AccountDbContext(_contextOptions);
+            await context.Database.ExecuteSqlRawAsync(sql, token);
         }
     }
 }

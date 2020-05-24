@@ -25,41 +25,41 @@ namespace Accounts.Application.Handlers
             _repository = repository;
         }
 
-        public async Task<Guid> Handle(OpenAccount cmd, CancellationToken token)
+        public async Task<Guid> Handle(OpenAccount command, CancellationToken token)
         {
-            var id = DeterministicGuid.Create(cmd.Id);
-            var account = Account.Open(id, cmd.ClientId, (InterestRate)cmd.InterestRate, (Money)cmd.Balance);
-            await _repository.CreateAsync(account, cmd.Id);
+            var id = DeterministicGuid.Create(command.Id);
+            var account = Account.Open(id, command.ClientId, (InterestRate)command.InterestRate, command.Balance);
+            await _repository.CreateAsync(account, command.Id);
             return id;
         }
 
-        public async Task<Unit> Handle(DepositToAccount cmd, CancellationToken token)
+        public async Task<Unit> Handle(DepositToAccount command, CancellationToken token)
         {
-            await _repository.ExecuteAsync(cmd.AccountId, account => account.Deposit((Money)cmd.Amount), cmd.Id, cmd.Id);
+            await _repository.ExecuteAsync(command.AccountId, account => account.Deposit(command.Amount), command.Id, command.Id);
             return default;
         }
 
-        public async Task<Unit> Handle(WithdrawFromAccount cmd, CancellationToken token)
+        public async Task<Unit> Handle(WithdrawFromAccount command, CancellationToken token)
         {
-            await _repository.ExecuteAsync(cmd.AccountId, account => account.Withdraw((Money)cmd.Amount), cmd.Id, cmd.Id);
+            await _repository.ExecuteAsync(command.AccountId, account => account.Withdraw(command.Amount), command.Id, command.Id);
             return default;
         }
 
-        public async Task<Unit> Handle(AddInterestsToAccount cmd, CancellationToken token)
+        public async Task<Unit> Handle(AddInterestsToAccount command, CancellationToken token)
         {
-            await _repository.ExecuteAsync(cmd.AccountId, account => account.AddInterests(), cmd.Id, cmd.Id);
+            await _repository.ExecuteAsync(command.AccountId, account => account.AddInterests(), command.Id, command.Id);
             return default;
         }
 
-        public async Task<Unit> Handle(FreezeAccount cmd, CancellationToken token)
+        public async Task<Unit> Handle(FreezeAccount command, CancellationToken token)
         {
-            await _repository.ExecuteAsync(cmd.AccountId, account => account.Freeze(), cmd.Id);
+            await _repository.ExecuteAsync(command.AccountId, account => account.Freeze(), command.Id);
             return default;
         }
 
-        public async Task<Unit> Handle(UnFreezeAccount cmd, CancellationToken token)
+        public async Task<Unit> Handle(UnFreezeAccount command, CancellationToken token)
         {
-            await _repository.ExecuteAsync(cmd.AccountId, account => account.Unfreeze(), cmd.Id);
+            await _repository.ExecuteAsync(command.AccountId, account => account.Unfreeze(), command.Id);
             return default;
         }
     }

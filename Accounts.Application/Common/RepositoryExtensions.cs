@@ -12,11 +12,11 @@ namespace Accounts.Application.Common
         {
             try
             {
-                await repository.SaveAsync(aggregate, correlationId.ToString());
+                await repository.SaveAsync(aggregate, correlationId);
             }
             catch (DuplicateKeyException)
             {
-                //Ignore idempotent operation
+                // Ignore idempotent operation.
             }
         }
 
@@ -24,25 +24,30 @@ namespace Accounts.Application.Common
             where TEventSourcedAggregate : EventSourcedAggregate
         {
             var aggregate = await repository.GetAsync(id);
+
             action(aggregate);
-            await repository.SaveAsync(aggregate, correlationId.ToString());
+
+            await repository.SaveAsync(aggregate, correlationId);
         }
 
         public static async Task ExecuteAsync<TEventSourcedAggregate>(this IEventSourcedRepository<TEventSourcedAggregate> repository, Guid id, Action<TEventSourcedAggregate> action, Guid correlationId, Guid operationId)
             where TEventSourcedAggregate : EventSourcedAggregate
         {
             var aggregate = await repository.GetAsync(id);
+
             try
             {
                 aggregate.SetOperation(operationId);
             }
             catch (InvalidOperationException)
             {
-                //Ignore idempotent operation
+                // Ignore idempotent operation.
                 return;
             }
+
             action(aggregate);
-            await repository.SaveAsync(aggregate, correlationId.ToString());
+
+            await repository.SaveAsync(aggregate, correlationId);
         }
     }
 }

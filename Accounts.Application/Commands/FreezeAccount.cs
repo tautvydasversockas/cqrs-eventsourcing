@@ -1,28 +1,23 @@
 ﻿using System;
 using FluentValidation;
-using Infrastructure.Messaging;
 using MediatR;
 
 namespace Accounts.Application.Commands
 {
-    public sealed class FreezeAccount : ICommand, IRequest
+    public sealed class FreezeAccount : Command, IRequest
     {
-        public Guid Id { get; }
         public Guid AccountId { get; }
 
-        public FreezeAccount(
-            Guid id,
-            Guid accountId)
+        public FreezeAccount(Guid id, Guid accountId)
+            : base(id)
         {
-            Id = id;
             AccountId = accountId;
         }
 
-        public sealed class Validator : AbstractValidator<FreezeAccount>
+        public sealed class Validator : CommandValidator<FreezeAccount>
         {
             public Validator()
             {
-                RuleFor(v => v.Id).NotEmpty();
                 RuleFor(v => v.AccountId).NotEmpty();
             }
         }

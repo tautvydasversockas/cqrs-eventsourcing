@@ -5,7 +5,7 @@ namespace Accounts.Api.Filters
 {
     public sealed class IgnoreReadOnlySchemaFilter : ISchemaFilter
     {
-        public void Apply(OpenApiSchema schema, SchemaFilterContext ctx)
+        public void Apply(OpenApiSchema schema, SchemaFilterContext context)
         {
             schema.ReadOnly = false;
 

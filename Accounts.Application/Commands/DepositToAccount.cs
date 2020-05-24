@@ -1,34 +1,27 @@
 ﻿using System;
-using Accounts.Application.Common;
 using FluentValidation;
-using Infrastructure.Messaging;
 using MediatR;
 
 namespace Accounts.Application.Commands
 {
-    public sealed class DepositToAccount : ICommand, IRequest
+    public sealed class DepositToAccount : Command, IRequest
     {
-        public Guid Id { get; }
         public Guid AccountId { get; }
         public decimal Amount { get; }
 
-        public DepositToAccount(
-            Guid id,
-            Guid accountId,
-            decimal amount)
+        public DepositToAccount(Guid id, Guid accountId, decimal amount)
+            : base(id)
         {
-            Id = id;
             AccountId = accountId;
             Amount = amount;
         }
 
-        public sealed class Validator : AbstractValidator<DepositToAccount>
+        public sealed class Validator : CommandValidator<DepositToAccount>
         {
             public Validator()
             {
-                RuleFor(v => v.Id).NotEmpty();
                 RuleFor(v => v.AccountId).NotEmpty();
-                RuleFor(v => v.Amount).ValidMoney();
+                RuleFor(v => v.Amount).GreaterThan(0);
             }
         }
     }

@@ -7,16 +7,16 @@ namespace Accounts.Api.Filters
 {
     public sealed class ExceptionFilter : IExceptionFilter
     {
-        public void OnException(ExceptionContext ctx)
+        public void OnException(ExceptionContext context)
         {
-            switch (ctx.Exception)
+            switch (context.Exception)
             {
                 case EntityNotFoundException _:
-                    ctx.Result = new NotFoundResult();
+                    context.Result = new NotFoundResult();
                     break;
 
                 default:
-                    ctx.Result = new InternalServerErrorResult();
+                    context.Result = new InternalServerErrorResult();
                     break;
             }
         }

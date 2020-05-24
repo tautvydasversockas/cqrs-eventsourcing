@@ -24,28 +24,28 @@ namespace Infrastructure
             _stringEnumConverter = new StringEnumConverter();
         }
 
-        public EventData Serialize<TEvent>(TEvent evt, IDictionary<string, object> evtMetadata) where TEvent : IEvent
+        public EventData Serialize<TEvent>(TEvent @event, IDictionary<string, object> evtMetadata) where TEvent : IEvent
         {
-            var evtId = Guid.NewGuid();
-            var type = evt.GetType().Name;
-            var data = Serialize(evt);
+            var eventId = Guid.NewGuid();
+            var type = @event.GetType().Name;
+            var data = Serialize(@event);
             var metadata = Serialize(evtMetadata);
-            return new EventData(evtId, type, true, data, metadata);
+            return new EventData(eventId, type, true, data, metadata);
         }
 
-        public (object, IDictionary<string, object>) Deserialize(ResolvedEvent resolvedEvt)
+        public (object, IDictionary<string, object>) Deserialize(ResolvedEvent resolvedEvent)
         {
-            var recordedEvt = resolvedEvt.Event;
-            var metadata = (Dictionary<string, object>?)Deserialize(recordedEvt.Metadata, typeof(Dictionary<string, object>)) ??
+            var recordedEvent = resolvedEvent.Event;
+            var metadata = (Dictionary<string, object>?)Deserialize(recordedEvent.Metadata, typeof(Dictionary<string, object>)) ??
                 throw new InvalidOperationException("Cannot deserialize event metadata.");
-            var evtTypeName = _eventNamespace == null
-                ? recordedEvt.EventType :
-                $"{_eventNamespace}.{recordedEvt.EventType}";
-            var evtType = _eventAssembly.GetType(evtTypeName) ??
-                throw new InvalidOperationException($"Cannot find event type '{evtTypeName}'.");
-            var evt = Deserialize(recordedEvt.Data, evtType) ??
-                throw new InvalidOperationException($"Cannot deserialize event '{evtTypeName}'.");
-            return (evt, metadata);
+            var eventTypeName = _eventNamespace == null
+                ? recordedEvent.EventType
+                : $"{_eventNamespace}.{recordedEvent.EventType}";
+            var eventType = _eventAssembly.GetType(eventTypeName) ??
+                throw new InvalidOperationException($"Cannot find event type '{eventTypeName}'.");
+            var @event = Deserialize(recordedEvent.Data, eventType) ??
+                throw new InvalidOperationException($"Cannot deserialize event '{eventTypeName}'.");
+            return (@event, metadata);
         }
 
         private byte[] Serialize(object value) =>

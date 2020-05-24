@@ -34,32 +34,50 @@ namespace Accounts.Api.BackgroundWorkers
 
         private async Task SubscribeAsync()
         {
-            _subscription = await _connection.ConnectToPersistentSubscriptionAsync("$ce-Account", "Account-ReadModel", EventAppeared, SubscriptionDropped);
+            const string stream = "$ce-Account";
+            const string groupName = "Account-ReadModel";
+            _subscription = await _connection.ConnectToPersistentSubscriptionAsync(stream, groupName, EventAppeared, SubscriptionDropped);
         }
 
-        private Task EventAppeared(EventStorePersistentSubscriptionBase subscription, ResolvedEvent resolvedEvt)
+        private async Task EventAppeared(EventStorePersistentSubscriptionBase subscription, ResolvedEvent resolvedEvent)
         {
-            if (IsSystemEvent(resolvedEvt))
-                return Task.CompletedTask;
+            if (IsSystemEvent(resolvedEvent))
+                return;
 
-            var (evt, _) = _serializer.Deserialize(resolvedEvt);
+            var (@event, _) = _serializer.Deserialize(resolvedEvent);
 
-            return evt switch
+            switch (@event)
             {
-                AccountOpened e => _readModelGenerator.Handle(e),
-                DepositedToAccount e => _readModelGenerator.Handle(e),
-                WithdrawnFromAccount e => _readModelGenerator.Handle(e),
-                AddedInterestsToAccount e => _readModelGenerator.Handle(e),
-                AccountFrozen e => _readModelGenerator.Handle(e),
-                AccountUnFrozen e => _readModelGenerator.Handle(e),
-                _ => Task.CompletedTask
-            };
+                case AccountOpened e:
+                    await _readModelGenerator.Handle(e);
+                    break;
+
+                case DepositedToAccount e:
+                    await _readModelGenerator.Handle(e);
+                    break;
+
+                case WithdrawnFromAccount e:
+                    await _readModelGenerator.Handle(e);
+                    break;
+
+                case AddedInterestsToAccount e:
+                    await _readModelGenerator.Handle(e);
+                    break;
+
+                case AccountFrozen e:
+                    await _readModelGenerator.Handle(e);
+                    break;
+
+                case AccountUnFrozen e:
+                    await _readModelGenerator.Handle(e);
+                    break;
+            }
         }
 
-        private static bool IsSystemEvent(ResolvedEvent resolvedEvt)
+        private static bool IsSystemEvent(ResolvedEvent resolvedEvent)
         {
-            var recordedEvt = resolvedEvt.Event;
-            return !recordedEvt.Data.Any() || !recordedEvt.IsJson || recordedEvt.EventType.StartsWith('$');
+            var recordedEvent = resolvedEvent.Event;
+            return !recordedEvent.Data.Any() || !recordedEvent.IsJson || recordedEvent.EventType.StartsWith('$');
         }
 
         private void SubscriptionDropped(EventStorePersistentSubscriptionBase subscription, SubscriptionDropReason reason, Exception e)

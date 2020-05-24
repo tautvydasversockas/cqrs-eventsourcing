@@ -7,13 +7,8 @@ namespace Infrastructure
     {
         public static Guid Create(Guid val)
         {
-            return Create(val.ToString());
-        }
-
-        public static Guid Create(string val)
-        {
             using var generator = new NameBasedGenerator(HashType.SHA1);
-            return generator.GenerateGuid(UUIDNameSpace.URL, val);
+            return generator.GenerateGuid(UUIDNameSpace.URL, val.ToString());
         }
     }
 }

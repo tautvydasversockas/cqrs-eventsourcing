@@ -9,10 +9,7 @@ namespace Accounts.Domain.Events
         public decimal InterestRate { get; }
         public decimal Balance { get; }
 
-        public AccountOpened(
-            Guid clientId,
-            decimal interestRate,
-            decimal balance)
+        public AccountOpened(Guid clientId, decimal interestRate, decimal balance)
         {
             ClientId = clientId;
             InterestRate = interestRate;

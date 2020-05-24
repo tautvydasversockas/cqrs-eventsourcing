@@ -40,15 +40,15 @@ namespace Accounts.Api
             var eventStoreConnectionString = _config.GetConnectionString("EventStore");
 
             services
-                .AddControllers(opt =>
+                .AddControllers(options =>
                 {
-                    opt.Filters.Add(new ExceptionFilter());
-                    opt.Filters.Add(new ProducesResponseTypeAttribute(typeof(string), (int)HttpStatusCode.BadRequest));
-                    opt.Filters.Add(new ProducesResponseTypeAttribute(typeof(string), (int)HttpStatusCode.InternalServerError));
+                    options.Filters.Add(new ExceptionFilter());
+                    options.Filters.Add(new ProducesResponseTypeAttribute(typeof(string), (int)HttpStatusCode.BadRequest));
+                    options.Filters.Add(new ProducesResponseTypeAttribute(typeof(string), (int)HttpStatusCode.InternalServerError));
                 })
-                .AddJsonOptions(opt => opt.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()))
-                .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<OpenAccount.Validator>())
-                .AddNewtonsoftJson(opt => opt.SerializerSettings.Converters.Add(new StringEnumConverter()));
+                .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()))
+                .AddNewtonsoftJson(options => options.SerializerSettings.Converters.Add(new StringEnumConverter()))
+                .AddFluentValidation(config => config.RegisterValidatorsFromAssemblyContaining<OpenAccount.Validator>());
 
             services
                 .AddHealthChecks()
@@ -56,22 +56,24 @@ namespace Accounts.Api
 
             services
                 .AddDbContext<AccountDbContext>(
-                    opt => opt.UseSqlServer(sqlServerConnectionString),
+                    optionsBuilder => optionsBuilder.UseSqlServer(sqlServerConnectionString),
                     optionsLifetime: ServiceLifetime.Singleton)
-                .AddSwaggerGen(opt =>
+                .AddSwaggerGen(options =>
                 {
-                    opt.SwaggerDoc("v1", new OpenApiInfo
-                    {
-                        Title = "Accounts",
-                        Version = "v1",
-                        Contact = new OpenApiContact
+                    options.SwaggerDoc(
+                        "v1",
+                        new OpenApiInfo
                         {
-                            Name = "Accounts Team"
-                        }
-                    });
-                    opt.SchemaFilter<FluentValidationRules>();
-                    opt.SchemaFilter<IgnoreReadOnlySchemaFilter>();
-                    opt.OperationFilter<FluentValidationOperationFilter>();
+                            Title = "Accounts",
+                            Version = "v1",
+                            Contact = new OpenApiContact
+                            {
+                                Name = "Accounts Team"
+                            }
+                        });
+                    options.SchemaFilter<FluentValidationRules>();
+                    options.SchemaFilter<IgnoreReadOnlySchemaFilter>();
+                    options.OperationFilter<FluentValidationOperationFilter>();
                 })
                 .AddMediatR(typeof(AccountsCommandHandler).GetTypeInfo().Assembly)
                 .AddSingleton<EventSourcedAggregateFactory>()
@@ -83,8 +85,8 @@ namespace Accounts.Api
                 })
                 .AddSingleton(_ =>
                 {
-                    var typeInfo = typeof(AccountOpened).GetTypeInfo();
-                    return new EventStoreSerializer(typeInfo.Assembly, typeInfo.Namespace);
+                    var eventTypeInfo = typeof(AccountOpened).GetTypeInfo();
+                    return new EventStoreSerializer(eventTypeInfo.Assembly, eventTypeInfo.Namespace);
                 })
                 .AddSingleton(typeof(IEventSourcedRepository<>), typeof(EventStoreRepository<>))
                 .AddSingleton<AccountReadModelGenerator>()
@@ -96,16 +98,18 @@ namespace Accounts.Api
         {
             app
                 .UseHttpsRedirection()
-                .UseHealthChecks("/health", new HealthCheckOptions
-                {
-                    Predicate = _ => true,
-                    ResponseWriter = HealthCheckResponseWriter.WriteAsync
-                })
+                .UseHealthChecks(
+                    "/health",
+                    new HealthCheckOptions
+                    {
+                        Predicate = _ => true,
+                        ResponseWriter = HealthCheckResponseWriter.WriteAsync
+                    })
                 .UseRouting()
                 .UseAuthorization()
-                .UseEndpoints(erb => erb.MapControllers())
+                .UseEndpoints(routeBuilder => routeBuilder.MapControllers())
                 .UseSwagger()
-                .UseSwaggerUI(opt => opt.SwaggerEndpoint("/swagger/v1/swagger.json", "Accounts"));
+                .UseSwaggerUI(options => options.SwaggerEndpoint("/swagger/v1/swagger.json", "Accounts"));
         }
     }
 }

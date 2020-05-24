@@ -5,7 +5,7 @@ namespace Infrastructure.Domain
 {
     public interface IEventSourcedRepository<TEventSourcedAggregate> where TEventSourcedAggregate : EventSourcedAggregate
     {
-        Task SaveAsync(TEventSourcedAggregate aggregate, string correlationId);
+        Task SaveAsync(TEventSourcedAggregate aggregate, Guid correlationId);
         Task<TEventSourcedAggregate> GetAsync(Guid id);
     }
 }

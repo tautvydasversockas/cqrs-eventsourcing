@@ -8,19 +8,23 @@ namespace Accounts.Api.HealthChecks
 {
     public sealed class HealthCheckResponseWriter
     {
-        public static Task WriteAsync(HttpContext ctx, HealthReport report)
+        private const string DefaultResponse = "{}";
+
+        public static Task WriteAsync(HttpContext context, HealthReport report)
         {
-            ctx.Response.ContentType = "application/json";
-            var result = report == null ? "{}" : JsonSerializer.Serialize(new
-            {
-                Status = report.Status.ToString(),
-                Entries = report.Entries.Select(e => new
+            context.Response.ContentType = "application/json";
+            var response = report == null
+                ? DefaultResponse
+                : JsonSerializer.Serialize(new
                 {
-                    Key = e.Key,
-                    Status = e.Value.Status.ToString()
-                })
-            });
-            return ctx.Response.WriteAsync(result);
+                    Status = report.Status.ToString(),
+                    Entries = report.Entries.Select(entry => new
+                    {
+                        Key = entry.Key,
+                        Status = entry.Value.Status.ToString()
+                    })
+                });
+            return context.Response.WriteAsync(response);
         }
     }
 }

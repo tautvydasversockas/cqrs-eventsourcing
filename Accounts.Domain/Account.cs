@@ -15,7 +15,7 @@ namespace Accounts.Domain
         }
 
         private Status _status;
-        private Money _balance;
+        private decimal _balance;
         private InterestRate _interestRate;
 
         private Account(Guid id)
@@ -24,11 +24,7 @@ namespace Accounts.Domain
         public Account(Guid id, IEnumerable<IVersionedEvent> events)
             : base(id, events) { }
 
-        public static Account Open(
-            Guid id,
-            Guid clientId,
-            InterestRate interestRate,
-            Money balance)
+        public static Account Open(Guid id, Guid clientId, InterestRate interestRate, decimal balance)
         {
             if (id == default)
                 throw new ArgumentException("Account id is required.");
@@ -36,13 +32,19 @@ namespace Accounts.Domain
             if (clientId == default)
                 throw new ArgumentException("Client id is required.");
 
+            if (balance < 0)
+                throw new InvalidOperationException("Balance cannot be negative.");
+
             var account = new Account(id);
             account.Raise(new AccountOpened(clientId, interestRate, balance));
             return account;
         }
 
-        public void Withdraw(Money amount)
+        public void Withdraw(decimal amount)
         {
+            if (amount <= 0)
+                throw new InvalidOperationException("Amount must be positive.");
+
             if (_status == Frozen)
                 throw new InvalidOperationException("Cannot withdraw from frozen account.");
 
@@ -52,8 +54,11 @@ namespace Accounts.Domain
             Raise(new WithdrawnFromAccount(amount));
         }
 
-        public void Deposit(Money amount)
+        public void Deposit(decimal amount)
         {
+            if (amount <= 0)
+                throw new InvalidOperationException("Amount must be positive.");
+
             if (_status == Frozen)
                 throw new InvalidOperationException("Cannot deposit to frozen account.");
 
@@ -86,34 +91,34 @@ namespace Accounts.Domain
             Raise(new AccountUnFrozen());
         }
 
-        private void Apply(AccountOpened evt)
+        private void Apply(AccountOpened @event)
         {
             _status = Active;
-            _balance = (Money)evt.Balance;
-            _interestRate = (InterestRate)evt.InterestRate;
+            _balance = @event.Balance;
+            _interestRate = (InterestRate)@event.InterestRate;
         }
 
-        private void Apply(WithdrawnFromAccount evt)
+        private void Apply(WithdrawnFromAccount @event)
         {
-            _balance -= (Money)evt.Amount;
+            _balance -= @event.Amount;
         }
 
-        private void Apply(DepositedToAccount evt)
+        private void Apply(DepositedToAccount @event)
         {
-            _balance += (Money)evt.Amount;
+            _balance += @event.Amount;
         }
 
-        private void Apply(AddedInterestsToAccount evt)
+        private void Apply(AddedInterestsToAccount @event)
         {
-            _balance += (Money)evt.Interests;
+            _balance += @event.Interests;
         }
 
-        private void Apply(AccountFrozen evt)
+        private void Apply(AccountFrozen @event)
         {
             _status = Frozen;
         }
 
-        private void Apply(AccountUnFrozen evt)
+        private void Apply(AccountUnFrozen @event)
         {
             _status = Active;
         }

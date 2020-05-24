@@ -26,7 +26,7 @@ namespace Infrastructure
             _aggregateFactory = aggregateFactory;
         }
 
-        public async Task SaveAsync(TEventSourcedAggregate aggregate, string correlationId)
+        public async Task SaveAsync(TEventSourcedAggregate aggregate, Guid correlationId)
         {
             var events = aggregate.GetUncommittedEvents();
             if (!events.Any())

@@ -7,13 +7,10 @@ namespace Accounts.Application.Common
 {
     public static class ValidationExtensions
     {
-        public static IRuleBuilderInitial<T, decimal> ValidMoney<T>(this IRuleBuilderInitial<T, decimal> builder) =>
-            builder.Custom((value, ctx) => ctx.Execute(() => new Money(value)));
-
         public static IRuleBuilderInitial<T, decimal> ValidInterestRate<T>(this IRuleBuilderInitial<T, decimal> builder) =>
-            builder.Custom((value, ctx) => ctx.Execute(() => new InterestRate(value)));
+            builder.Custom((value, context) => context.Execute(() => new InterestRate(value)));
 
-        private static void Execute(this CustomContext ctx, Action action)
+        private static void Execute(this CustomContext context, Action action)
         {
             try
             {
@@ -21,7 +18,7 @@ namespace Accounts.Application.Common
             }
             catch (ArgumentException e)
             {
-                ctx.AddFailure(e.Message);
+                context.AddFailure(e.Message);
             }
         }
     }
