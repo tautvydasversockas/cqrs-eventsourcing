@@ -2,5 +2,5 @@
 
 namespace Accounts.Domain.Events
 {
-    public sealed class AccountUnFrozen : VersionedEvent { }
+    public sealed class AccountUnfrozen : VersionedEvent { }
 }

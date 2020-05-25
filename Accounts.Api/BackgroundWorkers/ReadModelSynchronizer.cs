@@ -68,7 +68,7 @@ namespace Accounts.Api.BackgroundWorkers
                     await _readModelGenerator.Handle(e);
                     break;
 
-                case AccountUnFrozen e:
+                case AccountUnfrozen e:
                     await _readModelGenerator.Handle(e);
                     break;
             }

@@ -88,7 +88,7 @@ namespace Accounts.Domain
             if (_status != Frozen)
                 return;
 
-            Raise(new AccountUnFrozen());
+            Raise(new AccountUnfrozen());
         }
 
         private void Apply(AccountOpened @event)
@@ -118,7 +118,7 @@ namespace Accounts.Domain
             _status = Frozen;
         }
 
-        private void Apply(AccountUnFrozen @event)
+        private void Apply(AccountUnfrozen @event)
         {
             _status = Active;
         }

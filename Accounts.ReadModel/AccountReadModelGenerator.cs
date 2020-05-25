@@ -65,7 +65,7 @@ namespace Accounts.ReadModel
             await UpdateAsync(@event, $"{IsFrozenColumnName} = 1", token);
         }
 
-        public async Task Handle(AccountUnFrozen @event, CancellationToken token = default)
+        public async Task Handle(AccountUnfrozen @event, CancellationToken token = default)
         {
             await UpdateAsync(@event, $"{IsFrozenColumnName} = 0", token);
         }
