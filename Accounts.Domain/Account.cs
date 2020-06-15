@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
+using Accounts.Domain.Common;
 using Accounts.Domain.Events;
-using Infrastructure.Domain;
 using static Accounts.Domain.Account.Status;
 
 namespace Accounts.Domain
@@ -18,25 +17,13 @@ namespace Accounts.Domain
         private decimal _balance;
         private InterestRate _interestRate;
 
-        private Account(Guid id)
-            : base(id) { }
-
-        public Account(Guid id, IEnumerable<IVersionedEvent> events)
-            : base(id, events) { }
-
         public static Account Open(Guid id, Guid clientId, InterestRate interestRate, decimal balance)
         {
-            if (id == default)
-                throw new ArgumentException("Account id is required.");
-
-            if (clientId == default)
-                throw new ArgumentException("Client id is required.");
-
             if (balance < 0)
                 throw new InvalidOperationException("Balance cannot be negative.");
 
-            var account = new Account(id);
-            account.Raise(new AccountOpened(clientId, interestRate, balance));
+            var account = new Account();
+            account.Raise(new AccountOpened(id, clientId, interestRate, balance));
             return account;
         }
 
@@ -51,7 +38,7 @@ namespace Accounts.Domain
             if (amount > _balance)
                 throw new InvalidOperationException("Cannot withdraw more than balance.");
 
-            Raise(new WithdrawnFromAccount(amount));
+            Raise(new WithdrawnFromAccount(Id, amount));
         }
 
         public void Deposit(decimal amount)
@@ -62,7 +49,7 @@ namespace Accounts.Domain
             if (_status == Frozen)
                 throw new InvalidOperationException("Cannot deposit to frozen account.");
 
-            Raise(new DepositedToAccount(amount));
+            Raise(new DepositedToAccount(Id, amount));
         }
 
         public void AddInterests()
@@ -72,7 +59,7 @@ namespace Accounts.Domain
 
             var interests = _balance * _interestRate;
 
-            Raise(new AddedInterestsToAccount(interests));
+            Raise(new AddedInterestsToAccount(Id, interests));
         }
 
         public void Freeze()
@@ -80,7 +67,7 @@ namespace Accounts.Domain
             if (_status == Frozen)
                 return;
 
-            Raise(new AccountFrozen());
+            Raise(new AccountFrozen(Id));
         }
 
         public void Unfreeze()
@@ -88,11 +75,12 @@ namespace Accounts.Domain
             if (_status != Frozen)
                 return;
 
-            Raise(new AccountUnfrozen());
+            Raise(new AccountUnfrozen(Id));
         }
 
         private void Apply(AccountOpened @event)
         {
+            Id = @event.AccountId;
             _status = Active;
             _balance = @event.Balance;
             _interestRate = (InterestRate)@event.InterestRate;

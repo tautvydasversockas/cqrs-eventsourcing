@@ -1,13 +1,16 @@
-﻿using Infrastructure.Domain;
+﻿using System;
+using Accounts.Domain.Common;
 
 namespace Accounts.Domain.Events
 {
-    public sealed class WithdrawnFromAccount : VersionedEvent
+    public sealed class WithdrawnFromAccount : Event
     {
+        public Guid AccountId { get; }
         public decimal Amount { get; }
 
-        public WithdrawnFromAccount(decimal amount)
+        public WithdrawnFromAccount(Guid accountId, decimal amount)
         {
+            AccountId = accountId;
             Amount = amount;
         }
     }

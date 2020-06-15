@@ -1,13 +1,16 @@
-﻿using Infrastructure.Domain;
+﻿using System;
+using Accounts.Domain.Common;
 
 namespace Accounts.Domain.Events
 {
-    public sealed class AddedInterestsToAccount : VersionedEvent
+    public sealed class AddedInterestsToAccount : Event
     {
+        public Guid AccountId { get; }
         public decimal Interests { get; }
 
-        public AddedInterestsToAccount(decimal interests)
+        public AddedInterestsToAccount(Guid accountId, decimal interests)
         {
+            AccountId = accountId;
             Interests = interests;
         }
     }

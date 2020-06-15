@@ -4,6 +4,6 @@ namespace Accounts.ReadModel
 {
     public interface IAccountReadModel
     {
-        IQueryable<ActiveAccount> Accounts { get; }
+        IQueryable<AccountDto> Accounts { get; }
     }
 }

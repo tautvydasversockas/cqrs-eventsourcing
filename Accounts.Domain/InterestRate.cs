@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Infrastructure.Domain;
+using Accounts.Domain.Common;
 
 namespace Accounts.Domain
 {

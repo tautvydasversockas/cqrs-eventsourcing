@@ -1,0 +1,53 @@
+﻿using System.Threading;
+using System.Threading.Tasks;
+using Accounts.Application.Common;
+using Accounts.Domain;
+using Accounts.Domain.Commands;
+using Accounts.Domain.Common;
+
+namespace Accounts.Application.Handlers
+{
+    public sealed class AccountCommandHandlers :
+        Handler<Account>,
+        IHandler<OpenAccount>,
+        IHandler<DepositToAccount>,
+        IHandler<WithdrawFromAccount>,
+        IHandler<AddInterestsToAccount>,
+        IHandler<FreezeAccount>,
+        IHandler<UnfreezeAccount>
+    {
+        public AccountCommandHandlers(IEventSourcedRepository<Account> repository)
+            : base(repository) { }
+
+        public Task HandleAsync(OpenAccount command, CancellationToken token)
+        {
+            var account = Account.Open(command.AccountId, command.ClientId, (InterestRate)command.InterestRate, command.Balance);
+            return CreateAsync(account);
+        }
+
+        public Task HandleAsync(DepositToAccount command, CancellationToken token)
+        {
+            return UpdateAsync(command.AccountId, account => account.Deposit(command.Amount));
+        }
+
+        public Task HandleAsync(WithdrawFromAccount command, CancellationToken token)
+        {
+            return UpdateAsync(command.AccountId, account => account.Withdraw(command.Amount));
+        }
+
+        public Task HandleAsync(AddInterestsToAccount command, CancellationToken token)
+        {
+            return UpdateAsync(command.AccountId, account => account.AddInterests());
+        }
+
+        public Task HandleAsync(FreezeAccount command, CancellationToken token)
+        {
+            return UpdateAsync(command.AccountId, account => account.Freeze());
+        }
+
+        public Task HandleAsync(UnfreezeAccount command, CancellationToken token)
+        {
+            return UpdateAsync(command.AccountId, account => account.Unfreeze());
+        }
+    }
+}

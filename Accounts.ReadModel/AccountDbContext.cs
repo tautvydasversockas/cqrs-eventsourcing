@@ -8,8 +8,8 @@ namespace Accounts.ReadModel
     {
         public AccountDbContext(DbContextOptions<AccountDbContext> options) : base(options) { }
 
-        public DbSet<ActiveAccount> Accounts { get; set; }
-        IQueryable<ActiveAccount> IAccountReadModel.Accounts => Accounts;
+        public DbSet<AccountDto> Accounts { get; set; }
+        IQueryable<AccountDto> IAccountReadModel.Accounts => Accounts;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

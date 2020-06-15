@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using Accounts.Application.Commands;
+using Accounts.Api.Dto;
+using Accounts.Domain.Commands;
+using Accounts.Infrastructure;
 using Accounts.ReadModel;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,72 +16,80 @@ namespace Accounts.Api.Controllers
     [Route("api/v1/accounts")]
     public sealed class AccountsController : Controller
     {
-        private readonly IMediator _mediator;
+        private readonly CommandBus _commandBus;
         private readonly IAccountReadModel _readModel;
+        private readonly MessageContext _context;
 
-        public AccountsController(IMediator mediator, IAccountReadModel readModel)
+        public AccountsController(CommandBus commandBus, IAccountReadModel readModel, MessageContext context)
         {
-            _mediator = mediator;
+            _commandBus = commandBus;
             _readModel = readModel;
+            _context = context;
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(List<ActiveAccount>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(List<AccountDto>), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetAll(CancellationToken token)
         {
-            return Ok(await _readModel.Accounts.ToListAsync(token));
+            var accountDtos = await _readModel.Accounts.ToListAsync(token);
+            return Ok(accountDtos);
         }
 
         [HttpGet("{id}", Name = nameof(Get))]
-        [ProducesResponseType(typeof(ActiveAccount), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        public async Task<IActionResult> Get([Required]Guid id, CancellationToken token)
+        [ProducesResponseType(typeof(AccountDto), (int)HttpStatusCode.OK)]
+        public async Task<IActionResult> Get(Guid id, CancellationToken token)
         {
-            var account = await _readModel.Accounts.SingleOrDefaultAsync(o => o.Id == id, token);
-            return account == null ? (IActionResult)NotFound() : Ok(account);
+            var accountDto = await _readModel.Accounts.SingleOrDefaultAsync(account => account.Id == id, token);
+            return accountDto == null ? (IActionResult)NotFound() : Ok(accountDto);
         }
 
         [HttpPost("open")]
         [ProducesResponseType(typeof(Guid), (int)HttpStatusCode.Created)]
-        public async Task<IActionResult> Open([Required]OpenAccount command, CancellationToken token)
+        public async Task<IActionResult> Open(OpenAccountDto requestDto, CancellationToken token)
         {
-            var id = await _mediator.Send(command, token);
+            var id = DeterministicGuid.Create(_context.Id);
+            await _commandBus.SendAsync(new OpenAccount(id, requestDto.ClientId, requestDto.InterestRate, requestDto.Balance), token);
             return CreatedAtRoute(nameof(Get), new { id }, id);
         }
 
-        [HttpPost("deposit")]
+        [HttpPost("{id}/deposit")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
-        public async Task<IActionResult> Deposit([Required]DepositToAccount command, CancellationToken token)
+        public async Task<IActionResult> Deposit(Guid id, DepositToAccountDto requestDto, CancellationToken token)
         {
-            return Ok(await _mediator.Send(command, token));
+            await _commandBus.SendAsync(new DepositToAccount(id, requestDto.Amount), token);
+            return Ok();
         }
 
-        [HttpPost("withdraw")]
+        [HttpPost("{id}/withdraw")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
-        public async Task<IActionResult> Withdraw([Required]WithdrawFromAccount command, CancellationToken token)
+        public async Task<IActionResult> Withdraw(Guid id, WithdrawFromAccountDto requestDto, CancellationToken token)
         {
-            return Ok(await _mediator.Send(command, token));
+            await _commandBus.SendAsync(new WithdrawFromAccount(id, requestDto.Amount), token);
+            return Ok();
         }
 
-        [HttpPost("add-interests")]
+        [HttpPost("{id}/add-interests")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
-        public async Task<IActionResult> AddInterests([Required]AddInterestsToAccount command, CancellationToken token)
+        public async Task<IActionResult> AddInterests(Guid id, CancellationToken token)
         {
-            return Ok(await _mediator.Send(command, token));
+            await _commandBus.SendAsync(new AddInterestsToAccount(id), token);
+            return Ok();
         }
 
-        [HttpPost("freeze")]
+        [HttpPost("{id}/freeze")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
-        public async Task<IActionResult> Freeze([Required]FreezeAccount command, CancellationToken token)
+        public async Task<IActionResult> Freeze(Guid id, CancellationToken token)
         {
-            return Ok(await _mediator.Send(command, token));
+            await _commandBus.SendAsync(new FreezeAccount(id), token);
+            return Ok();
         }
 
-        [HttpPost("unfreeze")]
+        [HttpPost("{id}/unfreeze")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
-        public async Task<IActionResult> Unfreeze([Required]UnFreezeAccount command, CancellationToken token)
+        public async Task<IActionResult> Unfreeze(Guid id, CancellationToken token)
         {
-            return Ok(await _mediator.Send(command, token));
+            await _commandBus.SendAsync(new UnfreezeAccount(id), token);
+            return Ok();
         }
     }
 }

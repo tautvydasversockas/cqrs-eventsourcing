@@ -3,51 +3,23 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Accounts.ReadModel.Configurations
 {
-    public sealed class AccountConfig : IEntityTypeConfiguration<ActiveAccount>
+    public sealed class AccountConfig : IEntityTypeConfiguration<AccountDto>
     {
-        public const string TableName = "Accounts";
-        public const string IdColumnName = "Id";
-        public const string VersionColumnName = "Version";
-        public const string ClientIdColumnName = "ClientId";
-        public const string InterestRateColumnName = "InterestRate";
-        public const string BalanceColumnName = "Balance";
-        public const string IsFrozenColumnName = "IsFrozen";
-
-        public void Configure(EntityTypeBuilder<ActiveAccount> builder)
+        public void Configure(EntityTypeBuilder<AccountDto> builder)
         {
-            builder
-                .ToTable(TableName)
-                .HasKey(o => o.Id);
+            builder.ToTable("Accounts").HasKey(o => o.Id);
 
-            builder
-                .Property(o => o.Id)
-                .HasColumnName(IdColumnName)
-                .IsRequired();
+            builder.Property(o => o.Id).IsRequired();
 
-            builder
-                .Property(o => o.Version)
-                .HasColumnName(VersionColumnName)
-                .IsRequired();
+            builder.Property(o => o.Version).IsRequired();
 
-            builder
-                .Property(o => o.ClientId)
-                .HasColumnName(ClientIdColumnName)
-                .IsRequired();
+            builder.Property(o => o.ClientId).IsRequired();
 
-            builder
-                .Property(o => o.InterestRate)
-                .HasColumnName(InterestRateColumnName)
-                .IsRequired();
+            builder.Property(o => o.InterestRate).IsRequired();
 
-            builder
-                .Property(o => o.Balance)
-                .HasColumnName(BalanceColumnName)
-                .IsRequired();
+            builder.Property(o => o.Balance).IsRequired();
 
-            builder
-                .Property(o => o.IsFrozen)
-                .HasColumnName(IsFrozenColumnName)
-                .IsRequired();
+            builder.Property(o => o.IsFrozen).IsRequired();
         }
     }
 }
