@@ -11,5 +11,11 @@ namespace Accounts.Domain.Events
         {
             AccountId = accountId;
         }
+
+        public override string ToString()
+        {
+            return $"The account was frozen:\n" +
+                   $"Account ID: {AccountId}\n";
+        }
     }
 }

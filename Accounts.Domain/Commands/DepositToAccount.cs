@@ -13,5 +13,12 @@ namespace Accounts.Domain.Commands
             AccountId = accountId;
             Amount = amount;
         }
+
+        public override string ToString()
+        {
+            return $"Depositing to the account:\n" +
+                   $"Account ID: {AccountId}\n" +
+                   $"Amount: {Amount}\n";
+        }
     }
 }

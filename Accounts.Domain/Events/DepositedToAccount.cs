@@ -13,5 +13,12 @@ namespace Accounts.Domain.Events
             AccountId = accountId;
             Amount = amount;
         }
+
+        public override string ToString()
+        {
+            return $"Deposited to the account:\n" +
+                   $"Account ID: {AccountId}\n" +
+                   $"Amount: {Amount}\n";
+        }
     }
 }

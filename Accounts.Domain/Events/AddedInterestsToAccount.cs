@@ -13,5 +13,12 @@ namespace Accounts.Domain.Events
             AccountId = accountId;
             Interests = interests;
         }
+
+        public override string ToString()
+        {
+            return $"Added interests to the account:\n" +
+                   $"Account ID: {AccountId}\n" +
+                   $"Interests: {Interests}\n";
+        }
     }
 }

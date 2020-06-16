@@ -17,5 +17,14 @@ namespace Accounts.Domain.Events
             InterestRate = interestRate;
             Balance = balance;
         }
+
+        public override string ToString()
+        {
+            return $"The account was opened:\n" +
+                   $"Account ID: {AccountId}\n" +
+                   $"Client ID: {ClientId}\n" +
+                   $"Interest rate: {InterestRate}\n" +
+                   $"Balance: {Balance}\n";
+        }
     }
 }

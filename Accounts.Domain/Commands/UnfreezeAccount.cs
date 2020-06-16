@@ -11,5 +11,11 @@ namespace Accounts.Domain.Commands
         {
             AccountId = accountId;
         }
+
+        public override string ToString()
+        {
+            return $"Unfreezing the account:\n" +
+                   $"Account ID: {AccountId}\n";
+        }
     }
 }
