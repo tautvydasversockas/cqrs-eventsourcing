@@ -35,7 +35,7 @@ namespace Accounts.Domain.Common
         private void ApplyEvent(Event @event)
         {
             this.AsDynamic().Apply(@event);
-            Version = @event.Version;
+            Version++;
         }
     }
 }

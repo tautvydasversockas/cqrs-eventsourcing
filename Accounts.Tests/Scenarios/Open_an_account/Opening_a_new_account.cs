@@ -5,7 +5,7 @@ using Accounts.Domain.Commands;
 using Accounts.Domain.Common;
 using Accounts.Domain.Events;
 
-namespace Accounts.Tests.Scenarios.open_an_account
+namespace Accounts.Tests.Scenarios.Open_an_account
 {
     public sealed class Opening_a_new_account : Specification<Account, OpenAccount>
     {

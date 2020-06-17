@@ -5,7 +5,7 @@ using Accounts.Domain.Commands;
 using Accounts.Domain.Common;
 using Accounts.Domain.Events;
 
-namespace Accounts.Tests.Scenarios.withdraw_from_an_account
+namespace Accounts.Tests.Scenarios.Withdraw_from_an_account
 {
     public sealed class Withdrawing_from_an_account_with_not_sufficient_balance : Specification<Account, WithdrawFromAccount>
     {

@@ -1,3 +1,4 @@
+using System;
 using Accounts.Api;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,14 +21,16 @@ namespace Accounts.Tests
             startup.ConfigureServices(_services);
         }
 
-        public static IServiceCollection GetServices()
+        public static IServiceProvider GetServiceProvider(Action<IServiceCollection> setup)
         {
             var services = new ServiceCollection();
 
             foreach (var service in _services)
                 services.Add(service);
 
-            return services;
+            setup(services);
+
+            return services.BuildServiceProvider();
         }
     }
 }

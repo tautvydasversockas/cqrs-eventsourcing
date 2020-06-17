@@ -28,34 +28,26 @@ namespace Accounts.Tests
         {
             Before();
 
+            var eventSourcedAggregate = new TEventSourcedAggregate();
+            eventSourcedAggregate.LoadFromHistory(Given());
+
             var repositoryMock = new Mock<IEventSourcedRepository<TEventSourcedAggregate>>();
-
-            TEventSourcedAggregate? storedAggregate = null;
-
-            if (Given().Any())
-            {
-                storedAggregate = new TEventSourcedAggregate();
-                storedAggregate.LoadFromHistory(Given());
-            }
 
             repositoryMock
                 .Setup(repository => repository.GetAsync(It.IsAny<Guid>()))
-                .ReturnsAsync(storedAggregate);
-
-            var updatedAggregate = new TEventSourcedAggregate();
+                .ReturnsAsync(eventSourcedAggregate.Version == 0 ? null : eventSourcedAggregate);
 
             repositoryMock
                 .Setup(repository => repository.SaveAsync(It.IsAny<TEventSourcedAggregate>()))
-                .Callback<TEventSourcedAggregate>(aggregate => updatedAggregate = aggregate);
+                .Callback<TEventSourcedAggregate>(aggregate => eventSourcedAggregate = aggregate);
 
-            var services = Testing.GetServices();
-
-            var repositoryDescriptor = services.FirstOrDefault(descriptor =>
-                descriptor.ServiceType == typeof(IEventSourcedRepository<>));
-            services.Remove(repositoryDescriptor);
-            services.AddScoped(_ => repositoryMock.Object);
-
-            var serviceProvider = services.BuildServiceProvider();
+            var serviceProvider = Testing.GetServiceProvider(services =>
+            {
+                var repositoryDescriptor = services.FirstOrDefault(descriptor =>
+                    descriptor.ServiceType == typeof(IEventSourcedRepository<>));
+                services.Remove(repositoryDescriptor);
+                services.AddScoped(_ => repositoryMock.Object);
+            });
             var commandBus = serviceProvider.GetService<CommandBus>();
 
             try
@@ -68,13 +60,8 @@ namespace Accounts.Tests
                 return;
             }
 
-            var publishedEvents = updatedAggregate.GetUncommittedEvents().ToList();
-            publishedEvents.ForEach(@event => @event.Version = 0);
-
-            publishedEvents.Should().HaveSameCount(Then());
-
-            foreach (var @event in Then())
-                publishedEvents.Should().ContainEquivalentOf(@event);
+            eventSourcedAggregate.GetUncommittedEvents().Should().BeEquivalentTo(Then(), options => 
+                options.RespectingRuntimeTypes().Excluding(@event => @event.Version));
         }
 
         public override string ToString()

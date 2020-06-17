@@ -2,6 +2,6 @@
 {
     public abstract class Event : Message
     {
-        public int Version;
+        public int Version { get; set; }
     }
 }
