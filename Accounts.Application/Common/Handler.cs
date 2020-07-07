@@ -23,7 +23,9 @@ namespace Accounts.Application.Common
         {
             var aggregate = await _repository.GetAsync(id) ??
                 throw new EntityNotFoundException(nameof(TEventSourcedAggregate), id);
+
             action(aggregate);
+
             await _repository.SaveAsync(aggregate);
         }
     }

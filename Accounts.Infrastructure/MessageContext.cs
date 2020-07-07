@@ -2,13 +2,13 @@
 {
     public sealed class MessageContext
     {
-        public string Id { get; }
+        public string MessageId { get; }
         public string CausationId { get; }
         public string CorrelationId { get; }
 
-        public MessageContext(string id, string causationId, string correlationId)
+        public MessageContext(string messageId, string causationId, string correlationId)
         {
-            Id = id;
+            MessageId = messageId;
             CausationId = causationId;
             CorrelationId = correlationId;
         }

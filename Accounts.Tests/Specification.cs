@@ -7,6 +7,7 @@ using Accounts.Domain.Common;
 using Accounts.Infrastructure;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Moq;
 using NUnit.Framework;
 
@@ -28,40 +29,36 @@ namespace Accounts.Tests
         {
             Before();
 
-            var eventSourcedAggregate = new TEventSourcedAggregate();
-            eventSourcedAggregate.LoadFromHistory(Given());
+            var eventStoreMock = new Mock<IEventStore>();
 
-            var repositoryMock = new Mock<IEventSourcedRepository<TEventSourcedAggregate>>();
+            eventStoreMock
+                .Setup(eventStore => eventStore.GetAggregateEventsAsync<TEventSourcedAggregate>(
+                    It.IsAny<Guid>()))
+                .Returns(Given().ToAsyncEnumerable);
 
-            repositoryMock
-                .Setup(repository => repository.GetAsync(It.IsAny<Guid>()))
-                .ReturnsAsync(eventSourcedAggregate.Version == 0 ? null : eventSourcedAggregate);
-
-            repositoryMock
-                .Setup(repository => repository.SaveAsync(It.IsAny<TEventSourcedAggregate>()))
-                .Callback<TEventSourcedAggregate>(aggregate => eventSourcedAggregate = aggregate);
+            eventStoreMock
+                .Setup(eventStore => eventStore.SaveAggregateEventsAsync<TEventSourcedAggregate>(
+                    It.IsAny<Guid>(),
+                    It.IsAny<IEnumerable<Event>>(),
+                    It.IsAny<int>()))
+                .Callback<Guid, IEnumerable<Event>, int>((id, events, expectedVersion) => 
+                    events.Should().BeEquivalentTo(Then(), options =>
+                        options.RespectingRuntimeTypes().Excluding(@event => @event.Version)));
 
             var serviceProvider = Testing.GetServiceProvider(services =>
-            {
-                var repositoryDescriptor = services.FirstOrDefault(descriptor =>
-                    descriptor.ServiceType == typeof(IEventSourcedRepository<>));
-                services.Remove(repositoryDescriptor);
-                services.AddScoped(_ => repositoryMock.Object);
-            });
-            var commandBus = serviceProvider.GetService<CommandBus>();
+                services.Replace(new ServiceDescriptor(typeof(IEventStore), _ => eventStoreMock.Object, ServiceLifetime.Scoped)));
+
+            var messageBus = serviceProvider.GetRequiredService<MessageBus>();
+            var messageContext = new MessageContext(string.Empty, string.Empty, string.Empty);
 
             try
             {
-                await commandBus.SendAsync(When());
+                await messageBus.SendAsync(When(), messageContext);
             }
             catch (InvalidOperationException)
             {
                 Then_Fail().Should().NotBeNull();
-                return;
             }
-
-            eventSourcedAggregate.GetUncommittedEvents().Should().BeEquivalentTo(Then(), options => 
-                options.RespectingRuntimeTypes().Excluding(@event => @event.Version));
         }
 
         public override string ToString()

@@ -32,7 +32,7 @@ namespace Accounts.Domain.Common
             ApplyEvent(@event);
         }
 
-        private void ApplyEvent(Event @event)
+        public void ApplyEvent(Event @event)
         {
             this.AsDynamic().Apply(@event);
             Version++;

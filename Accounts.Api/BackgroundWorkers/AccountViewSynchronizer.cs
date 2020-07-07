@@ -83,7 +83,7 @@ namespace Accounts.Api.BackgroundWorkers
         private async Task UpdateViewAsync(Func<AccountView, Task> handleAsync)
         {
             using var scope = _serviceScopeFactory.CreateScope();
-            var accountView = scope.ServiceProvider.GetService<AccountView>();
+            var accountView = scope.ServiceProvider.GetRequiredService<AccountView>();
             await handleAsync(accountView);
         }
 

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Accounts.Domain.Common;
@@ -12,34 +11,27 @@ namespace Accounts.Infrastructure
     public sealed class EventSourcedRepository<TEventSourcedAggregate> : IEventSourcedRepository<TEventSourcedAggregate>
         where TEventSourcedAggregate : EventSourcedAggregate, new()
     {
-        private readonly IEventStoreConnection _connection;
-        private readonly EventStoreSerializer _serializer;
-        private readonly MessageContext _context;
+        private readonly IEventStore _eventStore;
 
-        public EventSourcedRepository(IEventStoreConnection connection, EventStoreSerializer serializer, MessageContext context)
+        public EventSourcedRepository(IEventStore eventStore)
         {
-            _connection = connection;
-            _serializer = serializer;
-            _context = context;
+            _eventStore = eventStore;
         }
 
         public async Task SaveAsync(TEventSourcedAggregate aggregate)
         {
-            var events = aggregate.GetUncommittedEvents();
-            if (!events.Any())
+            var uncommittedEvents = aggregate.GetUncommittedEvents();
+            if (!uncommittedEvents.Any())
                 return;
 
-            var streamName = GetStreamName(aggregate.Id);
-            var originalVersion = aggregate.Version - events.Count;
+            var originalVersion = aggregate.Version - uncommittedEvents.Count;
             var expectedVersion = originalVersion == 0
                 ? ExpectedVersion.NoStream
                 : originalVersion - 1;
-            var metadata = new Metadata(_context.CausationId, _context.CorrelationId);
-            var eventsToSave = events.Select(@event => _serializer.Serialize(@event, metadata));
 
             try
             {
-                await _connection.AppendToStreamAsync(streamName, expectedVersion, eventsToSave);
+                await _eventStore.SaveAggregateEventsAsync<TEventSourcedAggregate>(aggregate.Id, uncommittedEvents, expectedVersion);
             }
             catch (WrongExpectedVersionException e)
                 when (e.ExpectedVersion == ExpectedVersion.NoStream)
@@ -52,37 +44,12 @@ namespace Accounts.Infrastructure
 
         public async Task<TEventSourcedAggregate?> GetAsync(Guid id)
         {
-            var events = new List<Event>();
-            StreamEventsSlice currentSlice;
-            var nextSliceStart = (long)StreamPosition.Start;
-            var streamName = GetStreamName(id);
+            TEventSourcedAggregate? aggregate = null;
 
-            do
-            {
-                currentSlice = await _connection.ReadStreamEventsForwardAsync(streamName, nextSliceStart, 10, false);
-                nextSliceStart = currentSlice.NextEventNumber;
-                events.AddRange(currentSlice.Events.Select(resolvedEvent =>
-                {
-                    var (@event, metadata) = _serializer.Deserialize(resolvedEvent);
+            await foreach (var @event in _eventStore.GetAggregateEventsAsync<TEventSourcedAggregate>(id))
+                (aggregate ??= new TEventSourcedAggregate()).ApplyEvent(@event);
 
-                    if (_context.Id == metadata.CausationId)
-                        throw new DuplicateOperationException(_context.CausationId);
-
-                    return @event;
-                }));
-            } while (!currentSlice.IsEndOfStream);
-
-            if (!events.Any())
-                return null;
-
-            var aggregate = new TEventSourcedAggregate();
-            aggregate.LoadFromHistory(events);
             return aggregate;
-        }
-
-        private static string GetStreamName(Guid id)
-        {
-            return $"{typeof(TEventSourcedAggregate).Name}-{id}";
         }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using System;
-using Accounts.Infrastructure;
 
-namespace Accounts.Api
+namespace Accounts.Infrastructure
 {
     public sealed class MessageContextProvider
     {

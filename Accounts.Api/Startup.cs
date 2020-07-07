@@ -1,11 +1,9 @@
-using System;
 using System.Net;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using Accounts.Api.BackgroundWorkers;
 using Accounts.Api.Dto;
 using Accounts.Api.HealthChecks;
-using Accounts.Api.Middleware;
 using Accounts.Api.MvcFilters;
 using Accounts.Api.OpenApiFilters;
 using Accounts.Application.Common;
@@ -56,7 +54,6 @@ namespace Accounts.Api
                 });
                 options.SchemaFilter<FluentValidationRules>();
                 options.SchemaFilter<IgnoreReadOnlySchemaFilter>();
-                options.OperationFilter<AddRequiredHeaderParameterFilter>();
                 options.OperationFilter<FluentValidationOperationFilter>();
             });
 
@@ -87,7 +84,9 @@ namespace Accounts.Api
                 return new EventStoreSerializer(eventTypeInfo.Assembly, eventTypeInfo.Namespace);
             });
 
-            services.AddScoped<CommandBus>();
+            services.AddScoped<IEventStore, Infrastructure.EventStore>();
+
+            services.AddScoped<MessageBus>();
 
             services.AddScoped<MessageContextProvider>();
             services.AddScoped(provider => provider.GetRequiredService<MessageContextProvider>().Context);
@@ -125,10 +124,6 @@ namespace Accounts.Api
             app.UseRouting();
 
             app.UseAuthorization();
-
-            app.UseWhen(
-                context => context.Request.Path.StartsWithSegments("/api", StringComparison.OrdinalIgnoreCase),
-                appBuilder => appBuilder.UseMiddleware<MessageContextMiddleware>());
 
             app.UseEndpoints(routeBuilder => routeBuilder.MapControllers());
 

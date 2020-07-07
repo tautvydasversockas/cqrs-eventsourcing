@@ -45,7 +45,7 @@ namespace Accounts.ReadModel
 
         public async Task HandleAsync(WithdrawnFromAccount @event, CancellationToken token = default)
         {
-            await UpdateAsync(@event.AccountId, @event.Version, $"Balance += {@event.Amount.ToString(NumberFormat)}", token);
+            await UpdateAsync(@event.AccountId, @event.Version, $"Balance -= {@event.Amount.ToString(NumberFormat)}", token);
         }
 
         public async Task HandleAsync(DepositedToAccount @event, CancellationToken token = default)
