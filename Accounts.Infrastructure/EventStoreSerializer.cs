@@ -2,26 +2,24 @@
 using System.Reflection;
 using System.Text;
 using Accounts.Domain.Common;
+using Accounts.Domain.Events;
 using EventStore.ClientAPI;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
 namespace Accounts.Infrastructure
 {
-    public class EventStoreSerializer
+    public static class EventStoreSerializer
     {
         private static readonly Encoding Encoding = Encoding.UTF8;
         private static readonly StringEnumConverter StringEnumConverter = new StringEnumConverter();
-        private readonly Assembly _eventAssembly;
-        private readonly string? _eventNamespace;
+        private static readonly Type EventType = typeof(AccountOpened);
 
-        public EventStoreSerializer(Assembly eventAssembly, string? eventNamespace)
-        {
-            _eventAssembly = eventAssembly;
-            _eventNamespace = eventNamespace;
-        }
+        private static Assembly EventAssembly => EventType.Assembly;
+        private static string? EventNamespace => EventType.Namespace;
 
-        public EventData Serialize<TEvent>(TEvent @event, Metadata metadata) where TEvent : Event
+        public static EventData Serialize<TEvent>(TEvent @event, Metadata metadata) 
+            where TEvent : Event
         {
             var eventId = Guid.NewGuid();
             var eventType = @event.GetType().Name;
@@ -30,14 +28,14 @@ namespace Accounts.Infrastructure
             return new EventData(eventId, eventType, true, serializedEvent, serializedMetadata);
         }
 
-        public (Event, Metadata) Deserialize(ResolvedEvent resolvedEvent)
+        public static (Event, Metadata) Deserialize(ResolvedEvent resolvedEvent)
         {
             var recordedEvent = resolvedEvent.Event;
             var eventTypeShortName = recordedEvent.EventType;
-            var eventTypeFullName = _eventNamespace == null
+            var eventTypeFullName = EventNamespace == null
                 ? eventTypeShortName
-                : $"{_eventNamespace}.{eventTypeShortName}";
-            var eventType = _eventAssembly.GetType(eventTypeFullName, true);
+                : $"{EventNamespace}.{eventTypeShortName}";
+            var eventType = EventAssembly.GetType(eventTypeFullName, true);
             var @event = (Event)Deserialize(recordedEvent.Data, eventType);
             var metadata = (Metadata)Deserialize(recordedEvent.Metadata, typeof(Metadata));
             return (@event, metadata);

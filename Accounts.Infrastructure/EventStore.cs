@@ -11,13 +11,11 @@ namespace Accounts.Infrastructure
     public sealed class EventStore : IEventStore
     {
         private readonly IEventStoreConnection _connection;
-        private readonly EventStoreSerializer _serializer;
         private readonly MessageContext _context;
 
-        public EventStore(IEventStoreConnection connection, EventStoreSerializer serializer, MessageContext context)
+        public EventStore(IEventStoreConnection connection, MessageContext context)
         {
             _connection = connection;
-            _serializer = serializer;
             _context = context;
         }
 
@@ -35,7 +33,7 @@ namespace Accounts.Infrastructure
 
                 foreach (var resolvedEvent in currentSlice.Events)
                 {
-                    var (@event, metadata) = _serializer.Deserialize(resolvedEvent);
+                    var (@event, metadata) = EventStoreSerializer.Deserialize(resolvedEvent);
 
                     if (_context.MessageId == metadata.CausationId)
                         throw new DuplicateOperationException(_context.CausationId);
@@ -50,7 +48,7 @@ namespace Accounts.Infrastructure
         {
             var streamName = GetAggregateStreamName<TEventSourcedAggregate>(aggregateId);
             var metadata = new Metadata(_context.CausationId, _context.CorrelationId);
-            var eventsToSave = events.Select(@event => _serializer.Serialize(@event, metadata));
+            var eventsToSave = events.Select(@event => EventStoreSerializer.Serialize(@event, metadata));
             await _connection.AppendToStreamAsync(streamName, expectedVersion, eventsToSave);
         }
 

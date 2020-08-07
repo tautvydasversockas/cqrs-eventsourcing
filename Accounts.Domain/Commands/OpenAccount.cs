@@ -20,11 +20,11 @@ namespace Accounts.Domain.Commands
 
         public override string ToString()
         {
-            return $"Opening the account:\n" +
-                   $"Account ID: {AccountId}\n" +
-                   $"Client ID: {ClientId}\n" +
-                   $"Interest rate: {InterestRate}\n" +
-                   $"Balance: {Balance}\n";
+            return $"Opening the account:{Environment.NewLine}" +
+                   $"Account ID: {AccountId}{Environment.NewLine}" +
+                   $"Client ID: {ClientId}{Environment.NewLine}" +
+                   $"Interest rate: {InterestRate}{Environment.NewLine}" +
+                   $"Balance: {Balance}{Environment.NewLine}";
         }
     }
 }

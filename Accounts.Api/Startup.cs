@@ -1,7 +1,5 @@
 using System.Net;
-using System.Reflection;
 using System.Text.Json.Serialization;
-using Accounts.Api.BackgroundWorkers;
 using Accounts.Api.Dto;
 using Accounts.Api.HealthChecks;
 using Accounts.Api.MvcFilters;
@@ -10,14 +8,13 @@ using Accounts.Application.Common;
 using Accounts.Application.Handlers;
 using Accounts.Domain.Commands;
 using Accounts.Domain.Common;
-using Accounts.Domain.Events;
 using Accounts.Infrastructure;
 using Accounts.ReadModel;
 using EventStore.ClientAPI;
+using EventStore.ClientAPI.Exceptions;
 using FluentValidation.AspNetCore;
 using MicroElements.Swashbuckle.FluentValidation;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -27,7 +24,7 @@ using Newtonsoft.Json.Converters;
 
 namespace Accounts.Api
 {
-    public class Startup
+    public sealed class Startup
     {
         private readonly IConfiguration _config;
 
@@ -38,9 +35,6 @@ namespace Accounts.Api
 
         public void ConfigureServices(IServiceCollection services)
         {
-            var sqlServerConnectionString = _config.GetConnectionString("SqlServer");
-            var eventStoreConnectionString = _config.GetConnectionString("EventStore");
-
             services.AddSwaggerGen(options =>
             {
                 options.SwaggerDoc("v1", new OpenApiInfo
@@ -69,20 +63,41 @@ namespace Accounts.Api
                 .AddFluentValidation(config => config.RegisterValidatorsFromAssemblyContaining<OpenAccountDto.Validator>());
 
             services.AddHealthChecks()
-                .AddSqlServer(name: "SQL Connection", connectionString: sqlServerConnectionString);
+                .AddPrivateMemoryHealthCheck(
+                    name: "Private memory",
+                    maximumMemoryBytes: 1_000_000_000,
+                    tags: new[] { HealthCheckTag.Liveness })
+                .AddCheck<EventStoreConnectionHealthCheck>(
+                    name: "Event Store",
+                    tags: new[] { HealthCheckTag.Readiness })
+                .AddDbContextCheck<AccountDbContext>(
+                    name: "SQL Server",
+                    tags: new[] { HealthCheckTag.Readiness });
 
-            services.AddSingleton(_ =>
+            services.AddSingleton<EventStoreConnectionHealthCheck>();
+
+            services.AddSingleton(provider =>
             {
-                var connection = EventStoreConnection.Create(eventStoreConnectionString);
-                connection.ConnectAsync().GetAwaiter().GetResult();
+                var connectionString = _config.GetConnectionString("EventStore");
+                var connection = EventStoreConnection.Create(connectionString);
+                var healthCheck = provider.GetRequiredService<EventStoreConnectionHealthCheck>();
+                
+                connection.Connected += (sender, args) => healthCheck.IsConnected = true;
+                connection.Disconnected += (sender, args) => healthCheck.IsConnected = false;
+                connection.Closed += (sender, args) => healthCheck.IsConnected = false;
+                connection.AuthenticationFailed += (sender, args) => throw new NotAuthenticatedException(args.Reason);
+                connection.ErrorOccurred += (sender, args) => throw args.Exception;
+
                 return connection;
             });
 
-            services.AddSingleton(_ =>
+            services.AddDbContextPool<AccountDbContext>(optionsBuilder =>
             {
-                var eventTypeInfo = typeof(AccountOpened).GetTypeInfo();
-                return new EventStoreSerializer(eventTypeInfo.Assembly, eventTypeInfo.Namespace);
+                var connectionString = _config.GetConnectionString("SqlServer");
+                optionsBuilder.UseSqlServer(connectionString);
             });
+
+            services.AddScoped<IAccountReadModel, AccountDbContext>();
 
             services.AddScoped<IEventStore, Infrastructure.EventStore>();
 
@@ -99,27 +114,15 @@ namespace Accounts.Api
             services.AddScoped<IHandler<AddInterestsToAccount>, AccountCommandHandlers>();
             services.AddScoped<IHandler<FreezeAccount>, AccountCommandHandlers>();
             services.AddScoped<IHandler<UnfreezeAccount>, AccountCommandHandlers>();
-
-            services.AddDbContext<AccountDbContext>(
-                optionsBuilder => optionsBuilder.UseSqlServer(sqlServerConnectionString),
-                optionsLifetime: ServiceLifetime.Singleton);
-
-            services.AddScoped<IAccountReadModel, AccountDbContext>();
-
-            services.AddScoped<AccountView>();
-
-            services.AddHostedService<AccountViewSynchronizer>();
         }
 
-        public void Configure(IApplicationBuilder app)
+        public void Configure(IApplicationBuilder app, IEventStoreConnection eventStoreConnection)
         {
-            app.UseHttpsRedirection();
+            eventStoreConnection.ConnectAsync().GetAwaiter().GetResult();
 
-            app.UseHealthChecks("/health", new HealthCheckOptions
-            {
-                Predicate = _ => true,
-                ResponseWriter = HealthCheckResponseWriter.WriteAsync
-            });
+            app.UseHttpsRedirection();
+            
+            app.UseHealthChecks();
 
             app.UseRouting();
 

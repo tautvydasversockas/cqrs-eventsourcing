@@ -16,12 +16,13 @@ namespace Accounts.Infrastructure
             _serviceProvider = serviceProvider;
         }
 
-        public Task SendAsync<TCommand>(TCommand command, MessageContext context, CancellationToken token = default) where TCommand : Command
+        public Task SendAsync<TCommand>(TCommand command, MessageContext context, CancellationToken token = default) 
+            where TCommand : Command
         {
             var contextProvider = _serviceProvider.GetRequiredService<MessageContextProvider>();
             contextProvider.Context = context;
 
-            dynamic handler = _serviceProvider.GetRequiredService<IHandler<TCommand>>();
+            var handler = _serviceProvider.GetRequiredService<IHandler<TCommand>>();
             return handler.HandleAsync(command, token);
         }
     }

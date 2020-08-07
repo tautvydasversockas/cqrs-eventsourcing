@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Accounts.Api.Dto;
 using Accounts.Domain.Commands;
+using Accounts.Domain.Common;
 using Accounts.Infrastructure;
 using Accounts.ReadModel;
 using Microsoft.AspNetCore.Mvc;
@@ -47,10 +48,9 @@ namespace Accounts.Api.Controllers
         [ProducesResponseType(typeof(Guid), (int)HttpStatusCode.Created)]
         public async Task<IActionResult> Open([FromHeader(Name = RequestId)]string requestId, OpenAccountDto requestDto, CancellationToken token)
         {
-            var context = new MessageContext(requestId, requestId, requestId);
-            var id = DeterministicGuid.Create(context.MessageId);
+            var id = DeterministicGuid.Create(requestId);
             var command = new OpenAccount(id, requestDto.ClientId, requestDto.InterestRate, requestDto.Balance);
-            await _messageBus.SendAsync(command, context, token);
+            await SendAsync(command, requestId, token);
             return CreatedAtRoute(nameof(Get), new { id }, id);
         }
 
@@ -58,9 +58,8 @@ namespace Accounts.Api.Controllers
         [ProducesResponseType((int)HttpStatusCode.OK)]
         public async Task<IActionResult> Deposit([FromHeader(Name = RequestId)]string requestId, Guid id, DepositToAccountDto requestDto, CancellationToken token)
         {
-            var context = new MessageContext(requestId, requestId, requestId);
             var command = new DepositToAccount(id, requestDto.Amount);
-            await _messageBus.SendAsync(command, context, token);
+            await SendAsync(command, requestId, token);
             return Ok();
         }
 
@@ -68,9 +67,8 @@ namespace Accounts.Api.Controllers
         [ProducesResponseType((int)HttpStatusCode.OK)]
         public async Task<IActionResult> Withdraw([FromHeader(Name = RequestId)]string requestId, Guid id, WithdrawFromAccountDto requestDto, CancellationToken token)
         {
-            var context = new MessageContext(requestId, requestId, requestId);
             var command = new WithdrawFromAccount(id, requestDto.Amount);
-            await _messageBus.SendAsync(command, context, token);
+            await SendAsync(command, requestId, token);
             return Ok();
         }
 
@@ -78,9 +76,8 @@ namespace Accounts.Api.Controllers
         [ProducesResponseType((int)HttpStatusCode.OK)]
         public async Task<IActionResult> AddInterests([FromHeader(Name = RequestId)]string requestId, Guid id, CancellationToken token)
         {
-            var context = new MessageContext(requestId, requestId, requestId);
             var command = new AddInterestsToAccount(id);
-            await _messageBus.SendAsync(command, context, token);
+            await SendAsync(command, requestId, token);
             return Ok();
         }
 
@@ -88,9 +85,8 @@ namespace Accounts.Api.Controllers
         [ProducesResponseType((int)HttpStatusCode.OK)]
         public async Task<IActionResult> Freeze([FromHeader(Name = RequestId)]string requestId, Guid id, CancellationToken token)
         {
-            var context = new MessageContext(requestId, requestId, requestId);
             var command = new FreezeAccount(id);
-            await _messageBus.SendAsync(command, context, token);
+            await SendAsync(command, requestId, token);
             return Ok();
         }
 
@@ -98,10 +94,16 @@ namespace Accounts.Api.Controllers
         [ProducesResponseType((int)HttpStatusCode.OK)]
         public async Task<IActionResult> Unfreeze([FromHeader(Name = RequestId)]string requestId, Guid id, CancellationToken token)
         {
-            var context = new MessageContext(requestId, requestId, requestId);
             var command = new UnfreezeAccount(id);
-            await _messageBus.SendAsync(command, context, token);
+            await SendAsync(command, requestId, token);
             return Ok();
+        }
+
+        private Task SendAsync<TCommand>(TCommand command, string requestId, CancellationToken token)
+            where TCommand : Command
+        {
+            var context = new MessageContext(requestId, requestId, requestId);
+            return _messageBus.SendAsync(command, context, token);
         }
     }
 }

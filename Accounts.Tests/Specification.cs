@@ -67,20 +67,24 @@ namespace Accounts.Tests
 
             var sb = new StringBuilder();
 
-            sb.AppendLine($"SPECIFICATION: {GetType().Name.Replace('_', ' ')}\n");
+            sb.AppendLine($"SPECIFICATION: {GetType().Name.Replace('_', ' ')}");
+            sb.AppendLine();
 
             if (Given().Any())
             {
-                sb.AppendLine("GIVEN:\n");
+                sb.AppendLine("GIVEN:");
+                sb.AppendLine();
 
                 foreach (var (@event, i) in Given().Select((@event, i) => (@event, i)))
                     sb.AppendLine($"{i + 1}. {@event}");
             }
 
-            sb.AppendLine("WHEN:\n");
+            sb.AppendLine("WHEN:");
+            sb.AppendLine();
             sb.AppendLine($"{When()}");
 
-            sb.AppendLine("THEN:\n");
+            sb.AppendLine("THEN:");
+            sb.AppendLine();
 
             if (Then_Fail() == null)
             {
@@ -91,12 +95,14 @@ namespace Accounts.Tests
                 }
                 else
                 {
-                    sb.AppendLine("Nothing happened\n");
+                    sb.AppendLine("Nothing happened");
+                    sb.AppendLine();
                 }
             }
             else
             {
-                sb.AppendLine($"{Then_Fail()}\n");
+                sb.AppendLine($"{Then_Fail()}");
+                sb.AppendLine();
             }
 
             return sb.ToString();

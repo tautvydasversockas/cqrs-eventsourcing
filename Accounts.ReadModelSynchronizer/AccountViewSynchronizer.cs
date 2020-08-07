@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Accounts.Api.HealthChecks;
 using Accounts.Domain.Events;
 using Accounts.Infrastructure;
 using Accounts.ReadModel;
@@ -9,34 +10,40 @@ using EventStore.ClientAPI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace Accounts.Api.BackgroundWorkers
+namespace Accounts.ReadModelSynchronizer
 {
     public sealed class AccountViewSynchronizer : BackgroundService
     {
+        private const string Stream = "$ce-Account";
+        private const string GroupName = "Account-View";
+
         private readonly IEventStoreConnection _connection;
-        private readonly EventStoreSerializer _serializer;
         private readonly IServiceScopeFactory _serviceScopeFactory;
+        private readonly BackgroundServiceHealthCheck _healthCheck;
+
         private EventStorePersistentSubscriptionBase? _subscription;
         private CancellationToken _token;
 
-        public AccountViewSynchronizer(IEventStoreConnection connection, EventStoreSerializer serializer, IServiceScopeFactory serviceScopeFactory)
+        public AccountViewSynchronizer(
+            IEventStoreConnection connection, 
+            IServiceScopeFactory serviceScopeFactory,
+            BackgroundServiceHealthCheck healthCheck)
         {
             _connection = connection;
-            _serializer = serializer;
             _serviceScopeFactory = serviceScopeFactory;
+            _healthCheck = healthCheck;
         }
 
-        protected override Task ExecuteAsync(CancellationToken token)
+        protected override async Task ExecuteAsync(CancellationToken token)
         {
             _token = token;
-            return SubscribeAsync();
+            await _connection.ConnectAsync();
+            await SubscribeAsync();
         }
 
         private async Task SubscribeAsync()
         {
-            const string stream = "$ce-Account";
-            const string groupName = "Account-View";
-            _subscription = await _connection.ConnectToPersistentSubscriptionAsync(stream, groupName, EventAppeared, SubscriptionDropped);
+            _subscription = await _connection.ConnectToPersistentSubscriptionAsync(Stream, GroupName, EventAppeared, SubscriptionDropped);
         }
 
         private async Task EventAppeared(EventStorePersistentSubscriptionBase subscription, ResolvedEvent resolvedEvent)
@@ -44,7 +51,7 @@ namespace Accounts.Api.BackgroundWorkers
             if (IsSystemEvent(resolvedEvent))
                 return;
 
-            var (@event, _) = _serializer.Deserialize(resolvedEvent);
+            var (@event, _) = EventStoreSerializer.Deserialize(resolvedEvent);
 
             switch (@event)
             {
@@ -72,6 +79,8 @@ namespace Accounts.Api.BackgroundWorkers
                     await UpdateViewAsync(view => view.HandleAsync(e, _token));
                     break;
             }
+
+            _healthCheck.SetLastProcessTime();
         }
 
         private static bool IsSystemEvent(ResolvedEvent resolvedEvent)

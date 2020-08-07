@@ -16,9 +16,9 @@ namespace Accounts.Domain.Events
 
         public override string ToString()
         {
-            return $"Added interests to the account:\n" +
-                   $"Account ID: {AccountId}\n" +
-                   $"Interests: {Interests}\n";
+            return $"Added interests to the account:{Environment.NewLine}" +
+                   $"Account ID: {AccountId}{Environment.NewLine}" +
+                   $"Interests: {Interests}{Environment.NewLine}";
         }
     }
 }

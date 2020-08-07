@@ -14,8 +14,8 @@ namespace Accounts.Domain.Commands
 
         public override string ToString()
         {
-            return $"Adding interests to the account:\n" +
-                   $"Account ID: {AccountId}\n";
+            return $"Adding interests to the account:{Environment.NewLine}" +
+                   $"Account ID: {AccountId}{Environment.NewLine}";
         }
     }
 }

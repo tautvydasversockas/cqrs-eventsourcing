@@ -14,8 +14,8 @@ namespace Accounts.Domain.Events
 
         public override string ToString()
         {
-            return $"The account was frozen:\n" +
-                   $"Account ID: {AccountId}\n";
+            return $"The account was frozen:{Environment.NewLine}" +
+                   $"Account ID: {AccountId}{Environment.NewLine}";
         }
     }
 }

@@ -5,7 +5,8 @@ using Accounts.Domain.Common;
 
 namespace Accounts.Application.Common
 {
-    public abstract class Handler<TEventSourcedAggregate> where TEventSourcedAggregate : EventSourcedAggregate, new()
+    public abstract class Handler<TEventSourcedAggregate> 
+        where TEventSourcedAggregate : EventSourcedAggregate, new()
     {
         private readonly IEventSourcedRepository<TEventSourcedAggregate> _repository;
 

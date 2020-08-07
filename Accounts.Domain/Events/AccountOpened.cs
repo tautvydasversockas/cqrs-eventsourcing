@@ -20,11 +20,11 @@ namespace Accounts.Domain.Events
 
         public override string ToString()
         {
-            return $"The account was opened:\n" +
-                   $"Account ID: {AccountId}\n" +
-                   $"Client ID: {ClientId}\n" +
-                   $"Interest rate: {InterestRate}\n" +
-                   $"Balance: {Balance}\n";
+            return $"The account was opened:{Environment.NewLine}" +
+                   $"Account ID: {AccountId}{Environment.NewLine}" +
+                   $"Client ID: {ClientId}{Environment.NewLine}" +
+                   $"Interest rate: {InterestRate}{Environment.NewLine}" +
+                   $"Balance: {Balance}{Environment.NewLine}";
         }
     }
 }

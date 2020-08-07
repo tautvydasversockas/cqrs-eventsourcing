@@ -14,8 +14,8 @@ namespace Accounts.Domain.Commands
 
         public override string ToString()
         {
-            return $"Unfreezing the account:\n" +
-                   $"Account ID: {AccountId}\n";
+            return $"Unfreezing the account:{Environment.NewLine}" +
+                   $"Account ID: {AccountId}{Environment.NewLine}";
         }
     }
 }

@@ -16,9 +16,9 @@ namespace Accounts.Domain.Commands
 
         public override string ToString()
         {
-            return $"Depositing to the account:\n" +
-                   $"Account ID: {AccountId}\n" +
-                   $"Amount: {Amount}\n";
+            return $"Depositing to the account:{Environment.NewLine}" +
+                   $"Account ID: {AccountId}{Environment.NewLine}" +
+                   $"Amount: {Amount}{Environment.NewLine}";
         }
     }
 }

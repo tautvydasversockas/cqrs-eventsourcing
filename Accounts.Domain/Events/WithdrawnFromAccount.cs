@@ -16,9 +16,9 @@ namespace Accounts.Domain.Events
 
         public override string ToString()
         {
-            return $"Withdrawn from the account:\n" +
-                   $"Account ID: {AccountId}\n" +
-                   $"Amount: {Amount}\n";
+            return $"Withdrawn from the account:{Environment.NewLine}" +
+                   $"Account ID: {AccountId}{Environment.NewLine}" +
+                   $"Amount: {Amount}{Environment.NewLine}";
         }
     }
 }

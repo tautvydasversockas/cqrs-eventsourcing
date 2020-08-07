@@ -11,28 +11,14 @@ namespace Accounts.Api.MvcFilters
     {
         public void OnException(ExceptionContext context)
         {
-            switch (context.Exception)
+            context.Result = context.Exception switch
             {
-                case EntityNotFoundException e:
-                    context.Result = new NotFoundObjectResult(e.Message);
-                    break;
-
-                case DuplicateKeyException e:
-                    context.Result = new ConflictObjectResult(e.Message);
-                    break;
-
-                case DuplicateOperationException e:
-                    context.Result = new ConflictObjectResult(e.Message);
-                    break;
-
-                case InvalidOperationException e:
-                    context.Result = new BadRequestObjectResult(e.Message);
-                    break;
-
-                default:
-                    context.Result = new InternalServerErrorResult();
-                    break;
-            }
+                EntityNotFoundException e => new NotFoundObjectResult(e.Message),
+                DuplicateKeyException e => new ConflictObjectResult(e.Message),
+                DuplicateOperationException e => new ConflictObjectResult(e.Message),
+                InvalidOperationException e => new BadRequestObjectResult(e.Message),
+                _ => new InternalServerErrorResult()
+            };
         }
     }
 }
