@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Accounts.Application.Common.Exceptions;
+using Accounts.Application.Exceptions;
 using Accounts.Domain.Common;
 
 namespace Accounts.Application.Common
 {
-    public abstract class Handler<TEventSourcedAggregate> 
+    public abstract class Handler<TEventSourcedAggregate>
         where TEventSourcedAggregate : EventSourcedAggregate, new()
     {
         private readonly IEventSourcedRepository<TEventSourcedAggregate> _repository;

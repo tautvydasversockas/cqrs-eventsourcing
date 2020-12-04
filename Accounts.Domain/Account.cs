@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using Accounts.Domain.Common;
-using Accounts.Domain.Events;
 using static Accounts.Domain.Account.Status;
 
 namespace Accounts.Domain
@@ -15,9 +15,13 @@ namespace Accounts.Domain
 
         private Status _status;
         private decimal _balance;
-        private InterestRate _interestRate;
+        [AllowNull] private InterestRate _interestRate;
 
-        public static Account Open(Guid id, Guid clientId, InterestRate interestRate, decimal balance)
+        public static Account Open(
+            Guid id,
+            Guid clientId,
+            InterestRate interestRate,
+            decimal balance)
         {
             if (balance < 0)
                 throw new InvalidOperationException("Balance cannot be negative.");
@@ -32,7 +36,7 @@ namespace Accounts.Domain
             if (amount <= 0)
                 throw new InvalidOperationException("Amount must be positive.");
 
-            if (_status == Frozen)
+            if (_status is Frozen)
                 throw new InvalidOperationException("Cannot withdraw from frozen account.");
 
             if (amount > _balance)
@@ -46,7 +50,7 @@ namespace Accounts.Domain
             if (amount <= 0)
                 throw new InvalidOperationException("Amount must be positive.");
 
-            if (_status == Frozen)
+            if (_status is Frozen)
                 throw new InvalidOperationException("Cannot deposit to frozen account.");
 
             Raise(new DepositedToAccount(Id, amount));
@@ -54,7 +58,7 @@ namespace Accounts.Domain
 
         public void AddInterests()
         {
-            if (_status == Frozen)
+            if (_status is Frozen)
                 throw new InvalidOperationException("Cannot add interests to frozen account.");
 
             var interests = _balance * _interestRate;
@@ -64,7 +68,7 @@ namespace Accounts.Domain
 
         public void Freeze()
         {
-            if (_status == Frozen)
+            if (_status is Frozen)
                 return;
 
             Raise(new AccountFrozen(Id));
@@ -72,7 +76,7 @@ namespace Accounts.Domain
 
         public void Unfreeze()
         {
-            if (_status != Frozen)
+            if (_status is not Frozen)
                 return;
 
             Raise(new AccountUnfrozen(Id));
@@ -83,7 +87,7 @@ namespace Accounts.Domain
             Id = @event.AccountId;
             _status = Active;
             _balance = @event.Balance;
-            _interestRate = (InterestRate)@event.InterestRate;
+            _interestRate = new(@event.InterestRate);
         }
 
         private void Apply(WithdrawnFromAccount @event)

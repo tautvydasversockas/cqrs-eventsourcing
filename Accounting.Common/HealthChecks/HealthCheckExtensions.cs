@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Accounting.Common.HealthChecks;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
-namespace Accounts.Api.HealthChecks
+namespace Accounting.Common.HealthChecks
 {
     public static class HealthCheckExtensions
     {

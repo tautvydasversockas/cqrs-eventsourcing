@@ -1,35 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 using Accounts.Domain;
-using Accounts.Domain.Commands;
-using Accounts.Domain.Common;
-using Accounts.Domain.Events;
 
 namespace Accounts.Tests.Scenarios.Withdraw_from_an_account
 {
     public sealed class Withdrawing_from_a_frozen_account : Specification<Account, WithdrawFromAccount>
     {
-        private Guid _accountId;
-
-        protected override void Before()
-        {
-            _accountId = Guid.NewGuid();
-        }
+        private readonly Guid _accountId = Guid.NewGuid();
 
         protected override IEnumerable<Event> Given()
         {
-            yield return new AccountOpened(_accountId, Guid.NewGuid(), 0, 200);
-            yield return new AccountFrozen(_accountId);
+            yield return new AccountOpened(_accountId, Guid.NewGuid(), 0, 200) { Version = 1 };
+            yield return new AccountFrozen(_accountId) { Version = 2 };
         }
 
         protected override WithdrawFromAccount When()
         {
-            return new WithdrawFromAccount(_accountId, 100);
+            return new(_accountId, 100);
         }
 
-        protected override string Then_Fail()
-        {
-            return "Failed to withdraw from the account";
-        }
+        protected override bool Then_Fail() => true;
     }
 }

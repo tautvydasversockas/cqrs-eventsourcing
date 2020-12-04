@@ -2,8 +2,8 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Accounts.Api.HealthChecks;
-using Accounts.Domain.Events;
+using Accounting.Common.HealthChecks;
+using Accounts.Domain;
 using Accounts.Infrastructure;
 using Accounts.ReadModel;
 using EventStore.ClientAPI;
@@ -12,7 +12,7 @@ using Microsoft.Extensions.Hosting;
 
 namespace Accounts.ReadModelSynchronizer
 {
-    public sealed class AccountViewSynchronizer : BackgroundService
+    public sealed class App : BackgroundService
     {
         private const string Stream = "$ce-Account";
         private const string GroupName = "Account-View";
@@ -24,7 +24,7 @@ namespace Accounts.ReadModelSynchronizer
         private EventStorePersistentSubscriptionBase? _subscription;
         private CancellationToken _token;
 
-        public AccountViewSynchronizer(
+        public App(
             IEventStoreConnection connection, 
             IServiceScopeFactory serviceScopeFactory,
             BackgroundServiceHealthCheck healthCheck)
@@ -37,7 +37,6 @@ namespace Accounts.ReadModelSynchronizer
         protected override async Task ExecuteAsync(CancellationToken token)
         {
             _token = token;
-            await _connection.ConnectAsync();
             await SubscribeAsync();
         }
 
@@ -55,28 +54,28 @@ namespace Accounts.ReadModelSynchronizer
 
             switch (@event)
             {
-                case AccountOpened e:
-                    await UpdateViewAsync(view => view.HandleAsync(e, _token));
+                case AccountOpened accountOpened:
+                    await UpdateViewAsync(view => view.HandleAsync(accountOpened, _token));
                     break;
 
-                case DepositedToAccount e:
-                    await UpdateViewAsync(view => view.HandleAsync(e, _token));
+                case DepositedToAccount depositedToAccount:
+                    await UpdateViewAsync(view => view.HandleAsync(depositedToAccount, _token));
                     break;
 
-                case WithdrawnFromAccount e:
-                    await UpdateViewAsync(view => view.HandleAsync(e, _token));
+                case WithdrawnFromAccount withdrawnFromAccount:
+                    await UpdateViewAsync(view => view.HandleAsync(withdrawnFromAccount, _token));
                     break;
 
-                case AddedInterestsToAccount e:
-                    await UpdateViewAsync(view => view.HandleAsync(e, _token));
+                case AddedInterestsToAccount addedInterestsToAccount:
+                    await UpdateViewAsync(view => view.HandleAsync(addedInterestsToAccount, _token));
                     break;
 
-                case AccountFrozen e:
-                    await UpdateViewAsync(view => view.HandleAsync(e, _token));
+                case AccountFrozen accountFrozen:
+                    await UpdateViewAsync(view => view.HandleAsync(accountFrozen, _token));
                     break;
 
-                case AccountUnfrozen e:
-                    await UpdateViewAsync(view => view.HandleAsync(e, _token));
+                case AccountUnfrozen accountUnfrozen:
+                    await UpdateViewAsync(view => view.HandleAsync(accountUnfrozen, _token));
                     break;
             }
 
@@ -98,7 +97,7 @@ namespace Accounts.ReadModelSynchronizer
 
         private void SubscriptionDropped(EventStorePersistentSubscriptionBase subscription, SubscriptionDropReason reason, Exception e)
         {
-            SubscribeAsync().GetAwaiter().GetResult();
+            SubscribeAsync().Wait();
         }
 
         public override Task StopAsync(CancellationToken token)

@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using Accounts.Api;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,7 +11,7 @@ namespace Accounts.Tests
     [SetUpFixture]
     public sealed class Testing
     {
-        private static IServiceCollection _services;
+        [AllowNull] private static IServiceCollection _services;
 
         [OneTimeSetUp]
         public void RunBeforeAnyTests()

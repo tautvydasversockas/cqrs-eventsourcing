@@ -7,7 +7,7 @@ namespace Accounts.ReadModel.Configurations
     {
         public void Configure(EntityTypeBuilder<AccountDto> builder)
         {
-            builder.ToTable("Accounts").HasKey(o => o.Id);
+            builder.ToTable("Accounts").HasKey(account => account.Id);
         }
     }
 }

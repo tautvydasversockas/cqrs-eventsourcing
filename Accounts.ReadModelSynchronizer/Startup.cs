@@ -1,5 +1,7 @@
 using System;
-using Accounts.Api.HealthChecks;
+using Accounting.Common;
+using Accounting.Common.HealthChecks;
+using Accounts.Infrastructure;
 using Accounts.ReadModel;
 using EventStore.ClientAPI;
 using EventStore.ClientAPI.Exceptions;
@@ -21,42 +23,43 @@ namespace Accounts.ReadModelSynchronizer
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.BindOptions<EventStoreSettings>(_config);
+            services.BindOptions<SqlSettings>(_config);
+
             services.AddHealthChecks()
-                .AddPrivateMemoryHealthCheck(
-                    name: "Private memory",
-                    maximumMemoryBytes: 1_000_000_000,
-                    tags: new[] { HealthCheckTag.Liveness })
                 .AddCheck<BackgroundServiceHealthCheck>(
                     name: "Processing",
                     tags: new[] { HealthCheckTag.Liveness });
 
             services.AddSingleton(new BackgroundServiceHealthCheck(
-                timeBetweenProcess: TimeSpan.FromSeconds(90)));
+                timeout: TimeSpan.FromMinutes(5)));
 
             services.AddSingleton(provider =>
             {
-                var connectionString = _config.GetConnectionString("EventStore");
-                var connection = EventStoreConnection.Create(connectionString);
+                var eventStoreSettings = provider.GetRequiredService<EventStoreSettings>();
+                var connection = EventStoreConnection.Create(eventStoreSettings.ConnectionString);
 
-                connection.AuthenticationFailed += (sender, args) => throw new NotAuthenticatedException(args.Reason);
-                connection.ErrorOccurred += (sender, args) => throw args.Exception;
+                connection.AuthenticationFailed += (_, args) => throw new NotAuthenticatedException(args.Reason);
+                connection.ErrorOccurred += (_, args) => throw args.Exception;
 
                 return connection;
             });
 
-            services.AddDbContextPool<AccountDbContext>(optionsBuilder =>
+            services.AddDbContextPool<AccountDbContext>((provider, optionsBuilder) =>
             {
-                var connectionString = _config.GetConnectionString("SqlServer");
-                optionsBuilder.UseSqlServer(connectionString);
+                var sqlSettings = provider.GetRequiredService<SqlSettings>();
+                optionsBuilder.UseSqlServer(sqlSettings.ConnectionString);
             });
 
             services.AddScoped<AccountView>();
 
-            services.AddHostedService<AccountViewSynchronizer>();
+            services.AddHostedService<App>();
         }
 
-        public void Configure(IApplicationBuilder app)
+        public void Configure(IApplicationBuilder app, IEventStoreConnection eventStoreConnection)
         {
+            eventStoreConnection.ConnectAsync().Wait();
+
             app.UseHttpsRedirection();
 
             app.UseHealthChecks();

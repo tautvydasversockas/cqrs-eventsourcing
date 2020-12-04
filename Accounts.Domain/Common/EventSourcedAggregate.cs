@@ -5,25 +5,11 @@ namespace Accounts.Domain.Common
 {
     public abstract class EventSourcedAggregate : Entity
     {
-        private readonly List<Event> _events = new List<Event>();
+        private readonly List<Event> _events = new();
+        public IReadOnlyList<Event> UncommittedEvents => _events;
+        public void MarkEventsAsCommitted() => _events.Clear();
 
         public int Version { get; private set; }
-  
-        public void LoadFromHistory(IEnumerable<Event> events)
-        {
-            foreach (var @event in events)
-                ApplyEvent(@event);
-        }
-
-        public IReadOnlyList<Event> GetUncommittedEvents()
-        {
-            return _events;
-        }
-
-        public void MarkEventsAsCommitted()
-        {
-            _events.Clear();
-        }
 
         protected void Raise(Event @event)
         {

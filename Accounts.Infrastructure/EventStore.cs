@@ -2,21 +2,21 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Accounts.Domain;
 using Accounts.Domain.Common;
 using Accounts.Infrastructure.Exceptions;
 using EventStore.ClientAPI;
+using EventStore.ClientAPI.Exceptions;
 
 namespace Accounts.Infrastructure
 {
     public sealed class EventStore : IEventStore
     {
         private readonly IEventStoreConnection _connection;
-        private readonly MessageContext _context;
 
-        public EventStore(IEventStoreConnection connection, MessageContext context)
+        public EventStore(IEventStoreConnection connection)
         {
             _connection = connection;
-            _context = context;
         }
 
         public async IAsyncEnumerable<Event> GetAggregateEventsAsync<TEventSourcedAggregate>(Guid aggregateId)
@@ -35,21 +35,32 @@ namespace Accounts.Infrastructure
                 {
                     var (@event, metadata) = EventStoreSerializer.Deserialize(resolvedEvent);
 
-                    if (_context.MessageId == metadata.CausationId)
-                        throw new DuplicateOperationException(_context.CausationId);
+                    if (MessageContext.MessageId is not null && MessageContext.MessageId == metadata.CausationId)
+                        throw new DuplicateOperationException(MessageContext.MessageId);
 
                     yield return @event;
                 }
             } while (!currentSlice.IsEndOfStream);
         }
 
-        public async Task SaveAggregateEventsAsync<TEventSourcedAggregate>(Guid aggregateId, IEnumerable<Event> events, int expectedVersion)
+        public async Task SaveAggregateEventsAsync<TEventSourcedAggregate>(Guid aggregateId, IReadOnlyCollection<Event> events)
             where TEventSourcedAggregate : EventSourcedAggregate
         {
             var streamName = GetAggregateStreamName<TEventSourcedAggregate>(aggregateId);
-            var metadata = new Metadata(_context.CausationId, _context.CorrelationId);
+            var originalVersion = events.Min(@event => @event.Version) - 1;
+            var expectedVersion = originalVersion - 1;
+            var metadata = new Metadata(MessageContext.CausationId, MessageContext.CorrelationId);
             var eventsToSave = events.Select(@event => EventStoreSerializer.Serialize(@event, metadata));
-            await _connection.AppendToStreamAsync(streamName, expectedVersion, eventsToSave);
+
+            try
+            {
+                await _connection.AppendToStreamAsync(streamName, expectedVersion, eventsToSave);
+            }
+            catch (WrongExpectedVersionException e)
+                when (e.ExpectedVersion is ExpectedVersion.NoStream)
+            {
+                throw new DuplicateKeyException(aggregateId);
+            }
         }
 
         private static string GetAggregateStreamName<TEventSourcedAggregate>(Guid aggregateId)

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Accounts.Domain;
 using Accounts.Domain.Common;
 using Accounts.Infrastructure;
 using FluentAssertions;
@@ -18,17 +19,14 @@ namespace Accounts.Tests
         where TEventSourcedAggregate : EventSourcedAggregate, new()
         where TCommand : Command
     {
-        protected virtual void Before() { }
         protected virtual IEnumerable<Event> Given() => Enumerable.Empty<Event>();
         protected abstract TCommand When();
         protected virtual IEnumerable<Event> Then() => Enumerable.Empty<Event>();
-        protected virtual string? Then_Fail() => null;
+        protected virtual bool Then_Fail() => false;
 
         [Test]
         public async Task Run()
         {
-            Before();
-
             var eventStoreMock = new Mock<IEventStore>();
 
             eventStoreMock
@@ -39,32 +37,26 @@ namespace Accounts.Tests
             eventStoreMock
                 .Setup(eventStore => eventStore.SaveAggregateEventsAsync<TEventSourcedAggregate>(
                     It.IsAny<Guid>(),
-                    It.IsAny<IEnumerable<Event>>(),
-                    It.IsAny<int>()))
-                .Callback<Guid, IEnumerable<Event>, int>((id, events, expectedVersion) => 
-                    events.Should().BeEquivalentTo(Then(), options =>
-                        options.RespectingRuntimeTypes().Excluding(@event => @event.Version)));
+                    It.IsAny<IReadOnlyCollection<Event>>()))
+                .Callback<Guid, IReadOnlyCollection<Event>>((_, events) => events.Should().BeEquivalentTo(Then()));
 
             var serviceProvider = Testing.GetServiceProvider(services =>
-                services.Replace(new ServiceDescriptor(typeof(IEventStore), _ => eventStoreMock.Object, ServiceLifetime.Scoped)));
+                services.Replace(new(typeof(IEventStore), _ => eventStoreMock.Object, ServiceLifetime.Scoped)));
 
-            var messageBus = serviceProvider.GetRequiredService<MessageBus>();
-            var messageContext = new MessageContext(string.Empty, string.Empty, string.Empty);
+            var mediator = serviceProvider.GetRequiredService<Mediator>();
 
             try
             {
-                await messageBus.SendAsync(When(), messageContext);
+                await mediator.SendAsync(When());
             }
             catch (InvalidOperationException)
             {
-                Then_Fail().Should().NotBeNull();
+                Then_Fail().Should().BeTrue();
             }
         }
 
         public override string ToString()
         {
-            Before();
-
             var sb = new StringBuilder();
 
             sb.AppendLine($"SPECIFICATION: {GetType().Name.Replace('_', ' ')}");
@@ -77,16 +69,23 @@ namespace Accounts.Tests
 
                 foreach (var (@event, i) in Given().Select((@event, i) => (@event, i)))
                     sb.AppendLine($"{i + 1}. {@event}");
+
+                sb.AppendLine();
             }
 
             sb.AppendLine("WHEN:");
             sb.AppendLine();
             sb.AppendLine($"{When()}");
+            sb.AppendLine();
 
             sb.AppendLine("THEN:");
             sb.AppendLine();
 
-            if (Then_Fail() == null)
+            if (Then_Fail())
+            {
+                sb.AppendLine("Failed");
+            }
+            else
             {
                 if (Then().Any())
                 {
@@ -96,14 +95,10 @@ namespace Accounts.Tests
                 else
                 {
                     sb.AppendLine("Nothing happened");
-                    sb.AppendLine();
                 }
             }
-            else
-            {
-                sb.AppendLine($"{Then_Fail()}");
-                sb.AppendLine();
-            }
+
+            sb.AppendLine();
 
             return sb.ToString();
         }

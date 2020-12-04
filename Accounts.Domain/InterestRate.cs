@@ -10,14 +10,14 @@ namespace Accounts.Domain
 
         public InterestRate(decimal value)
         {
-            if (value < 0 || value > 1)
+            if (value is < 0 or > 1)
                 throw new ArgumentException("Interest rate must be between 0 and 1.");
 
             _value = value;
         }
 
         public static implicit operator decimal(InterestRate interestRate) => interestRate._value;
-        public static explicit operator InterestRate(decimal value) => new InterestRate(value);
+        public static explicit operator InterestRate(decimal value) => new(value);
 
         protected override IEnumerable<object> GetEqualityComponents()
         {

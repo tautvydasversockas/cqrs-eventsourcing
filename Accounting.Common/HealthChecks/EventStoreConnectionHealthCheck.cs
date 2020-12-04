@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-namespace Accounts.Api.HealthChecks
+namespace Accounting.Common.HealthChecks
 {
     public sealed class EventStoreConnectionHealthCheck : IHealthCheck
     {

@@ -2,9 +2,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Accounts.Domain.Common;
-using Accounts.Infrastructure.Exceptions;
-using EventStore.ClientAPI;
-using EventStore.ClientAPI.Exceptions;
 
 namespace Accounts.Infrastructure
 {
@@ -20,24 +17,10 @@ namespace Accounts.Infrastructure
 
         public async Task SaveAsync(TEventSourcedAggregate aggregate)
         {
-            var uncommittedEvents = aggregate.GetUncommittedEvents();
-            if (!uncommittedEvents.Any())
+            if (!aggregate.UncommittedEvents.Any())
                 return;
 
-            var originalVersion = aggregate.Version - uncommittedEvents.Count;
-            var expectedVersion = originalVersion == 0
-                ? ExpectedVersion.NoStream
-                : originalVersion - 1;
-
-            try
-            {
-                await _eventStore.SaveAggregateEventsAsync<TEventSourcedAggregate>(aggregate.Id, uncommittedEvents, expectedVersion);
-            }
-            catch (WrongExpectedVersionException e)
-                when (e.ExpectedVersion == ExpectedVersion.NoStream)
-            {
-                throw new DuplicateKeyException(aggregate.Id);
-            }
+            await _eventStore.SaveAggregateEventsAsync<TEventSourcedAggregate>(aggregate.Id, aggregate.UncommittedEvents);
 
             aggregate.MarkEventsAsCommitted();
         }
