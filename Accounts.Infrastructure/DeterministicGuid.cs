@@ -5,10 +5,10 @@ namespace Accounts.Infrastructure
 {
     public static class DeterministicGuid
     {
-        public static Guid Create(string val)
+        public static Guid Create(Guid val)
         {
             using var generator = new NameBasedGenerator(HashType.Sha1);
-            return generator.GenerateGuid(UUIDNameSpace.Url, val);
+            return generator.GenerateGuid(UUIDNameSpace.Url, val.ToString());
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace Accounting.Common.HealthChecks
+﻿namespace Accounting.Common
 {
     public static class HealthCheckTag
     {

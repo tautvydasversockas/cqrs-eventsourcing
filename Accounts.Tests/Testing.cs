@@ -16,9 +16,13 @@ namespace Accounts.Tests
         [OneTimeSetUp]
         public void RunBeforeAnyTests()
         {
-            var config = new ConfigurationBuilder().Build();
-            var startup = new Startup(config);
+            var config = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.Development.json")
+                .AddEnvironmentVariables()
+                .Build();
+
             _services = new ServiceCollection();
+            var startup = new Startup(config);
             startup.ConfigureServices(_services);
         }
 

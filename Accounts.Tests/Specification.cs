@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Accounts.Domain;
 using Accounts.Domain.Common;
@@ -27,21 +28,34 @@ namespace Accounts.Tests
         [Test]
         public async Task Run()
         {
-            var eventStoreMock = new Mock<IEventStore>();
+            var eventSourcedRepositoryMock = new Mock<IEventSourcedRepository<TEventSourcedAggregate>>();
 
-            eventStoreMock
-                .Setup(eventStore => eventStore.GetAggregateEventsAsync<TEventSourcedAggregate>(
-                    It.IsAny<Guid>()))
-                .Returns(Given().ToAsyncEnumerable);
-
-            eventStoreMock
-                .Setup(eventStore => eventStore.SaveAggregateEventsAsync<TEventSourcedAggregate>(
+            eventSourcedRepositoryMock
+                .Setup(eventSourcedRepository => eventSourcedRepository.GetAsync(
                     It.IsAny<Guid>(),
-                    It.IsAny<IReadOnlyCollection<Event>>()))
-                .Callback<Guid, IReadOnlyCollection<Event>>((_, events) => events.Should().BeEquivalentTo(Then()));
+                    It.IsAny<CancellationToken>()))
+                .ReturnsAsync(() =>
+                {
+                    TEventSourcedAggregate? aggregate = null;
 
-            var serviceProvider = Testing.GetServiceProvider(services =>
-                services.Replace(new(typeof(IEventStore), _ => eventStoreMock.Object, ServiceLifetime.Scoped)));
+                    foreach (var @event in Given())
+                        (aggregate ??= new()).ApplyEvent(@event);
+
+                    return aggregate;
+                });
+
+            eventSourcedRepositoryMock
+                .Setup(eventSourcedRepository => eventSourcedRepository.SaveAsync(
+                    It.IsAny<TEventSourcedAggregate>(),
+                    It.IsAny<CancellationToken>()))
+                .Callback<TEventSourcedAggregate, CancellationToken>((aggregate, _) =>
+                    aggregate.UncommittedEvents.Should().BeEquivalentTo(Then()));
+
+            var serviceProvider = Testing.GetServiceProvider(services => 
+                services.Replace(new(
+                    typeof(IEventSourcedRepository<TEventSourcedAggregate>),
+                    _ => eventSourcedRepositoryMock.Object,
+                    ServiceLifetime.Scoped)));
 
             var mediator = serviceProvider.GetRequiredService<Mediator>();
 

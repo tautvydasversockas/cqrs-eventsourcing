@@ -45,7 +45,7 @@ namespace Accounts.Api.Controllers
 
         [HttpPost("open")]
         [ProducesResponseType(typeof(Guid), (int)HttpStatusCode.Created)]
-        public async Task<IActionResult> Open([FromHeader(Name = RequestId)] string requestId, OpenAccountDto requestDto, CancellationToken token)
+        public async Task<IActionResult> Open([FromHeader(Name = RequestId)] Guid requestId, OpenAccountDto requestDto, CancellationToken token)
         {
             MessageContext.MessageId = requestId;
             MessageContext.CausationId = requestId;
@@ -59,7 +59,7 @@ namespace Accounts.Api.Controllers
 
         [HttpPost("{id}/deposit")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
-        public async Task<IActionResult> Deposit([FromHeader(Name = RequestId)] string requestId, Guid id, DepositToAccountDto requestDto, CancellationToken token)
+        public async Task<IActionResult> Deposit([FromHeader(Name = RequestId)] Guid requestId, Guid id, DepositToAccountDto requestDto, CancellationToken token)
         {
             MessageContext.MessageId = requestId;
             MessageContext.CausationId = requestId;
@@ -72,7 +72,7 @@ namespace Accounts.Api.Controllers
 
         [HttpPost("{id}/withdraw")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
-        public async Task<IActionResult> Withdraw([FromHeader(Name = RequestId)] string requestId, Guid id, WithdrawFromAccountDto requestDto, CancellationToken token)
+        public async Task<IActionResult> Withdraw([FromHeader(Name = RequestId)] Guid requestId, Guid id, WithdrawFromAccountDto requestDto, CancellationToken token)
         {
             MessageContext.MessageId = requestId;
             MessageContext.CausationId = requestId;
@@ -85,7 +85,7 @@ namespace Accounts.Api.Controllers
 
         [HttpPost("{id}/add-interests")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
-        public async Task<IActionResult> AddInterests([FromHeader(Name = RequestId)] string requestId, Guid id, CancellationToken token)
+        public async Task<IActionResult> AddInterests([FromHeader(Name = RequestId)] Guid requestId, Guid id, CancellationToken token)
         {
             MessageContext.MessageId = requestId;
             MessageContext.CausationId = requestId;
@@ -98,7 +98,7 @@ namespace Accounts.Api.Controllers
 
         [HttpPost("{id}/freeze")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
-        public async Task<IActionResult> Freeze([FromHeader(Name = RequestId)] string requestId, Guid id, CancellationToken token)
+        public async Task<IActionResult> Freeze([FromHeader(Name = RequestId)] Guid requestId, Guid id, CancellationToken token)
         {
             MessageContext.MessageId = requestId;
             MessageContext.CausationId = requestId;
@@ -111,7 +111,7 @@ namespace Accounts.Api.Controllers
 
         [HttpPost("{id}/unfreeze")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
-        public async Task<IActionResult> Unfreeze([FromHeader(Name = RequestId)] string requestId, Guid id, CancellationToken token)
+        public async Task<IActionResult> Unfreeze([FromHeader(Name = RequestId)] Guid requestId, Guid id, CancellationToken token)
         {
             MessageContext.MessageId = requestId;
             MessageContext.CausationId = requestId;

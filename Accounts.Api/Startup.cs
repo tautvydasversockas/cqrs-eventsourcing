@@ -1,7 +1,6 @@
 using System.Net;
 using System.Text.Json.Serialization;
 using Accounting.Common;
-using Accounting.Common.HealthChecks;
 using Accounts.Api.Dto;
 using Accounts.Api.MvcFilters;
 using Accounts.Application.Common;
@@ -9,9 +8,8 @@ using Accounts.Application.Handlers;
 using Accounts.Domain;
 using Accounts.Domain.Common;
 using Accounts.Infrastructure;
+using Accounts.Infrastructure.HealthChecks;
 using Accounts.ReadModel;
-using EventStore.ClientAPI;
-using EventStore.ClientAPI.Exceptions;
 using FluentValidation.AspNetCore;
 using MicroElements.Swashbuckle.FluentValidation;
 using Microsoft.AspNetCore.Builder;
@@ -33,9 +31,6 @@ namespace Accounts.Api
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.BindOptions<EventStoreSettings>(_config);
-            services.BindOptions<SqlSettings>(_config);
-
             services.AddSwaggerGen(options =>
             {
                 options.SwaggerDoc(
@@ -64,39 +59,26 @@ namespace Accounts.Api
                 .AddFluentValidation(config => config.RegisterValidatorsFromAssemblyContaining<OpenAccountDto.Validator>());
 
             services.AddHealthChecks()
-                .AddCheck<EventStoreConnectionHealthCheck>(
+                .AddCheck<EventStoreHealthCheck>(
                     name: "Event Store",
                     tags: new[] { HealthCheckTag.Readiness })
                 .AddDbContextCheck<AccountDbContext>(
                     name: "SQL Server",
                     tags: new[] { HealthCheckTag.Readiness });
 
-            services.AddSingleton<EventStoreConnectionHealthCheck>();
-
-            services.AddSingleton(provider =>
+            services.AddEventStoreClient(settings =>
             {
-                var eventStoreSettings = provider.GetRequiredService<EventStoreSettings>();
-                var connection = EventStoreConnection.Create(eventStoreSettings.ConnectionString);
-                var healthCheck = provider.GetRequiredService<EventStoreConnectionHealthCheck>();
-
-                connection.Connected += (_, _) => healthCheck.IsConnected = true;
-                connection.Disconnected += (_, _) => healthCheck.IsConnected = false;
-                connection.Closed += (_, _) => healthCheck.IsConnected = false;
-                connection.AuthenticationFailed += (_, args) => throw new NotAuthenticatedException(args.Reason);
-                connection.ErrorOccurred += (_, args) => throw args.Exception;
-
-                return connection;
+                settings.ConnectionName = "Accounts.Api";
+                settings.DefaultCredentials = new(
+                    username: _config.GetValue<string>("EventStore:Username"),
+                    password: _config.GetValue<string>("EventStore:Password"));
+                settings.ConnectivitySettings.Address = new(_config.GetValue<string>("EventStore:Address"));
             });
 
             services.AddDbContextPool<AccountDbContext>((provider, optionsBuilder) =>
-            {
-                var sqlSettings = provider.GetRequiredService<SqlSettings>();
-                optionsBuilder.UseSqlServer(sqlSettings.ConnectionString);
-            });
+                optionsBuilder.UseSqlServer(_config.GetValue<string>("Sql:ConnectionString")));
 
             services.AddScoped<IAccountReadModel, AccountDbContext>();
-
-            services.AddScoped<IEventStore, Infrastructure.EventStore>();
 
             services.AddScoped<Mediator>();
 
@@ -110,10 +92,8 @@ namespace Accounts.Api
             services.AddScoped<IHandler<UnfreezeAccount>, AccountCommandHandlers>();
         }
 
-        public void Configure(IApplicationBuilder app, IEventStoreConnection eventStoreConnection)
+        public void Configure(IApplicationBuilder app)
         {
-            eventStoreConnection.ConnectAsync().Wait();
-
             app.UseHttpsRedirection();
 
             app.UseHealthChecks();
