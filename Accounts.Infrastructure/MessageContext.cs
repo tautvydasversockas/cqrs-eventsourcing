@@ -1,16 +1,29 @@
-﻿namespace Accounts.Infrastructure
-{
-    public sealed class MessageContext
-    {
-        public string MessageId { get; }
-        public string CausationId { get; }
-        public string CorrelationId { get; }
+﻿using System;
+using System.Threading;
 
-        public MessageContext(string messageId, string causationId, string correlationId)
+namespace Accounts.Infrastructure
+{
+    public static class MessageContext
+    {
+        private static readonly AsyncLocal<Guid?> MessageIdAsyncLocal = new();
+        public static Guid? MessageId 
+        { 
+            get => MessageIdAsyncLocal.Value; 
+            set => MessageIdAsyncLocal.Value = value; 
+        }
+
+        private static readonly AsyncLocal<Guid?> CausationIdAsyncLocal = new();
+        public static Guid? CausationId
         {
-            MessageId = messageId;
-            CausationId = causationId;
-            CorrelationId = correlationId;
+            get => CausationIdAsyncLocal.Value;
+            set => CausationIdAsyncLocal.Value = value;
+        }
+
+        private static readonly AsyncLocal<Guid?> CorrelationIdAsyncLocal = new();
+        public static Guid? CorrelationId
+        {
+            get => CorrelationIdAsyncLocal.Value;
+            set => CorrelationIdAsyncLocal.Value = value;
         }
     }
 }

@@ -1,8 +1,7 @@
 using System;
-using Accounts.Api.HealthChecks;
+using Accounting.Common;
+using Accounts.Infrastructure.HealthChecks;
 using Accounts.ReadModel;
-using EventStore.ClientAPI;
-using EventStore.ClientAPI.Exceptions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -22,37 +21,28 @@ namespace Accounts.ReadModelSynchronizer
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddHealthChecks()
-                .AddPrivateMemoryHealthCheck(
-                    name: "Private memory",
-                    maximumMemoryBytes: 1_000_000_000,
-                    tags: new[] { HealthCheckTag.Liveness })
                 .AddCheck<BackgroundServiceHealthCheck>(
                     name: "Processing",
                     tags: new[] { HealthCheckTag.Liveness });
 
             services.AddSingleton(new BackgroundServiceHealthCheck(
-                timeBetweenProcess: TimeSpan.FromSeconds(90)));
+                timeout: TimeSpan.FromMinutes(5)));
 
-            services.AddSingleton(provider =>
+            services.AddEventStorePersistentSubscriptionsClient(settings =>
             {
-                var connectionString = _config.GetConnectionString("EventStore");
-                var connection = EventStoreConnection.Create(connectionString);
-
-                connection.AuthenticationFailed += (sender, args) => throw new NotAuthenticatedException(args.Reason);
-                connection.ErrorOccurred += (sender, args) => throw args.Exception;
-
-                return connection;
+                settings.ConnectionName = "Accounts.ReadModelSynchronizer";
+                settings.DefaultCredentials = new(
+                    username: _config.GetValue<string>("EventStore:Username"),
+                    password: _config.GetValue<string>("EventStore:Password"));
+                settings.ConnectivitySettings.Address = new(_config.GetValue<string>("EventStore:Address"));
             });
 
-            services.AddDbContextPool<AccountDbContext>(optionsBuilder =>
-            {
-                var connectionString = _config.GetConnectionString("SqlServer");
-                optionsBuilder.UseSqlServer(connectionString);
-            });
+            services.AddDbContextPool<AccountDbContext>((provider, optionsBuilder) =>
+                optionsBuilder.UseSqlServer(_config.GetValue<string>("Sql:ConnectionString")));
 
             services.AddScoped<AccountView>();
 
-            services.AddHostedService<AccountViewSynchronizer>();
+            services.AddHostedService<App>();
         }
 
         public void Configure(IApplicationBuilder app)

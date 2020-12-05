@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using Accounts.Api;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,14 +11,18 @@ namespace Accounts.Tests
     [SetUpFixture]
     public sealed class Testing
     {
-        private static IServiceCollection _services;
+        [AllowNull] private static IServiceCollection _services;
 
         [OneTimeSetUp]
         public void RunBeforeAnyTests()
         {
-            var config = new ConfigurationBuilder().Build();
-            var startup = new Startup(config);
+            var config = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.Development.json")
+                .AddEnvironmentVariables()
+                .Build();
+
             _services = new ServiceCollection();
+            var startup = new Startup(config);
             startup.ConfigureServices(_services);
         }
 

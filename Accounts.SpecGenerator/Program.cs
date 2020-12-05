@@ -3,27 +3,18 @@ using System.IO;
 using System.Linq;
 using Accounts.Tests;
 
-namespace Accounts.SpecGenerator
+var specifications = typeof(Specification<,>).Assembly
+    .GetTypes()
+    .Where(type =>
+        type.BaseType is not null &&
+        type.BaseType.IsGenericType &&
+        type.BaseType.GetGenericTypeDefinition() == typeof(Specification<,>))
+    .Select(type => Activator.CreateInstance(type)?.ToString());
+
+using var streamWriter = File.CreateText("specifications.txt");
+
+foreach (var specification in specifications)
 {
-    class Program
-    {
-        static void Main()
-        {
-            var specifications = typeof(Specification<,>).Assembly
-                .GetTypes()
-                .Where(type =>
-                    type.BaseType != null && 
-                    type.BaseType.IsGenericType && 
-                    type.BaseType.GetGenericTypeDefinition() == typeof(Specification<,>))
-                .Select(type => Activator.CreateInstance(type)?.ToString());
-
-            using var sw = File.CreateText("specifications.txt");
-
-            foreach (var specification in specifications)
-            {
-                sw.WriteLine("-----------------------------");
-                sw.Write(specification);
-            }
-        }
-    }
+    streamWriter.WriteLine("-----------------------------");
+    streamWriter.Write(specification);
 }

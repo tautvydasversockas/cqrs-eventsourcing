@@ -5,6 +5,6 @@ namespace Accounts.Application.Common
 {
     public interface IHandler<in TMessage>
     {
-        Task HandleAsync(TMessage message, CancellationToken token);
+        Task HandleAsync(TMessage message, CancellationToken token = default);
     }
 }

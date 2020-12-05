@@ -21,7 +21,7 @@ namespace Accounts.Domain.Common
             return GetEqualityComponents().SequenceEqual(other.GetEqualityComponents());
         }
 
-        public static bool operator ==(ValueObject a, ValueObject b)
+        public static bool operator ==(ValueObject? a, ValueObject? b)
         {
             if (a is null && b is null)
                 return true;
@@ -32,7 +32,7 @@ namespace Accounts.Domain.Common
             return a.Equals(b);
         }
 
-        public static bool operator !=(ValueObject a, ValueObject b)
+        public static bool operator !=(ValueObject? a, ValueObject? b)
         {
             return !(a == b);
         }

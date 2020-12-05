@@ -1,57 +1,44 @@
 ﻿using System;
 using System.Reflection;
-using System.Text;
-using Accounts.Domain.Common;
-using Accounts.Domain.Events;
-using EventStore.ClientAPI;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+using System.Text.Json;
+using Accounts.Domain;
+using EventStore.Client;
 
 namespace Accounts.Infrastructure
 {
     public static class EventStoreSerializer
     {
-        private static readonly Encoding Encoding = Encoding.UTF8;
-        private static readonly StringEnumConverter StringEnumConverter = new StringEnumConverter();
         private static readonly Type EventType = typeof(AccountOpened);
-
         private static Assembly EventAssembly => EventType.Assembly;
         private static string? EventNamespace => EventType.Namespace;
 
-        public static EventData Serialize<TEvent>(TEvent @event, Metadata metadata) 
+        public static EventData Serialize<TEvent>(TEvent @event, Metadata metadata)
             where TEvent : Event
         {
-            var eventId = Guid.NewGuid();
+            var eventId = Uuid.NewUuid();
             var eventType = @event.GetType().Name;
-            var serializedEvent = Serialize(@event);
-            var serializedMetadata = Serialize(metadata);
-            return new EventData(eventId, eventType, true, serializedEvent, serializedMetadata);
+            var serializedEvent = JsonSerializer.SerializeToUtf8Bytes(@event, @event.GetType());
+            var serializedMetadata = JsonSerializer.SerializeToUtf8Bytes(metadata, metadata.GetType());
+            return new(eventId, eventType, serializedEvent, serializedMetadata);
         }
 
-        public static (Event, Metadata) Deserialize(ResolvedEvent resolvedEvent)
+        public static (Event @event, Metadata metadata) Deserialize(EventRecord eventRecord)
         {
-            var recordedEvent = resolvedEvent.Event;
-            var eventTypeShortName = recordedEvent.EventType;
-            var eventTypeFullName = EventNamespace == null
+            var eventTypeShortName = eventRecord.EventType;
+            var eventTypeFullName = EventNamespace is null
                 ? eventTypeShortName
                 : $"{EventNamespace}.{eventTypeShortName}";
-            var eventType = EventAssembly.GetType(eventTypeFullName, true);
-            var @event = (Event)Deserialize(recordedEvent.Data, eventType);
-            var metadata = (Metadata)Deserialize(recordedEvent.Metadata, typeof(Metadata));
+
+            var eventType = EventAssembly.GetType(eventTypeFullName) ??
+                throw new ArgumentException($"Event type {eventTypeFullName} was not found.", nameof(eventRecord));
+
+            var @event = (Event)(JsonSerializer.Deserialize(eventRecord.Data.Span, eventType) ??
+                throw new JsonException($"Failed to deserialize {eventType.Name}."));
+
+            var metadata = (Metadata)(JsonSerializer.Deserialize(eventRecord.Metadata.Span, typeof(Metadata)) ??
+                throw new JsonException($"Failed to deserialize {nameof(Metadata)}."));
+
             return (@event, metadata);
-        }
-
-        private static byte[] Serialize(object value)
-        {
-            var json = JsonConvert.SerializeObject(value, StringEnumConverter);
-            return Encoding.GetBytes(json);
-        }
-
-        private static object Deserialize(byte[] value, Type type)
-        {
-            var json = Encoding.GetString(value);
-            return JsonConvert.DeserializeObject(json, type, StringEnumConverter) ??
-                throw new JsonSerializationException($"Failed to deserialize {type.Name}.");
         }
     }
 }

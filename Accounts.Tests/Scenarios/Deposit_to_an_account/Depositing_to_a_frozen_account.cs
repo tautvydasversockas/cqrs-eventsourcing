@@ -1,35 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 using Accounts.Domain;
-using Accounts.Domain.Commands;
-using Accounts.Domain.Common;
-using Accounts.Domain.Events;
 
 namespace Accounts.Tests.Scenarios.Deposit_to_an_account
 {
     public sealed class Depositing_to_a_frozen_account : Specification<Account, DepositToAccount>
     {
-        private Guid _accountId;
-
-        protected override void Before()
-        {
-            _accountId = Guid.NewGuid();
-        }
+        private readonly Guid _accountId = Guid.NewGuid();
 
         protected override IEnumerable<Event> Given()
         {
-            yield return new AccountOpened(_accountId, Guid.NewGuid(), 0, 0);
-            yield return new AccountFrozen(_accountId);
+            yield return new AccountOpened(_accountId, Guid.NewGuid(), 0, 0) { Version = 1 };
+            yield return new AccountFrozen(_accountId) { Version = 2 };
         }
 
         protected override DepositToAccount When()
         {
-            return new DepositToAccount(_accountId, 100);
+            return new(_accountId, 100);
         }
 
-        protected override string Then_Fail()
-        {
-            return "Failed to deposit to the account";
-        }
+        protected override bool Then_Fail() => true;
     }
 }

@@ -8,7 +8,7 @@ namespace Accounts.Domain.Common
 
         public override bool Equals(object? obj)
         {
-            if (!(obj is Entity other))
+            if (obj is not Entity other)
                 return false;
 
             if (ReferenceEquals(this, other))
@@ -20,7 +20,7 @@ namespace Accounts.Domain.Common
             return Id.Equals(other.Id);
         }
 
-        public static bool operator ==(Entity a, Entity b)
+        public static bool operator ==(Entity? a, Entity? b)
         {
             if (a is null && b is null)
                 return true;
@@ -31,14 +31,14 @@ namespace Accounts.Domain.Common
             return a.Equals(b);
         }
 
-        public static bool operator !=(Entity a, Entity b)
+        public static bool operator !=(Entity? a, Entity? b)
         {
             return !(a == b);
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(GetType().ToString() + Id);
+            return HashCode.Combine($"{GetType()}{Id}");
         }
     }
 }

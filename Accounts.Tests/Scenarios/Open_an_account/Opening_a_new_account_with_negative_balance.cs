@@ -1,6 +1,5 @@
 ﻿using System;
 using Accounts.Domain;
-using Accounts.Domain.Commands;
 
 namespace Accounts.Tests.Scenarios.Open_an_account
 {
@@ -8,12 +7,9 @@ namespace Accounts.Tests.Scenarios.Open_an_account
     {
         protected override OpenAccount When()
         {
-            return new OpenAccount(Guid.NewGuid(), Guid.NewGuid(), 0, -100);
+            return new(Guid.NewGuid(), Guid.NewGuid(), 0, -100);
         }
 
-        protected override string Then_Fail()
-        {
-            return "Failed to open an account";
-        }
+        protected override bool Then_Fail() => true;
     }
 }

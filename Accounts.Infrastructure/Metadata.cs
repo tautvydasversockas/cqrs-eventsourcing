@@ -1,19 +1,9 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using System.Text.Json.Serialization;
 
 namespace Accounts.Infrastructure
 {
-    public sealed class Metadata
-    {
-        [JsonProperty("$causationId")]
-        public string CausationId { get; }
-
-        [JsonProperty("$correlationId")]
-        public string CorrelationId { get; }
-
-        public Metadata(string causationId, string correlationId)
-        {
-            CausationId = causationId;
-            CorrelationId = correlationId;
-        }
-    }
+    public sealed record Metadata(
+        [property:JsonPropertyName("$causationId")] Guid? CausationId,
+        [property:JsonPropertyName("$correlationId")] Guid? CorrelationId);
 }

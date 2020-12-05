@@ -1,17 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
-    <LangVersion>8</LangVersion>
+    <TargetFramework>net5.0</TargetFramework>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.5" />
+    <PackageReference Include="EventStore.Client.Grpc.PersistentSubscriptions" Version="20.6.1" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Accounts.Api\Accounts.Api.csproj" />
+    <ProjectReference Include="..\Accounting.Common\Accounting.Common.csproj" />
     <ProjectReference Include="..\Accounts.Domain\Accounts.Domain.csproj" />
     <ProjectReference Include="..\Accounts.Infrastructure\Accounts.Infrastructure.csproj" />
     <ProjectReference Include="..\Accounts.ReadModel\Accounts.ReadModel.csproj" />
