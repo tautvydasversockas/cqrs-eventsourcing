@@ -69,7 +69,7 @@ namespace Accounts.Infrastructure
 
         private static string GetStreamName(Guid aggregateId)
         {
-            return $"{typeof(TEventSourcedAggregate).Name}-{aggregateId}";
+            return $"{typeof(TEventSourcedAggregate).Name.ToLower()}-{aggregateId}";
         }
     }
 }

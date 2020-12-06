@@ -37,8 +37,8 @@ namespace Accounts.ReadModelSynchronizer
         private async Task SubscribeAsync(CancellationToken token)
         {
             _subscription = await _client.SubscribeAsync(
-                streamName: "$ce-Account",
-                groupName: "Account-View",
+                streamName: "$ce-account",
+                groupName: "account-view",
                 eventAppeared: async (subscription, resolvedEvent, retryCount, token) =>
                 {
                     if (IsSystemEvent(resolvedEvent))
