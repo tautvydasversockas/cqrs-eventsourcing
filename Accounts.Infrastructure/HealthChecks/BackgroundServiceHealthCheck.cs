@@ -18,7 +18,7 @@ namespace Accounts.Infrastructure.HealthChecks
 
         public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken token = default)
         {
-            return Task.FromResult<HealthCheckResult>(LastProcessTime.Add(_timeout) < DateTime.Now
+            return Task.FromResult<HealthCheckResult>(LastProcessTime.Add(_timeout) > DateTime.Now
                 ? new(HealthStatus.Healthy)
                 : new(context.Registration.FailureStatus));
         }
