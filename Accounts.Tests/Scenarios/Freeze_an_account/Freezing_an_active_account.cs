@@ -4,7 +4,7 @@ using Accounts.Domain;
 
 namespace Accounts.Tests.Scenarios.Freeze_an_account
 {
-    public sealed class Freezing_an_active_account : Specification<Account, FreezeAccount>
+    public sealed class Freezing_an_active_account : Specification<Account, Guid, FreezeAccount>
     {
         private readonly Guid _accountId = Guid.NewGuid();
 

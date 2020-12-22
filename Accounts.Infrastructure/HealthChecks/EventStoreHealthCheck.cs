@@ -20,7 +20,8 @@ namespace Accounts.Infrastructure.HealthChecks
         {
             try
             {
-                await _client.ReadAllAsync(Direction.Forwards, Position.Start, maxCount: 1, cancellationToken: token)
+                await _client
+                    .ReadAllAsync(Direction.Forwards, Position.Start, maxCount: 1, cancellationToken: token)
                     .FirstOrDefaultAsync(token);
             }
             catch (Exception e)
@@ -28,7 +29,7 @@ namespace Accounts.Infrastructure.HealthChecks
                 return new(context.Registration.FailureStatus, exception: e);
             }
 
-            return new(HealthStatus.Healthy);
+            return HealthCheckResult.Healthy();
         }
     }
 }

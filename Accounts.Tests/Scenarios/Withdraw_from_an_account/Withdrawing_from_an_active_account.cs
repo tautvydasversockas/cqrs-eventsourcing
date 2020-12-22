@@ -4,7 +4,7 @@ using Accounts.Domain;
 
 namespace Accounts.Tests.Scenarios.Withdraw_from_an_account
 {
-    public sealed class Withdrawing_from_an_active_account : Specification<Account, WithdrawFromAccount>
+    public sealed class Withdrawing_from_an_active_account : Specification<Account, Guid, WithdrawFromAccount>
     {
         private readonly Guid _accountId = Guid.NewGuid();
 

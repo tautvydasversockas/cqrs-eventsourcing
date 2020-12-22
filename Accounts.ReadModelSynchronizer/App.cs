@@ -15,18 +15,13 @@ namespace Accounts.ReadModelSynchronizer
     {
         private readonly EventStorePersistentSubscriptionsClient _client;
         private readonly IServiceScopeFactory _serviceScopeFactory;
-        private readonly BackgroundServiceHealthCheck _healthCheck;
 
         private PersistentSubscription? _subscription;
 
-        public App(
-            EventStorePersistentSubscriptionsClient client,
-            IServiceScopeFactory serviceScopeFactory,
-            BackgroundServiceHealthCheck healthCheck)
+        public App(EventStorePersistentSubscriptionsClient client, IServiceScopeFactory serviceScopeFactory)
         {
             _client = client;
             _serviceScopeFactory = serviceScopeFactory;
-            _healthCheck = healthCheck;
         }
 
         protected override async Task ExecuteAsync(CancellationToken token)
@@ -73,7 +68,7 @@ namespace Accounts.ReadModelSynchronizer
                             break;
                     }
 
-                    _healthCheck.SetLastProcessTime();
+                    BackgroundServiceStatistics.SetLastProcessTime();
                 },
                 subscriptionDropped: (subscription, reason, exception) =>
                 {

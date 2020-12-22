@@ -6,12 +6,13 @@ using Accounts.Domain.Common;
 
 namespace Accounts.Application.Common
 {
-    public abstract class Handler<TEventSourcedAggregate>
-        where TEventSourcedAggregate : EventSourcedAggregate, new()
+    public abstract class Handler<TEventSourcedAggregate, TId>
+        where TEventSourcedAggregate : EventSourcedAggregate<TId>, new()
+        where TId : notnull
     {
-        private readonly IEventSourcedRepository<TEventSourcedAggregate> _repository;
+        private readonly IEventSourcedRepository<TEventSourcedAggregate, TId> _repository;
 
-        protected Handler(IEventSourcedRepository<TEventSourcedAggregate> repository)
+        protected Handler(IEventSourcedRepository<TEventSourcedAggregate, TId> repository)
         {
             _repository = repository;
         }
@@ -21,7 +22,7 @@ namespace Accounts.Application.Common
             await _repository.SaveAsync(aggregate, token);
         }
 
-        protected async Task UpdateAsync(Guid id, Action<TEventSourcedAggregate> action, CancellationToken token)
+        protected async Task UpdateAsync(TId id, Action<TEventSourcedAggregate> action, CancellationToken token)
         {
             var aggregate = await _repository.GetAsync(id, token) ??
                 throw new EntityNotFoundException(typeof(TEventSourcedAggregate).Name, id);

@@ -1,9 +1,11 @@
 ﻿using System.Collections.Generic;
+using CSharpFunctionalExtensions;
 using ReflectionMagic;
 
 namespace Accounts.Domain.Common
 {
-    public abstract class EventSourcedAggregate : Entity
+    public abstract class EventSourcedAggregate<TId> : Entity<TId>
+        where TId : notnull
     {
         private readonly List<Event> _events = new();
         public IReadOnlyList<Event> UncommittedEvents => _events;

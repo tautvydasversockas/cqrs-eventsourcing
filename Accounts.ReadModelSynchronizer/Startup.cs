@@ -20,25 +20,22 @@ namespace Accounts.ReadModelSynchronizer
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddHealthChecks()
-                .AddCheck<BackgroundServiceHealthCheck>(
+            services
+                .AddHealthChecks()
+                .AddCheck(
+                    instance: new BackgroundServiceHealthCheck(TimeSpan.FromMinutes(5)),
                     name: "Processing",
                     tags: new[] { HealthCheckTag.Liveness });
-
-            services.AddSingleton(new BackgroundServiceHealthCheck(
-                timeout: TimeSpan.FromMinutes(5)));
 
             services.AddEventStorePersistentSubscriptionsClient(settings =>
             {
                 settings.ConnectionName = "Accounts.ReadModelSynchronizer";
-                settings.DefaultCredentials = new(
-                    username: _config.GetValue<string>("EventStore:Username"),
-                    password: _config.GetValue<string>("EventStore:Password"));
-                settings.ConnectivitySettings.Address = new(_config.GetValue<string>("EventStore:Address"));
+                settings.DefaultCredentials = new(_config["EventStore:Username"], _config["EventStore:Password"]);
+                settings.ConnectivitySettings.Address = new(_config["EventStore:Address"]);
             });
 
-            services.AddDbContextPool<AccountDbContext>((provider, optionsBuilder) =>
-                optionsBuilder.UseSqlServer(_config.GetValue<string>("Sql:ConnectionString")));
+            services.AddDbContextPool<AccountDbContext>(optionsBuilder =>
+                optionsBuilder.UseSqlServer(_config["Sql:ConnectionString"]));
 
             services.AddScoped<AccountView>();
 

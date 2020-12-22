@@ -4,7 +4,7 @@ using Accounts.Domain;
 
 namespace Accounts.Tests.Scenarios.Unfreeze_an_account
 {
-    public sealed class Unfreezing_a_frozen_account : Specification<Account, UnfreezeAccount>
+    public sealed class Unfreezing_a_frozen_account : Specification<Account, Guid, UnfreezeAccount>
     {
         private readonly Guid _accountId = Guid.NewGuid();
 

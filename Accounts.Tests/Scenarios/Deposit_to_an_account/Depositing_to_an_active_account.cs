@@ -4,7 +4,7 @@ using Accounts.Domain;
 
 namespace Accounts.Tests.Scenarios.Deposit_to_an_account
 {
-    public sealed class Depositing_to_an_active_account : Specification<Account, DepositToAccount>
+    public sealed class Depositing_to_an_active_account : Specification<Account, Guid, DepositToAccount>
     {
         private readonly Guid _accountId = Guid.NewGuid();
 

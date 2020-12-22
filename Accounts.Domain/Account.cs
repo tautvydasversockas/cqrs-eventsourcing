@@ -5,7 +5,7 @@ using static Accounts.Domain.Account.Status;
 
 namespace Accounts.Domain
 {
-    public sealed class Account : EventSourcedAggregate
+    public sealed class Account : EventSourcedAggregate<Guid>
     {
         public enum Status
         {

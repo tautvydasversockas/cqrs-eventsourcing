@@ -12,17 +12,17 @@ namespace Accounts.Infrastructure
         private static Assembly EventAssembly => EventType.Assembly;
         private static string? EventNamespace => EventType.Namespace;
 
-        public static EventData Serialize<TEvent>(TEvent @event, Metadata metadata)
+        public static EventData Serialize<TEvent>(TEvent @event, EventMetadata metadata)
             where TEvent : Event
         {
             var eventId = Uuid.NewUuid();
             var eventType = @event.GetType().Name;
-            var serializedEvent = JsonSerializer.SerializeToUtf8Bytes(@event, @event.GetType());
-            var serializedMetadata = JsonSerializer.SerializeToUtf8Bytes(metadata, metadata.GetType());
+            var serializedEvent = Serialize(@event);
+            var serializedMetadata = Serialize(metadata);
             return new(eventId, eventType, serializedEvent, serializedMetadata);
         }
 
-        public static (Event @event, Metadata metadata) Deserialize(EventRecord eventRecord)
+        public static (Event @event, EventMetadata metadata) Deserialize(EventRecord eventRecord)
         {
             var eventTypeShortName = eventRecord.EventType;
             var eventTypeFullName = EventNamespace is null
@@ -32,13 +32,24 @@ namespace Accounts.Infrastructure
             var eventType = EventAssembly.GetType(eventTypeFullName) ??
                 throw new ArgumentException($"Event type {eventTypeFullName} was not found.", nameof(eventRecord));
 
-            var @event = (Event)(JsonSerializer.Deserialize(eventRecord.Data.Span, eventType) ??
-                throw new JsonException($"Failed to deserialize {eventType.Name}."));
-
-            var metadata = (Metadata)(JsonSerializer.Deserialize(eventRecord.Metadata.Span, typeof(Metadata)) ??
-                throw new JsonException($"Failed to deserialize {nameof(Metadata)}."));
-
+            var @event = Deserialize<Event>(eventRecord.Data.Span, eventType);
+            var metadata = Deserialize<EventMetadata>(eventRecord.Metadata.Span);
+            
             return (@event, metadata);
+        }
+
+        private static byte[] Serialize<T>(T obj)
+            where T : notnull
+        {
+            return JsonSerializer.SerializeToUtf8Bytes(obj, obj.GetType());
+        }
+
+        private static T Deserialize<T>(ReadOnlySpan<byte> utf8Json, Type? returnType = null)
+            where T : notnull
+        {
+            returnType ??= typeof(T);
+            return (T)(JsonSerializer.Deserialize(utf8Json, returnType) ??
+                throw new JsonException($"Failed to deserialize {returnType.Name}."));
         }
     }
 }

@@ -25,7 +25,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Accounts.ReadModelSynchroni
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Kubernetes", "Kubernetes", "{E53FD15F-81E7-4CA5-B7BC-0775B43DCF8C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Accounting.Common", "Accounting.Common\Accounting.Common.csproj", "{81632513-4B6E-48A3-90B7-190DA3C5DAD7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Accounting.Common", "Accounting.Common\Accounting.Common.csproj", "{81632513-4B6E-48A3-90B7-190DA3C5DAD7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

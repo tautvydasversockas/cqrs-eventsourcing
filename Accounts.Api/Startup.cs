@@ -48,7 +48,8 @@ namespace Accounts.Api
                 options.OperationFilter<FluentValidationOperationFilter>();
             });
 
-            services.AddControllers(options =>
+            services
+                .AddControllers(options =>
                 {
                     options.Filters.Add(new ExceptionFilter());
                     options.Filters.Add(new ProducesResponseTypeAttribute(typeof(string), (int)HttpStatusCode.BadRequest));
@@ -58,7 +59,8 @@ namespace Accounts.Api
                 .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()))
                 .AddFluentValidation(config => config.RegisterValidatorsFromAssemblyContaining<OpenAccountDto.Validator>());
 
-            services.AddHealthChecks()
+            services
+                .AddHealthChecks()
                 .AddCheck<EventStoreHealthCheck>(
                     name: "Event Store",
                     tags: new[] { HealthCheckTag.Readiness })
@@ -69,20 +71,18 @@ namespace Accounts.Api
             services.AddEventStoreClient(settings =>
             {
                 settings.ConnectionName = "Accounts.Api";
-                settings.DefaultCredentials = new(
-                    username: _config.GetValue<string>("EventStore:Username"),
-                    password: _config.GetValue<string>("EventStore:Password"));
-                settings.ConnectivitySettings.Address = new(_config.GetValue<string>("EventStore:Address"));
+                settings.DefaultCredentials = new(_config["EventStore:Username"], _config["EventStore:Password"]);
+                settings.ConnectivitySettings.Address = new(_config["EventStore:Address"]);
             });
 
-            services.AddDbContextPool<AccountDbContext>((provider, optionsBuilder) =>
-                optionsBuilder.UseSqlServer(_config.GetValue<string>("Sql:ConnectionString")));
+            services.AddDbContextPool<AccountDbContext>(optionsBuilder =>
+                optionsBuilder.UseSqlServer(_config["Sql:ConnectionString"]));
 
             services.AddScoped<IAccountReadModel, AccountDbContext>();
 
             services.AddScoped<Mediator>();
 
-            services.AddScoped(typeof(IEventSourcedRepository<>), typeof(EventSourcedRepository<>));
+            services.AddScoped(typeof(IEventSourcedRepository<,>), typeof(EventSourcedRepository<,>));
 
             services.AddScoped<IHandler<OpenAccount>, AccountCommandHandlers>();
             services.AddScoped<IHandler<DepositToAccount>, AccountCommandHandlers>();

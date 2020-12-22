@@ -4,7 +4,7 @@ using Accounts.Domain;
 
 namespace Accounts.Tests.Scenarios.Open_an_account
 {
-    public sealed class Opening_a_new_account : Specification<Account, OpenAccount>
+    public sealed class Opening_a_new_account : Specification<Account, Guid, OpenAccount>
     {
         private readonly Guid _accountId = Guid.NewGuid();
         private readonly Guid _clientId = Guid.NewGuid();

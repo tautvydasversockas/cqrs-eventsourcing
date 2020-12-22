@@ -4,7 +4,7 @@ using Accounts.Domain;
 
 namespace Accounts.Tests.Scenarios.Add_interests_to_an_account
 {
-    public sealed class Adding_interests_to_an_active_account : Specification<Account, AddInterestsToAccount>
+    public sealed class Adding_interests_to_an_active_account : Specification<Account, Guid, AddInterestsToAccount>
     {
         private readonly Guid _accountId = Guid.NewGuid();
 

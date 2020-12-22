@@ -31,41 +31,41 @@ namespace Accounts.Api.Controllers
         [ProducesResponseType(typeof(List<AccountDto>), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetAll(CancellationToken token)
         {
-            var accountDtos = await _readModel.Accounts.ToListAsync(token);
-            return Ok(accountDtos);
+            var accounts = await _readModel.Accounts.ToListAsync(token);
+            return Ok(accounts);
         }
 
         [HttpGet("{id}", Name = nameof(Get))]
         [ProducesResponseType(typeof(AccountDto), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> Get(Guid id, CancellationToken token)
         {
-            var accountDto = await _readModel.Accounts.SingleOrDefaultAsync(account => account.Id == id, token);
-            return accountDto is null ? NotFound() : Ok(accountDto);
+            var account = await _readModel.Accounts.SingleOrDefaultAsync(account => account.Id == id, token);
+            return account is null ? NotFound() : Ok(account);
         }
 
         [HttpPost("open")]
         [ProducesResponseType(typeof(Guid), (int)HttpStatusCode.Created)]
-        public async Task<IActionResult> Open([FromHeader(Name = RequestId)] Guid requestId, OpenAccountDto requestDto, CancellationToken token)
+        public async Task<IActionResult> Open([FromHeader(Name = RequestId)] Guid requestId, OpenAccountDto request, CancellationToken token)
         {
             MessageContext.MessageId = requestId;
             MessageContext.CausationId = requestId;
             MessageContext.CorrelationId = requestId;
 
             var id = DeterministicGuid.Create(requestId);
-            var command = new OpenAccount(id, requestDto.ClientId, requestDto.InterestRate, requestDto.Balance);
+            var command = new OpenAccount(id, request.ClientId, request.InterestRate, request.Balance);
             await _mediator.SendAsync(command, token);
             return CreatedAtRoute(nameof(Get), new { id }, id);
         }
 
         [HttpPost("{id}/deposit")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
-        public async Task<IActionResult> Deposit([FromHeader(Name = RequestId)] Guid requestId, Guid id, DepositToAccountDto requestDto, CancellationToken token)
+        public async Task<IActionResult> Deposit([FromHeader(Name = RequestId)] Guid requestId, Guid id, DepositToAccountDto request, CancellationToken token)
         {
             MessageContext.MessageId = requestId;
             MessageContext.CausationId = requestId;
             MessageContext.CorrelationId = requestId;
 
-            var command = new DepositToAccount(id, requestDto.Amount);
+            var command = new DepositToAccount(id, request.Amount);
             await _mediator.SendAsync(command, token);
             return Ok();
         }

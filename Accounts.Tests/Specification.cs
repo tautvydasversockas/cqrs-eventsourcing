@@ -16,9 +16,10 @@ using NUnit.Framework;
 namespace Accounts.Tests
 {
     [TestFixture]
-    public abstract class Specification<TEventSourcedAggregate, TCommand>
-        where TEventSourcedAggregate : EventSourcedAggregate, new()
+    public abstract class Specification<TEventSourcedAggregate, TId, TCommand>
+        where TEventSourcedAggregate : EventSourcedAggregate<TId>, new()
         where TCommand : Command
+        where TId : notnull
     {
         protected virtual IEnumerable<Event> Given() => Enumerable.Empty<Event>();
         protected abstract TCommand When();
@@ -28,11 +29,11 @@ namespace Accounts.Tests
         [Test]
         public async Task Run()
         {
-            var eventSourcedRepositoryMock = new Mock<IEventSourcedRepository<TEventSourcedAggregate>>();
+            var eventSourcedRepositoryMock = new Mock<IEventSourcedRepository<TEventSourcedAggregate, TId>>();
 
             eventSourcedRepositoryMock
                 .Setup(eventSourcedRepository => eventSourcedRepository.GetAsync(
-                    It.IsAny<Guid>(),
+                    It.IsAny<TId>(),
                     It.IsAny<CancellationToken>()))
                 .ReturnsAsync(() =>
                 {
@@ -51,9 +52,9 @@ namespace Accounts.Tests
                 .Callback<TEventSourcedAggregate, CancellationToken>((aggregate, _) =>
                     aggregate.UncommittedEvents.Should().BeEquivalentTo(Then()));
 
-            var serviceProvider = Testing.GetServiceProvider(services => 
+            var serviceProvider = Testing.GetServiceProvider(services =>
                 services.Replace(new(
-                    typeof(IEventSourcedRepository<TEventSourcedAggregate>),
+                    typeof(IEventSourcedRepository<TEventSourcedAggregate, TId>),
                     _ => eventSourcedRepositoryMock.Object,
                     ServiceLifetime.Scoped)));
 

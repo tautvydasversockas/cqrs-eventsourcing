@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Accounts.Domain.Common;
@@ -8,8 +7,9 @@ using EventStore.Client;
 
 namespace Accounts.Infrastructure
 {
-    public sealed class EventSourcedRepository<TEventSourcedAggregate> : IEventSourcedRepository<TEventSourcedAggregate>
-        where TEventSourcedAggregate : EventSourcedAggregate, new()
+    public sealed class EventSourcedRepository<TEventSourcedAggregate, TId> : IEventSourcedRepository<TEventSourcedAggregate, TId>
+        where TEventSourcedAggregate : EventSourcedAggregate<TId>, new()
+        where TId : notnull
     {
         private readonly EventStoreClient _client;
 
@@ -29,14 +29,15 @@ namespace Accounts.Infrastructure
                 ? StreamRevision.None
                 : new((ulong)originalVersion - 1);
 
-            var metadata = new Metadata(MessageContext.CausationId, MessageContext.CorrelationId);
+            var metadata = new EventMetadata(MessageContext.CausationId, MessageContext.CorrelationId);
             var eventsToSave = aggregate.UncommittedEvents.Select(@event => EventStoreSerializer.Serialize(@event, metadata));
 
             try
             {
                 await _client.AppendToStreamAsync(streamName, expectedState, eventsToSave, cancellationToken: token);
             }
-            catch (WrongExpectedVersionException e) when (e.ExpectedStreamRevision == StreamRevision.None)
+            catch (WrongExpectedVersionException e) 
+                when (e.ExpectedStreamRevision == StreamRevision.None)
             {
                 throw new Exceptions.DuplicateKeyException(aggregate.Id);
             }
@@ -44,7 +45,7 @@ namespace Accounts.Infrastructure
             aggregate.MarkEventsAsCommitted();
         }
 
-        public async Task<TEventSourcedAggregate?> GetAsync(Guid id, CancellationToken token = default)
+        public async Task<TEventSourcedAggregate?> GetAsync(TId id, CancellationToken token = default)
         {
             var streamName = GetStreamName(id);
             var readStreamResult = _client.ReadStreamAsync(Direction.Forwards, streamName, StreamPosition.Start, cancellationToken: token);
@@ -67,7 +68,7 @@ namespace Accounts.Infrastructure
             return aggregate;
         }
 
-        private static string GetStreamName(Guid aggregateId)
+        private static string GetStreamName(TId aggregateId)
         {
             return $"{typeof(TEventSourcedAggregate).Name.ToLower()}-{aggregateId}";
         }

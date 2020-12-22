@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Accounts.Application.Common;
 using Accounts.Domain;
@@ -7,7 +8,7 @@ using Accounts.Domain.Common;
 namespace Accounts.Application.Handlers
 {
     public sealed class AccountCommandHandlers :
-        Handler<Account>,
+        Handler<Account, Guid>,
         IHandler<OpenAccount>,
         IHandler<DepositToAccount>,
         IHandler<WithdrawFromAccount>,
@@ -15,7 +16,7 @@ namespace Accounts.Application.Handlers
         IHandler<FreezeAccount>,
         IHandler<UnfreezeAccount>
     {
-        public AccountCommandHandlers(IEventSourcedRepository<Account> repository)
+        public AccountCommandHandlers(IEventSourcedRepository<Account, Guid> repository)
             : base(repository) { }
 
         public Task HandleAsync(OpenAccount command, CancellationToken token = default)
