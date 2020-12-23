@@ -28,8 +28,8 @@ namespace Accounts.ReadModel
                 Id: @event.AccountId,
                 Version: @event.Version,
                 ClientId: @event.ClientId,
-                InterestRate: @event.Balance,
-                Balance: @event.InterestRate,
+                InterestRate: @event.InterestRate,
+                Balance: @event.Balance,
                 IsFrozen: false));
 
             try
