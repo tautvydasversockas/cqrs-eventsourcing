@@ -18,12 +18,12 @@ namespace Accounts.Tests
     [TestFixture]
     public abstract class Specification<TEventSourcedAggregate, TId, TCommand>
         where TEventSourcedAggregate : EventSourcedAggregate<TId>, new()
-        where TCommand : Command
+        where TCommand : ICommand
         where TId : notnull
     {
-        protected virtual IEnumerable<Event> Given() => Enumerable.Empty<Event>();
+        protected virtual IEnumerable<IEvent> Given() => Enumerable.Empty<IEvent>();
         protected abstract TCommand When();
-        protected virtual IEnumerable<Event> Then() => Enumerable.Empty<Event>();
+        protected virtual IEnumerable<IEvent> Then() => Enumerable.Empty<IEvent>();
         protected virtual bool Then_Fail() => false;
 
         [Test]
@@ -50,7 +50,8 @@ namespace Accounts.Tests
                     It.IsAny<TEventSourcedAggregate>(),
                     It.IsAny<CancellationToken>()))
                 .Callback<TEventSourcedAggregate, CancellationToken>((aggregate, _) =>
-                    aggregate.UncommittedEvents.Should().BeEquivalentTo(Then()));
+                    aggregate.UncommittedEvents.Should().BeEquivalentTo(
+                        Then(), options => options.RespectingRuntimeTypes()));
 
             var serviceProvider = Testing.GetServiceProvider(services =>
                 services.Replace(new(

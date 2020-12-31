@@ -8,9 +8,9 @@ namespace Accounts.Tests.Scenarios.Freeze_an_account
     {
         private readonly Guid _accountId = Guid.NewGuid();
 
-        protected override IEnumerable<Event> Given()
+        protected override IEnumerable<IEvent> Given()
         {
-            yield return new AccountOpened(_accountId, Guid.NewGuid(), 0, 0) { Version = 1 };
+            yield return new AccountOpened(_accountId, Guid.NewGuid(), 0, 0);
         }
 
         protected override FreezeAccount When()
@@ -18,9 +18,9 @@ namespace Accounts.Tests.Scenarios.Freeze_an_account
             return new(_accountId);
         }
 
-        protected override IEnumerable<Event> Then()
+        protected override IEnumerable<IEvent> Then()
         {
-            yield return new AccountFrozen(_accountId) { Version = 2 };
+            yield return new AccountFrozen(_accountId);
         }
     }
 }

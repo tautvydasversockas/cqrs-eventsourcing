@@ -17,7 +17,7 @@ namespace Accounts.Infrastructure
         }
 
         public Task SendAsync<TCommand>(TCommand command, CancellationToken token = default) 
-            where TCommand : Command
+            where TCommand : ICommand
         {
             var handler = _serviceProvider.GetRequiredService<IHandler<TCommand>>();
             return handler.HandleAsync(command, token);

@@ -36,36 +36,49 @@ namespace Accounts.ReadModelSynchronizer
                 groupName: "account-view",
                 eventAppeared: async (subscription, resolvedEvent, retryCount, token) =>
                 {
-                    if (IsSystemEvent(resolvedEvent))
+                    var eventRecord = resolvedEvent.Event;
+                    if (IsSystemEvent(eventRecord))
                         return;
 
-                    var (@event, _) = EventStoreSerializer.Deserialize(resolvedEvent.Event);
+                    var (@event, _) = EventStoreSerializer.Deserialize(eventRecord);
 
                     switch (@event)
                     {
                         case AccountOpened accountOpened:
-                            await UpdateViewAsync(view => view.HandleAsync(accountOpened, token));
-                            break;
-
+                            {
+                                await UpdateViewAsync(view => view.HandleAsync(accountOpened, token));
+                                break;
+                            }
                         case DepositedToAccount depositedToAccount:
-                            await UpdateViewAsync(view => view.HandleAsync(depositedToAccount, token));
-                            break;
-
+                            {
+                                var version = (int)eventRecord.EventNumber.ToUInt64();
+                                await UpdateViewAsync(view => view.HandleAsync(depositedToAccount, version, token));
+                                break;
+                            }
                         case WithdrawnFromAccount withdrawnFromAccount:
-                            await UpdateViewAsync(view => view.HandleAsync(withdrawnFromAccount, token));
-                            break;
-
+                            {
+                                var version = (int)eventRecord.EventNumber.ToUInt64();
+                                await UpdateViewAsync(view => view.HandleAsync(withdrawnFromAccount, version, token));
+                                break;
+                            }
                         case AddedInterestsToAccount addedInterestsToAccount:
-                            await UpdateViewAsync(view => view.HandleAsync(addedInterestsToAccount, token));
-                            break;
-
+                            {
+                                var version = (int)eventRecord.EventNumber.ToUInt64();
+                                await UpdateViewAsync(view => view.HandleAsync(addedInterestsToAccount, version, token));
+                                break;
+                            }
                         case AccountFrozen accountFrozen:
-                            await UpdateViewAsync(view => view.HandleAsync(accountFrozen, token));
-                            break;
-
+                            {
+                                var version = (int)eventRecord.EventNumber.ToUInt64();
+                                await UpdateViewAsync(view => view.HandleAsync(accountFrozen, version, token));
+                                break;
+                            }
                         case AccountUnfrozen accountUnfrozen:
-                            await UpdateViewAsync(view => view.HandleAsync(accountUnfrozen, token));
-                            break;
+                            {
+                                var version = (int)eventRecord.EventNumber.ToUInt64();
+                                await UpdateViewAsync(view => view.HandleAsync(accountUnfrozen, version, token));
+                                break;
+                            }
                     }
 
                     BackgroundServiceStatistics.SetLastProcessTime();
@@ -77,9 +90,9 @@ namespace Accounts.ReadModelSynchronizer
                 cancellationToken: token);
         }
 
-        private static bool IsSystemEvent(ResolvedEvent resolvedEvent)
+        private static bool IsSystemEvent(EventRecord eventRecord)
         {
-            return resolvedEvent.Event.EventType.StartsWith("$");
+            return eventRecord.EventType.StartsWith("$");
         }
 
         private async Task UpdateViewAsync(Func<AccountView, Task> handleAsync)

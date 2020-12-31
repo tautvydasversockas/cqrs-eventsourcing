@@ -8,9 +8,9 @@ namespace Accounts.Tests.Scenarios.Add_interests_to_an_account
     {
         private readonly Guid _accountId = Guid.NewGuid();
 
-        protected override IEnumerable<Event> Given()
+        protected override IEnumerable<IEvent> Given()
         {
-            yield return new AccountOpened(_accountId, Guid.NewGuid(), 0.1m, 100) { Version = 1 };
+            yield return new AccountOpened(_accountId, Guid.NewGuid(), 0.1m, 100);
         }
 
         protected override AddInterestsToAccount When()
@@ -18,9 +18,9 @@ namespace Accounts.Tests.Scenarios.Add_interests_to_an_account
             return new(_accountId);
         }
 
-        protected override IEnumerable<Event> Then()
+        protected override IEnumerable<IEvent> Then()
         {
-            yield return new AddedInterestsToAccount(_accountId, 10) { Version = 2 };
+            yield return new AddedInterestsToAccount(_accountId, 10);
         }
     }
 }

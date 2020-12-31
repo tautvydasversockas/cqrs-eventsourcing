@@ -8,9 +8,9 @@ namespace Accounts.Tests.Scenarios.Withdraw_from_an_account
     {
         private readonly Guid _accountId = Guid.NewGuid();
 
-        protected override IEnumerable<Event> Given()
+        protected override IEnumerable<IEvent> Given()
         {
-            yield return new AccountOpened(_accountId, Guid.NewGuid(), 0, 200) { Version = 1 };
+            yield return new AccountOpened(_accountId, Guid.NewGuid(), 0, 200);
         }
 
         protected override WithdrawFromAccount When()
@@ -18,9 +18,9 @@ namespace Accounts.Tests.Scenarios.Withdraw_from_an_account
             return new(_accountId, 100);
         }
 
-        protected override IEnumerable<Event> Then()
+        protected override IEnumerable<IEvent> Then()
         {
-            yield return new WithdrawnFromAccount(_accountId, 100) { Version = 2 };
+            yield return new WithdrawnFromAccount(_accountId, 100);
         }
     }
 }

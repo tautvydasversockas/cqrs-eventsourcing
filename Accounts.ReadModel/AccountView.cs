@@ -26,7 +26,7 @@ namespace Accounts.ReadModel
         {
             _context.Accounts.Add(new(
                 Id: @event.AccountId,
-                Version: @event.Version,
+                Version: 0,
                 ClientId: @event.ClientId,
                 InterestRate: @event.InterestRate,
                 Balance: @event.Balance,
@@ -43,29 +43,29 @@ namespace Accounts.ReadModel
             }
         }
 
-        public async Task HandleAsync(WithdrawnFromAccount @event, CancellationToken token = default)
+        public async Task HandleAsync(WithdrawnFromAccount @event, int version, CancellationToken token = default)
         {
-            await UpdateAsync(@event.AccountId, @event.Version, $"Balance -= {ParseDecimal(@event.Amount)}", token);
+            await UpdateAsync(@event.AccountId, version, $"Balance -= {ParseDecimal(@event.Amount)}", token);
         }
 
-        public async Task HandleAsync(DepositedToAccount @event, CancellationToken token = default)
+        public async Task HandleAsync(DepositedToAccount @event, int version, CancellationToken token = default)
         {
-            await UpdateAsync(@event.AccountId, @event.Version, $"Balance += {ParseDecimal(@event.Amount)}", token);
+            await UpdateAsync(@event.AccountId, version, $"Balance += {ParseDecimal(@event.Amount)}", token);
         }
 
-        public async Task HandleAsync(AddedInterestsToAccount @event, CancellationToken token = default)
+        public async Task HandleAsync(AddedInterestsToAccount @event, int version, CancellationToken token = default)
         {
-            await UpdateAsync(@event.AccountId, @event.Version, $"Balance += {ParseDecimal(@event.Interests)}", token);
+            await UpdateAsync(@event.AccountId, version, $"Balance += {ParseDecimal(@event.Interests)}", token);
         }
 
-        public async Task HandleAsync(AccountFrozen @event, CancellationToken token = default)
+        public async Task HandleAsync(AccountFrozen @event, int version, CancellationToken token = default)
         {
-            await UpdateAsync(@event.AccountId, @event.Version, "IsFrozen = 1", token);
+            await UpdateAsync(@event.AccountId, version, "IsFrozen = 1", token);
         }
 
-        public async Task HandleAsync(AccountUnfrozen @event, CancellationToken token = default)
+        public async Task HandleAsync(AccountUnfrozen @event, int version, CancellationToken token = default)
         {
-            await UpdateAsync(@event.AccountId, @event.Version, "IsFrozen = 0", token);
+            await UpdateAsync(@event.AccountId, version, "IsFrozen = 0", token);
         }
 
         private Task UpdateAsync(Guid id, int version, string updateSql, CancellationToken token)

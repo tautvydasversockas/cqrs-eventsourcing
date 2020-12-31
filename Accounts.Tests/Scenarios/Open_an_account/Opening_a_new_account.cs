@@ -14,9 +14,9 @@ namespace Accounts.Tests.Scenarios.Open_an_account
             return new(_accountId, _clientId, 0, 0);
         }
 
-        protected override IEnumerable<Event> Then()
+        protected override IEnumerable<IEvent> Then()
         {
-            yield return new AccountOpened(_accountId, _clientId, 0, 0) { Version = 1 };
+            yield return new AccountOpened(_accountId, _clientId, 0, 0);
         }
     }
 }

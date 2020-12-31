@@ -2,28 +2,28 @@
 
 namespace Accounts.Domain
 {
-    public abstract record Command;
+    public interface ICommand { };
 
     public sealed record OpenAccount(
         Guid AccountId,
         Guid ClientId,
         decimal InterestRate,
-        decimal Balance) : Command;
+        decimal Balance) : ICommand;
 
     public sealed record AddInterestsToAccount(
-        Guid AccountId) : Command;
+        Guid AccountId) : ICommand;
 
     public sealed record DepositToAccount(
         Guid AccountId,
-        decimal Amount) : Command;
+        decimal Amount) : ICommand;
 
     public sealed record WithdrawFromAccount(
         Guid AccountId,
-        decimal Amount) : Command;
+        decimal Amount) : ICommand;
 
     public sealed record FreezeAccount(
-        Guid AccountId) : Command;
+        Guid AccountId) : ICommand;
 
     public sealed record UnfreezeAccount(
-        Guid AccountId) : Command;
+        Guid AccountId) : ICommand;
 }

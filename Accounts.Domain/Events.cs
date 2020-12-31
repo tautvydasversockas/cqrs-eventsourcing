@@ -2,32 +2,29 @@
 
 namespace Accounts.Domain
 {
-    public abstract record Event
-    {
-        public int Version { get; set; }
-    }
+    public interface IEvent { }
 
     public sealed record AccountOpened(
         Guid AccountId,
         Guid ClientId,
         decimal InterestRate,
-        decimal Balance) : Event;
+        decimal Balance) : IEvent;
 
     public sealed record AddedInterestsToAccount(
         Guid AccountId,
-        decimal Interests) : Event;
+        decimal Interests) : IEvent;
 
     public sealed record DepositedToAccount(
         Guid AccountId,
-        decimal Amount) : Event;
+        decimal Amount) : IEvent;
 
     public sealed record WithdrawnFromAccount(
         Guid AccountId,
-        decimal Amount) : Event;
+        decimal Amount) : IEvent;
 
     public sealed record AccountFrozen(
-        Guid AccountId) : Event;
+        Guid AccountId) : IEvent;
 
     public sealed record AccountUnfrozen(
-        Guid AccountId) : Event;
+        Guid AccountId) : IEvent;
 }
