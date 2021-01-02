@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Accounts.Application.Exceptions;
+using Accounts.Application.Common.Exceptions;
 using Accounts.Domain.Common;
 
 namespace Accounts.Application.Common

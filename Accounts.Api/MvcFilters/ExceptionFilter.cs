@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Web.Http;
-using Accounts.Application.Exceptions;
+using Accounts.Application.Common.Exceptions;
 using Accounts.Infrastructure.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;

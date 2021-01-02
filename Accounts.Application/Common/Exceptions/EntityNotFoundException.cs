@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Accounts.Application.Exceptions
+namespace Accounts.Application.Common.Exceptions
 {
     public sealed class EntityNotFoundException : Exception
     {
