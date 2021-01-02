@@ -6,13 +6,13 @@ using Accounts.Domain.Common;
 
 namespace Accounts.Application.Common
 {
-    public abstract class Handler<TEventSourcedAggregate, TId>
+    public abstract class EventSourcedAggregateHandler<TEventSourcedAggregate, TId>
         where TEventSourcedAggregate : EventSourcedAggregate<TId>, new()
         where TId : notnull
     {
         private readonly IEventSourcedRepository<TEventSourcedAggregate, TId> _repository;
 
-        protected Handler(IEventSourcedRepository<TEventSourcedAggregate, TId> repository)
+        protected EventSourcedAggregateHandler(IEventSourcedRepository<TEventSourcedAggregate, TId> repository)
         {
             _repository = repository;
         }

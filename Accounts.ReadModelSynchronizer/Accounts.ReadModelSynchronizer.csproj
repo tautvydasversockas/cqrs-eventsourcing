@@ -13,7 +13,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Accounting.Common\Accounting.Common.csproj" />
     <ProjectReference Include="..\Accounts.Domain\Accounts.Domain.csproj" />
     <ProjectReference Include="..\Accounts.Infrastructure\Accounts.Infrastructure.csproj" />
     <ProjectReference Include="..\Accounts.ReadModel\Accounts.ReadModel.csproj" />

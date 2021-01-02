@@ -1,16 +1,14 @@
 using System.Net;
 using System.Text.Json.Serialization;
-using Accounting.Common;
 using Accounts.Api.Dto;
 using Accounts.Api.MvcFilters;
-using Accounts.Application.Common;
 using Accounts.Application.Handlers;
-using Accounts.Domain;
 using Accounts.Domain.Common;
 using Accounts.Infrastructure;
 using Accounts.Infrastructure.HealthChecks;
 using Accounts.ReadModel;
 using FluentValidation.AspNetCore;
+using MediatR;
 using MicroElements.Swashbuckle.FluentValidation;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
@@ -68,6 +66,8 @@ namespace Accounts.Api
                     name: "SQL Server",
                     tags: new[] { HealthCheckTag.Readiness });
 
+            services.AddMediatR(typeof(AccountCommandHandlers));
+
             services.AddEventStoreClient(settings =>
             {
                 settings.ConnectionName = "Accounts.Api";
@@ -80,16 +80,7 @@ namespace Accounts.Api
 
             services.AddScoped<IAccountReadModel, AccountDbContext>();
 
-            services.AddScoped<Mediator>();
-
             services.AddScoped(typeof(IEventSourcedRepository<,>), typeof(EventSourcedRepository<,>));
-
-            services.AddScoped<IHandler<OpenAccount>, AccountCommandHandlers>();
-            services.AddScoped<IHandler<DepositToAccount>, AccountCommandHandlers>();
-            services.AddScoped<IHandler<WithdrawFromAccount>, AccountCommandHandlers>();
-            services.AddScoped<IHandler<AddInterestsToAccount>, AccountCommandHandlers>();
-            services.AddScoped<IHandler<FreezeAccount>, AccountCommandHandlers>();
-            services.AddScoped<IHandler<UnfreezeAccount>, AccountCommandHandlers>();
         }
 
         public void Configure(IApplicationBuilder app)

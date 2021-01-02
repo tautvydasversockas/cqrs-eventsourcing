@@ -8,13 +8,14 @@
   <ItemGroup>
     <PackageReference Include="EventStore.Client.Grpc.Streams" Version="20.10.0" />
     <PackageReference Include="Grpc.Net.Client" Version="2.34.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="5.0.0" />
     <PackageReference Include="System.Linq.Async" Version="5.0.0" />
     <PackageReference Include="Vlingo.UUID" Version="0.9.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.HealthChecks" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Accounting.Common\Accounting.Common.csproj" />
     <ProjectReference Include="..\Accounts.Application\Accounts.Application.csproj" />
   </ItemGroup>
 

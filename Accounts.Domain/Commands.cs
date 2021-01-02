@@ -1,29 +1,28 @@
-﻿using System;
+﻿using MediatR;
+using System;
 
 namespace Accounts.Domain
 {
-    public interface ICommand { };
-
     public sealed record OpenAccount(
         Guid AccountId,
         Guid ClientId,
         decimal InterestRate,
-        decimal Balance) : ICommand;
+        decimal Balance) : IRequest;
 
     public sealed record AddInterestsToAccount(
-        Guid AccountId) : ICommand;
+        Guid AccountId) : IRequest;
 
     public sealed record DepositToAccount(
         Guid AccountId,
-        decimal Amount) : ICommand;
+        decimal Amount) : IRequest;
 
     public sealed record WithdrawFromAccount(
         Guid AccountId,
-        decimal Amount) : ICommand;
+        decimal Amount) : IRequest;
 
     public sealed record FreezeAccount(
-        Guid AccountId) : ICommand;
+        Guid AccountId) : IRequest;
 
     public sealed record UnfreezeAccount(
-        Guid AccountId) : ICommand;
+        Guid AccountId) : IRequest;
 }

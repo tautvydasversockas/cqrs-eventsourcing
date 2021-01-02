@@ -7,6 +7,7 @@ using Accounts.Api.Dto;
 using Accounts.Domain;
 using Accounts.Infrastructure;
 using Accounts.ReadModel;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,7 +19,7 @@ namespace Accounts.Api.Controllers
     {
         public const string RequestId = "X-Request-ID";
 
-        private readonly Mediator _mediator;
+        private readonly IMediator _mediator;
         private readonly IAccountReadModel _readModel;
 
         public AccountsController(Mediator mediator, IAccountReadModel readModel)
@@ -53,7 +54,7 @@ namespace Accounts.Api.Controllers
 
             var id = DeterministicGuid.Create(requestId);
             var command = new OpenAccount(id, request.ClientId, request.InterestRate, request.Balance);
-            await _mediator.SendAsync(command, token);
+            await _mediator.Send(command, token);
             return CreatedAtRoute(nameof(Get), new { id }, id);
         }
 
@@ -66,7 +67,7 @@ namespace Accounts.Api.Controllers
             MessageContext.CorrelationId = requestId;
 
             var command = new DepositToAccount(id, request.Amount);
-            await _mediator.SendAsync(command, token);
+            await _mediator.Send(command, token);
             return Ok();
         }
 
@@ -79,7 +80,7 @@ namespace Accounts.Api.Controllers
             MessageContext.CorrelationId = requestId;
 
             var command = new WithdrawFromAccount(id, requestDto.Amount);
-            await _mediator.SendAsync(command, token);
+            await _mediator.Send(command, token);
             return Ok();
         }
 
@@ -92,7 +93,7 @@ namespace Accounts.Api.Controllers
             MessageContext.CorrelationId = requestId;
 
             var command = new AddInterestsToAccount(id);
-            await _mediator.SendAsync(command, token);
+            await _mediator.Send(command, token);
             return Ok();
         }
 
@@ -105,7 +106,7 @@ namespace Accounts.Api.Controllers
             MessageContext.CorrelationId = requestId;
 
             var command = new FreezeAccount(id);
-            await _mediator.SendAsync(command, token);
+            await _mediator.Send(command, token);
             return Ok();
         }
 
@@ -118,7 +119,7 @@ namespace Accounts.Api.Controllers
             MessageContext.CorrelationId = requestId;
 
             var command = new UnfreezeAccount(id);
-            await _mediator.SendAsync(command, token);
+            await _mediator.Send(command, token);
             return Ok();
         }
     }

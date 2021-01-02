@@ -4,50 +4,57 @@ using System.Threading.Tasks;
 using Accounts.Application.Common;
 using Accounts.Domain;
 using Accounts.Domain.Common;
+using MediatR;
 
 namespace Accounts.Application.Handlers
 {
     public sealed class AccountCommandHandlers :
-        Handler<Account, Guid>,
-        IHandler<OpenAccount>,
-        IHandler<DepositToAccount>,
-        IHandler<WithdrawFromAccount>,
-        IHandler<AddInterestsToAccount>,
-        IHandler<FreezeAccount>,
-        IHandler<UnfreezeAccount>
+        EventSourcedAggregateHandler<Account, Guid>,
+        IRequestHandler<OpenAccount>,
+        IRequestHandler<DepositToAccount>,
+        IRequestHandler<WithdrawFromAccount>,
+        IRequestHandler<AddInterestsToAccount>,
+        IRequestHandler<FreezeAccount>,
+        IRequestHandler<UnfreezeAccount>
     {
         public AccountCommandHandlers(IEventSourcedRepository<Account, Guid> repository)
             : base(repository) { }
 
-        public Task HandleAsync(OpenAccount command, CancellationToken token = default)
+        public async Task<Unit> Handle(OpenAccount command, CancellationToken token = default)
         {
             var account = Account.Open(command.AccountId, command.ClientId, new(command.InterestRate), command.Balance);
-            return CreateAsync(account, token);
+            await CreateAsync(account, token);
+            return Unit.Value;
         }
 
-        public Task HandleAsync(DepositToAccount command, CancellationToken token = default)
+        public async Task<Unit> Handle(DepositToAccount command, CancellationToken token = default)
         {
-            return UpdateAsync(command.AccountId, account => account.Deposit(command.Amount), token);
+            await UpdateAsync(command.AccountId, account => account.Deposit(command.Amount), token);
+            return Unit.Value;
         }
 
-        public Task HandleAsync(WithdrawFromAccount command, CancellationToken token = default)
+        public async Task<Unit> Handle(WithdrawFromAccount command, CancellationToken token = default)
         {
-            return UpdateAsync(command.AccountId, account => account.Withdraw(command.Amount), token);
+            await UpdateAsync(command.AccountId, account => account.Withdraw(command.Amount), token);
+            return Unit.Value;
         }
 
-        public Task HandleAsync(AddInterestsToAccount command, CancellationToken token = default)
+        public async Task<Unit> Handle(AddInterestsToAccount command, CancellationToken token = default)
         {
-            return UpdateAsync(command.AccountId, account => account.AddInterests(), token);
+            await UpdateAsync(command.AccountId, account => account.AddInterests(), token);
+            return Unit.Value;
         }
 
-        public Task HandleAsync(FreezeAccount command, CancellationToken token = default)
+        public async Task<Unit> Handle(FreezeAccount command, CancellationToken token = default)
         {
-            return UpdateAsync(command.AccountId, account => account.Freeze(), token);
+            await UpdateAsync(command.AccountId, account => account.Freeze(), token);
+            return Unit.Value;
         }
 
-        public Task HandleAsync(UnfreezeAccount command, CancellationToken token = default)
+        public async Task<Unit> Handle(UnfreezeAccount command, CancellationToken token = default)
         {
-            return UpdateAsync(command.AccountId, account => account.Unfreeze(), token);
+            await UpdateAsync(command.AccountId, account => account.Unfreeze(), token);
+            return Unit.Value;
         }
     }
 }

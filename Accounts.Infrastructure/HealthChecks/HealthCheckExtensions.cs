@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Accounts.Infrastructure.HealthChecks;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using System.Linq;
 using System.Text.Json;
 
-namespace Accounting.Common
+namespace Accounts.Infrastructure.HealthChecks
 {
     public static class HealthCheckExtensions
     {

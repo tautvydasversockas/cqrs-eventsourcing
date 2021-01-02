@@ -6,8 +6,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Accounts.Domain;
 using Accounts.Domain.Common;
-using Accounts.Infrastructure;
 using FluentAssertions;
+using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Moq;
@@ -18,7 +18,7 @@ namespace Accounts.Tests
     [TestFixture]
     public abstract class Specification<TEventSourcedAggregate, TId, TCommand>
         where TEventSourcedAggregate : EventSourcedAggregate<TId>, new()
-        where TCommand : ICommand
+        where TCommand : IRequest
         where TId : notnull
     {
         protected virtual IEnumerable<IEvent> Given() => Enumerable.Empty<IEvent>();
@@ -59,11 +59,11 @@ namespace Accounts.Tests
                     _ => eventSourcedRepositoryMock.Object,
                     ServiceLifetime.Scoped)));
 
-            var mediator = serviceProvider.GetRequiredService<Mediator>();
+            var mediator = serviceProvider.GetRequiredService<IMediator>();
 
             try
             {
-                await mediator.SendAsync(When());
+                await mediator.Send(When());
             }
             catch (InvalidOperationException)
             {

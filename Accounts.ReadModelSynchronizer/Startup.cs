@@ -1,5 +1,4 @@
 using System;
-using Accounting.Common;
 using Accounts.Infrastructure.HealthChecks;
 using Accounts.ReadModel;
 using Microsoft.AspNetCore.Builder;
