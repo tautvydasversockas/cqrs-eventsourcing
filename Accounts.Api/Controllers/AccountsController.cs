@@ -4,6 +4,7 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Accounts.Api.Dto;
+using Accounts.Application.Common.Exceptions;
 using Accounts.Domain;
 using Accounts.Infrastructure;
 using Accounts.ReadModel;
@@ -40,31 +41,34 @@ namespace Accounts.Api.Controllers
         [ProducesResponseType(typeof(AccountDto), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> Get(Guid id, CancellationToken token)
         {
-            var account = await _readModel.Accounts.SingleOrDefaultAsync(account => account.Id == id, token);
-            return account is null ? NotFound() : Ok(account);
+            var account = await _readModel.Accounts.SingleOrDefaultAsync(account => account.Id == id, token) ??
+                throw new EntityNotFoundException(nameof(Account), id);
+
+            return Ok(account);
         }
 
         [HttpPost("open")]
         [ProducesResponseType(typeof(Guid), (int)HttpStatusCode.Created)]
-        public async Task<IActionResult> Open([FromHeader(Name = RequestId)] Guid requestId, OpenAccountDto request, CancellationToken token)
+        public async Task<IActionResult> Open(
+            [FromHeader(Name = RequestId)] Guid requestId, OpenAccountDto request, CancellationToken token)
         {
-            MessageContext.MessageId = requestId;
-            MessageContext.CausationId = requestId;
-            MessageContext.CorrelationId = requestId;
+            RequestContext.RequestId = requestId;
+            RequestContext.CausationId = requestId;
+            RequestContext.CorrelationId = requestId;
 
-            var id = DeterministicGuid.Create(requestId);
-            var command = new OpenAccount(id, request.ClientId, request.InterestRate, request.Balance);
-            await _mediator.Send(command, token);
+            var command = new OpenAccount(request.ClientId, request.InterestRate, request.Balance);
+            var id = await _mediator.Send(command, token);
             return CreatedAtRoute(nameof(Get), new { id }, id);
         }
 
         [HttpPost("{id}/deposit")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
-        public async Task<IActionResult> Deposit([FromHeader(Name = RequestId)] Guid requestId, Guid id, DepositToAccountDto request, CancellationToken token)
+        public async Task<IActionResult> Deposit(
+            [FromHeader(Name = RequestId)] Guid requestId, Guid id, DepositToAccountDto request, CancellationToken token)
         {
-            MessageContext.MessageId = requestId;
-            MessageContext.CausationId = requestId;
-            MessageContext.CorrelationId = requestId;
+            RequestContext.RequestId = requestId;
+            RequestContext.CausationId = requestId;
+            RequestContext.CorrelationId = requestId;
 
             var command = new DepositToAccount(id, request.Amount);
             await _mediator.Send(command, token);
@@ -73,11 +77,12 @@ namespace Accounts.Api.Controllers
 
         [HttpPost("{id}/withdraw")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
-        public async Task<IActionResult> Withdraw([FromHeader(Name = RequestId)] Guid requestId, Guid id, WithdrawFromAccountDto requestDto, CancellationToken token)
+        public async Task<IActionResult> Withdraw(
+            [FromHeader(Name = RequestId)] Guid requestId, Guid id, WithdrawFromAccountDto requestDto, CancellationToken token)
         {
-            MessageContext.MessageId = requestId;
-            MessageContext.CausationId = requestId;
-            MessageContext.CorrelationId = requestId;
+            RequestContext.RequestId = requestId;
+            RequestContext.CausationId = requestId;
+            RequestContext.CorrelationId = requestId;
 
             var command = new WithdrawFromAccount(id, requestDto.Amount);
             await _mediator.Send(command, token);
@@ -86,11 +91,12 @@ namespace Accounts.Api.Controllers
 
         [HttpPost("{id}/add-interests")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
-        public async Task<IActionResult> AddInterests([FromHeader(Name = RequestId)] Guid requestId, Guid id, CancellationToken token)
+        public async Task<IActionResult> AddInterests(
+            [FromHeader(Name = RequestId)] Guid requestId, Guid id, CancellationToken token)
         {
-            MessageContext.MessageId = requestId;
-            MessageContext.CausationId = requestId;
-            MessageContext.CorrelationId = requestId;
+            RequestContext.RequestId = requestId;
+            RequestContext.CausationId = requestId;
+            RequestContext.CorrelationId = requestId;
 
             var command = new AddInterestsToAccount(id);
             await _mediator.Send(command, token);
@@ -99,11 +105,12 @@ namespace Accounts.Api.Controllers
 
         [HttpPost("{id}/freeze")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
-        public async Task<IActionResult> Freeze([FromHeader(Name = RequestId)] Guid requestId, Guid id, CancellationToken token)
+        public async Task<IActionResult> Freeze(
+            [FromHeader(Name = RequestId)] Guid requestId, Guid id, CancellationToken token)
         {
-            MessageContext.MessageId = requestId;
-            MessageContext.CausationId = requestId;
-            MessageContext.CorrelationId = requestId;
+            RequestContext.RequestId = requestId;
+            RequestContext.CausationId = requestId;
+            RequestContext.CorrelationId = requestId;
 
             var command = new FreezeAccount(id);
             await _mediator.Send(command, token);
@@ -112,11 +119,12 @@ namespace Accounts.Api.Controllers
 
         [HttpPost("{id}/unfreeze")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
-        public async Task<IActionResult> Unfreeze([FromHeader(Name = RequestId)] Guid requestId, Guid id, CancellationToken token)
+        public async Task<IActionResult> Unfreeze(
+            [FromHeader(Name = RequestId)] Guid requestId, Guid id, CancellationToken token)
         {
-            MessageContext.MessageId = requestId;
-            MessageContext.CausationId = requestId;
-            MessageContext.CorrelationId = requestId;
+            RequestContext.RequestId = requestId;
+            RequestContext.CausationId = requestId;
+            RequestContext.CorrelationId = requestId;
 
             var command = new UnfreezeAccount(id);
             await _mediator.Send(command, token);

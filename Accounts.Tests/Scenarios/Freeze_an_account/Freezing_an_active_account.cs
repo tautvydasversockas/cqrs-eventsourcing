@@ -4,23 +4,21 @@ using Accounts.Domain;
 
 namespace Accounts.Tests.Scenarios.Freeze_an_account
 {
-    public sealed class Freezing_an_active_account : Specification<Account, Guid, FreezeAccount>
+    public sealed class Freezing_an_active_account : AccountSpecification<FreezeAccount>
     {
-        private readonly Guid _accountId = Guid.NewGuid();
-
         protected override IEnumerable<IEvent> Given()
         {
-            yield return new AccountOpened(_accountId, Guid.NewGuid(), 0, 0);
+            yield return new AccountOpened(AccountId, Guid.NewGuid(), 0, 0);
         }
 
         protected override FreezeAccount When()
         {
-            return new(_accountId);
+            return new(AccountId);
         }
 
         protected override IEnumerable<IEvent> Then()
         {
-            yield return new AccountFrozen(_accountId);
+            yield return new AccountFrozen(AccountId);
         }
     }
 }

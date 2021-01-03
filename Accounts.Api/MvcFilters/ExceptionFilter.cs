@@ -15,7 +15,7 @@ namespace Accounts.Api.MvcFilters
             {
                 EntityNotFoundException e => new NotFoundObjectResult(e.Message),
                 DuplicateKeyException e => new ConflictObjectResult(e.Message),
-                DuplicateOperationException e => new ConflictObjectResult(e.Message),
+                DuplicateRequestException e => new ConflictObjectResult(e.Message),
                 InvalidOperationException e => new BadRequestObjectResult(e.Message),
                 _ => new InternalServerErrorResult()
             };

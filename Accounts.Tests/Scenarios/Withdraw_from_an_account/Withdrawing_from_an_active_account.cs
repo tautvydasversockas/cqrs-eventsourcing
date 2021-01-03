@@ -4,23 +4,21 @@ using Accounts.Domain;
 
 namespace Accounts.Tests.Scenarios.Withdraw_from_an_account
 {
-    public sealed class Withdrawing_from_an_active_account : Specification<Account, Guid, WithdrawFromAccount>
+    public sealed class Withdrawing_from_an_active_account : AccountSpecification<WithdrawFromAccount>
     {
-        private readonly Guid _accountId = Guid.NewGuid();
-
         protected override IEnumerable<IEvent> Given()
         {
-            yield return new AccountOpened(_accountId, Guid.NewGuid(), 0, 200);
+            yield return new AccountOpened(AccountId, Guid.NewGuid(), 0, 200);
         }
 
         protected override WithdrawFromAccount When()
         {
-            return new(_accountId, 100);
+            return new(AccountId, 100);
         }
 
         protected override IEnumerable<IEvent> Then()
         {
-            yield return new WithdrawnFromAccount(_accountId, 100);
+            yield return new WithdrawnFromAccount(AccountId, 100);
         }
     }
 }

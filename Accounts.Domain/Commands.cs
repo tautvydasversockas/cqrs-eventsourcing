@@ -3,26 +3,27 @@ using System;
 
 namespace Accounts.Domain
 {
+    public interface ICommand { }
+
     public sealed record OpenAccount(
-        Guid AccountId,
         Guid ClientId,
         decimal InterestRate,
-        decimal Balance) : IRequest;
+        decimal Balance) : ICommand, IRequest<Guid>;
 
     public sealed record AddInterestsToAccount(
-        Guid AccountId) : IRequest;
+        Guid AccountId) : ICommand, IRequest;
 
     public sealed record DepositToAccount(
         Guid AccountId,
-        decimal Amount) : IRequest;
+        decimal Amount) : ICommand, IRequest;
 
     public sealed record WithdrawFromAccount(
         Guid AccountId,
-        decimal Amount) : IRequest;
+        decimal Amount) : ICommand, IRequest;
 
     public sealed record FreezeAccount(
-        Guid AccountId) : IRequest;
+        Guid AccountId) : ICommand, IRequest;
 
     public sealed record UnfreezeAccount(
-        Guid AccountId) : IRequest;
+        Guid AccountId) : ICommand, IRequest;
 }

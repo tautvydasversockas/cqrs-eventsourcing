@@ -4,23 +4,21 @@ using Accounts.Domain;
 
 namespace Accounts.Tests.Scenarios.Add_interests_to_an_account
 {
-    public sealed class Adding_interests_to_an_active_account : Specification<Account, Guid, AddInterestsToAccount>
+    public sealed class Adding_interests_to_an_active_account : AccountSpecification<AddInterestsToAccount>
     {
-        private readonly Guid _accountId = Guid.NewGuid();
-
         protected override IEnumerable<IEvent> Given()
         {
-            yield return new AccountOpened(_accountId, Guid.NewGuid(), 0.1m, 100);
+            yield return new AccountOpened(AccountId, Guid.NewGuid(), 0.1m, 100);
         }
 
         protected override AddInterestsToAccount When()
         {
-            return new(_accountId);
+            return new(AccountId);
         }
 
         protected override IEnumerable<IEvent> Then()
         {
-            yield return new AddedInterestsToAccount(_accountId, 10);
+            yield return new AddedInterestsToAccount(AccountId, 10);
         }
     }
 }

@@ -3,14 +3,16 @@ using System.Threading;
 
 namespace Accounts.Infrastructure
 {
-    public static class MessageContext
+    public static class RequestContext
     {
-        private static readonly AsyncLocal<Guid?> MessageIdAsyncLocal = new();
-        public static Guid? MessageId 
-        { 
-            get => MessageIdAsyncLocal.Value; 
-            set => MessageIdAsyncLocal.Value = value; 
+        private static readonly AsyncLocal<Guid?> RequestIdAsyncLocal = new();
+        public static Guid? RequestId
+        {
+            get => RequestIdAsyncLocal.Value;
+            set => RequestIdAsyncLocal.Value = value;
         }
+        public static Guid RequestIdNonNull => 
+            RequestId ?? throw new ArgumentNullException(nameof(RequestId));
 
         private static readonly AsyncLocal<Guid?> CausationIdAsyncLocal = new();
         public static Guid? CausationId

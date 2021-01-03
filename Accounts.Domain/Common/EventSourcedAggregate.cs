@@ -5,7 +5,6 @@ using ReflectionMagic;
 namespace Accounts.Domain.Common
 {
     public abstract class EventSourcedAggregate<TId> : Entity<TId>
-        where TId : notnull
     {
         private readonly List<IEvent> _events = new();
         public IReadOnlyList<IEvent> UncommittedEvents => _events;

@@ -1,5 +1,3 @@
-using System;
-using System.Diagnostics.CodeAnalysis;
 using Accounts.Api;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,7 +9,7 @@ namespace Accounts.Tests
     [SetUpFixture]
     public sealed class Testing
     {
-        [AllowNull] private static IServiceCollection _services;
+        private static readonly ServiceCollection Services = new();
 
         [OneTimeSetUp]
         public void RunBeforeAnyTests()
@@ -20,22 +18,18 @@ namespace Accounts.Tests
                 .AddJsonFile("appsettings.Development.json")
                 .AddEnvironmentVariables()
                 .Build();
-
-            _services = new ServiceCollection();
             var startup = new Startup(config);
-            startup.ConfigureServices(_services);
+            startup.ConfigureServices(Services);
         }
 
-        public static IServiceProvider GetServiceProvider(Action<IServiceCollection> setup)
+        public static ServiceCollection GetServices()
         {
             var services = new ServiceCollection();
-
-            foreach (var service in _services)
+            
+            foreach (var service in Services)
                 services.Add(service);
 
-            setup(services);
-
-            return services.BuildServiceProvider();
+            return services;
         }
     }
 }

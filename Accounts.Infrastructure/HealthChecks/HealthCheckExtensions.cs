@@ -1,5 +1,4 @@
-﻿using Accounts.Infrastructure.HealthChecks;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using System.Linq;
 using System.Text.Json;

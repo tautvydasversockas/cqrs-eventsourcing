@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 namespace Accounts.Domain.Common
 {
     public interface IEventSourcedRepository<TEventSourcedAggregate, in TId>
-        where TEventSourcedAggregate : EventSourcedAggregate<TId>, new()
+        where TEventSourcedAggregate : EventSourcedAggregate<TId>
         where TId : notnull
     {
         Task SaveAsync(TEventSourcedAggregate aggregate, CancellationToken token = default);

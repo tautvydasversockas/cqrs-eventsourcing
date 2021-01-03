@@ -5,7 +5,7 @@ using static Accounts.Domain.Account.Status;
 
 namespace Accounts.Domain
 {
-    public sealed class Account : EventSourcedAggregate<Guid>
+    public sealed class Account : EventSourcedAggregate<AccountId>
     {
         public enum Status
         {
@@ -17,8 +17,10 @@ namespace Accounts.Domain
         private decimal _balance;
         [AllowNull] private InterestRate _interestRate;
 
+        private Account() { }
+
         public static Account Open(
-            Guid id,
+            AccountId id,
             Guid clientId,
             InterestRate interestRate,
             decimal balance)
@@ -84,7 +86,7 @@ namespace Accounts.Domain
 
         private void Apply(AccountOpened @event)
         {
-            Id = @event.AccountId;
+            Id = new(@event.AccountId);
             _status = Active;
             _balance = @event.Balance;
             _interestRate = new(@event.InterestRate);

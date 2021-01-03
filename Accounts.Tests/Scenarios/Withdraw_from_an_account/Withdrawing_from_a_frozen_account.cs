@@ -4,21 +4,22 @@ using Accounts.Domain;
 
 namespace Accounts.Tests.Scenarios.Withdraw_from_an_account
 {
-    public sealed class Withdrawing_from_a_frozen_account : Specification<Account, Guid, WithdrawFromAccount>
+    public sealed class Withdrawing_from_a_frozen_account : AccountSpecification<WithdrawFromAccount>
     {
-        private readonly Guid _accountId = Guid.NewGuid();
-
         protected override IEnumerable<IEvent> Given()
         {
-            yield return new AccountOpened(_accountId, Guid.NewGuid(), 0, 200);
-            yield return new AccountFrozen(_accountId);
+            yield return new AccountOpened(AccountId, Guid.NewGuid(), 0, 200);
+            yield return new AccountFrozen(AccountId);
         }
 
         protected override WithdrawFromAccount When()
         {
-            return new(_accountId, 100);
+            return new(AccountId, 100);
         }
 
-        protected override bool Then_Fail() => true;
+        protected override IEnumerable<IEvent> Then()
+        {
+            throw new InvalidOperationException();
+        }
     }
 }

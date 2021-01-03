@@ -7,7 +7,7 @@ namespace Accounts.Infrastructure.Exceptions
         public object Key { get; }
 
         public DuplicateKeyException(object key)
-            : base($"Duplicate key {key}.")
+            : base($"Duplicate key ({key}).")
         {
             Key = key;
         }

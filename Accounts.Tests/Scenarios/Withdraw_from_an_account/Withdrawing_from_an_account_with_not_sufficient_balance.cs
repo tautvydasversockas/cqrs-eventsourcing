@@ -4,20 +4,21 @@ using Accounts.Domain;
 
 namespace Accounts.Tests.Scenarios.Withdraw_from_an_account
 {
-    public sealed class Withdrawing_from_an_account_with_not_sufficient_balance : Specification<Account, Guid, WithdrawFromAccount>
+    public sealed class Withdrawing_from_an_account_with_not_sufficient_balance : AccountSpecification<WithdrawFromAccount>
     {
-        private readonly Guid _accountId = Guid.NewGuid();
-
         protected override IEnumerable<IEvent> Given()
         {
-            yield return new AccountOpened(_accountId, Guid.NewGuid(), 0, 100);
+            yield return new AccountOpened(AccountId, Guid.NewGuid(), 0, 100);
         }
 
         protected override WithdrawFromAccount When()
         {
-            return new(_accountId, 200);
+            return new(AccountId, 200);
         }
 
-        protected override bool Then_Fail() => true;
+        protected override IEnumerable<IEvent> Then()
+        {
+            throw new InvalidOperationException();
+        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Accounts.Domain.Common;
@@ -8,7 +9,7 @@ using EventStore.Client;
 namespace Accounts.Infrastructure
 {
     public sealed class EventSourcedRepository<TEventSourcedAggregate, TId> : IEventSourcedRepository<TEventSourcedAggregate, TId>
-        where TEventSourcedAggregate : EventSourcedAggregate<TId>, new()
+        where TEventSourcedAggregate : EventSourcedAggregate<TId>
         where TId : notnull
     {
         private readonly EventStoreClient _client;
@@ -24,19 +25,23 @@ namespace Accounts.Infrastructure
                 return;
 
             var streamName = GetStreamName(aggregate.Id);
-            var originalVersion = aggregate.Version - aggregate.UncommittedEvents.Count;
-            var expectedState = originalVersion is 0
+            
+            var originalAggregateVersion = aggregate.Version - aggregate.UncommittedEvents.Count;
+            var expectedStreamRevision = originalAggregateVersion is 0
                 ? StreamRevision.None
-                : new((ulong)originalVersion - 1);
+                : new((ulong)originalAggregateVersion - 1);
 
-            var metadata = new EventMetadata(MessageContext.CausationId, MessageContext.CorrelationId);
+            var metadata = new EventMetadata(
+                CausationId: RequestContext.RequestId,
+                CorrelationId: RequestContext.CorrelationId);
+
             var eventsToSave = aggregate.UncommittedEvents.Select(@event => EventStoreSerializer.Serialize(@event, metadata));
 
             try
             {
-                await _client.AppendToStreamAsync(streamName, expectedState, eventsToSave, cancellationToken: token);
+                await _client.AppendToStreamAsync(streamName, expectedStreamRevision, eventsToSave, cancellationToken: token);
             }
-            catch (WrongExpectedVersionException e) 
+            catch (WrongExpectedVersionException e)
                 when (e.ExpectedStreamRevision == StreamRevision.None)
             {
                 throw new Exceptions.DuplicateKeyException(aggregate.Id);
@@ -59,10 +64,11 @@ namespace Accounts.Infrastructure
             {
                 var (@event, metadata) = EventStoreSerializer.Deserialize(resolvedEvent.Event);
 
-                if (MessageContext.MessageId is not null && MessageContext.MessageId == metadata.CausationId)
-                    throw new DuplicateOperationException(MessageContext.MessageId);
+                if (RequestContext.RequestId is not null && RequestContext.RequestId == metadata.CausationId)
+                    throw new DuplicateRequestException(RequestContext.RequestId);
 
-                (aggregate ??= new()).ApplyEvent(@event);
+                aggregate ??= (TEventSourcedAggregate)Activator.CreateInstance(typeof(TEventSourcedAggregate), true)!;
+                aggregate.ApplyEvent(@event);
             }
 
             return aggregate;

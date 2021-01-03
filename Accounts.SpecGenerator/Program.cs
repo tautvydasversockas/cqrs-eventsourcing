@@ -1,14 +1,14 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using Accounts.SpecGenerator;
 using Accounts.Tests;
 
 var specifications = typeof(Specification<,,>).Assembly
     .GetTypes()
-    .Where(type =>
-        type.BaseType is not null &&
-        type.BaseType.IsGenericType &&
-        type.BaseType.GetGenericTypeDefinition() == typeof(Specification<,,>))
+    .Where(type => 
+        !type.IsAbstract && 
+        type.IsSubclassOfRawGeneric(typeof(Specification<,,>)))
     .Select(type => Activator.CreateInstance(type)?.ToString());
 
 using var streamWriter = File.CreateText("specifications.txt");

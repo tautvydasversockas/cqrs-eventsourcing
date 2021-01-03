@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using Accounts.Api.Dto;
 using Accounts.Api.MvcFilters;
 using Accounts.Application.Handlers;
+using Accounts.Domain;
 using Accounts.Domain.Common;
 using Accounts.Infrastructure;
 using Accounts.Infrastructure.HealthChecks;
@@ -81,6 +82,8 @@ namespace Accounts.Api
             services.AddScoped<IAccountReadModel, AccountDbContext>();
 
             services.AddScoped(typeof(IEventSourcedRepository<,>), typeof(EventSourcedRepository<,>));
+
+            services.AddScoped<IAccountRepository, AccountRepository>();
         }
 
         public void Configure(IApplicationBuilder app)
