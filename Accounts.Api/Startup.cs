@@ -1,3 +1,4 @@
+using System;
 using System.Net;
 using System.Text.Json.Serialization;
 using Accounts.Api.Dto;
@@ -8,6 +9,7 @@ using Accounts.Domain.Common;
 using Accounts.Infrastructure;
 using Accounts.Infrastructure.HealthChecks;
 using Accounts.ReadModel;
+using EventStore.Client;
 using FluentValidation.AspNetCore;
 using MediatR;
 using MicroElements.Swashbuckle.FluentValidation;
@@ -16,6 +18,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OpenApi.Models;
 
 namespace Accounts.Api
 {
@@ -34,11 +37,11 @@ namespace Accounts.Api
             {
                 options.SwaggerDoc(
                     name: "v1",
-                    info: new()
+                    info: new OpenApiInfo
                     {
                         Title = "Accounts",
                         Version = "v1",
-                        Contact = new()
+                        Contact = new OpenApiContact
                         {
                             Name = "Accounts Team"
                         }
@@ -72,8 +75,8 @@ namespace Accounts.Api
             services.AddEventStoreClient(settings =>
             {
                 settings.ConnectionName = "Accounts.Api";
-                settings.DefaultCredentials = new(_config["EventStore:Username"], _config["EventStore:Password"]);
-                settings.ConnectivitySettings.Address = new(_config["EventStore:Address"]);
+                settings.DefaultCredentials = new UserCredentials(_config["EventStore:Username"], _config["EventStore:Password"]);
+                settings.ConnectivitySettings.Address = new Uri(_config["EventStore:Address"]);
             });
 
             services.AddDbContextPool<AccountDbContext>(optionsBuilder =>

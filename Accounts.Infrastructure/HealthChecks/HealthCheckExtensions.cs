@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using System.Linq;
 using System.Text.Json;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
 namespace Accounts.Infrastructure.HealthChecks
 {
@@ -11,7 +12,7 @@ namespace Accounts.Infrastructure.HealthChecks
         {
             app.UseHealthChecks(
                 path: "/health",
-                options: new()
+                options: new HealthCheckOptions
                 {
                     Predicate = _ => true,
                     ResponseWriter = (context, report) =>
@@ -36,14 +37,14 @@ namespace Accounts.Infrastructure.HealthChecks
 
             app.UseHealthChecks(
                 path: "/health/live",
-                options: new()
+                options: new HealthCheckOptions
                 {
                     Predicate = check => check.Tags.Contains(HealthCheckTag.Liveness)
                 });
 
             app.UseHealthChecks(
                 path: "/health/ready",
-                options: new()
+                options: new HealthCheckOptions
                 {
                     Predicate = check => check.Tags.Contains(HealthCheckTag.Readiness)
                 });

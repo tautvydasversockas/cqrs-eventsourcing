@@ -28,7 +28,7 @@ namespace Accounts.Tests
                 .Setup(repository => repository.GetNextIdentity())
                 .Returns(AccountId);
 
-            services.Replace(new(typeof(IAccountRepository), accountRepositoryMock.Object));
+            services.Replace(new ServiceDescriptor(typeof(IAccountRepository), accountRepositoryMock.Object));
             base.ConfigureServices(services);
         }
     }

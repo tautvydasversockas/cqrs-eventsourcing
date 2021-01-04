@@ -24,13 +24,15 @@ namespace Accounts.ReadModel
 
         public async Task HandleAsync(AccountOpened @event, CancellationToken token = default)
         {
-            _context.Accounts.Add(new(
+            var account = new AccountDto(
                 Id: @event.AccountId,
                 Version: 0,
                 ClientId: @event.ClientId,
                 InterestRate: @event.InterestRate,
                 Balance: @event.Balance,
-                IsFrozen: false));
+                IsFrozen: false);
+            
+            _context.Accounts.Add(account);
 
             try
             {

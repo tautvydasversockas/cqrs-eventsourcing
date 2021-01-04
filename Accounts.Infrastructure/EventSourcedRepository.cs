@@ -25,11 +25,11 @@ namespace Accounts.Infrastructure
                 return;
 
             var streamName = GetStreamName(aggregate.Id);
-            
+
             var originalAggregateVersion = aggregate.Version - aggregate.UncommittedEvents.Count;
             var expectedStreamRevision = originalAggregateVersion is 0
                 ? StreamRevision.None
-                : new((ulong)originalAggregateVersion - 1);
+                : new StreamRevision((ulong)originalAggregateVersion - 1);
 
             var metadata = new EventMetadata(
                 CausationId: RequestContext.RequestId,

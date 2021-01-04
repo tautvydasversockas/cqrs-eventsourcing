@@ -21,7 +21,7 @@ namespace Accounts.Domain
 
         public static Account Open(
             AccountId id,
-            Guid clientId,
+            ClientId clientId,
             InterestRate interestRate,
             decimal balance)
         {
@@ -86,10 +86,10 @@ namespace Accounts.Domain
 
         private void Apply(AccountOpened @event)
         {
-            Id = new(@event.AccountId);
+            Id = new AccountId(@event.AccountId);
             _status = Active;
             _balance = @event.Balance;
-            _interestRate = new(@event.InterestRate);
+            _interestRate = new InterestRate(@event.InterestRate);
         }
 
         private void Apply(WithdrawnFromAccount @event)

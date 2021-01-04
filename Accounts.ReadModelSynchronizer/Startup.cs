@@ -1,6 +1,7 @@
 using System;
 using Accounts.Infrastructure.HealthChecks;
 using Accounts.ReadModel;
+using EventStore.Client;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -29,8 +30,8 @@ namespace Accounts.ReadModelSynchronizer
             services.AddEventStorePersistentSubscriptionsClient(settings =>
             {
                 settings.ConnectionName = "Accounts.ReadModelSynchronizer";
-                settings.DefaultCredentials = new(_config["EventStore:Username"], _config["EventStore:Password"]);
-                settings.ConnectivitySettings.Address = new(_config["EventStore:Address"]);
+                settings.DefaultCredentials = new UserCredentials(_config["EventStore:Username"], _config["EventStore:Password"]);
+                settings.ConnectivitySettings.Address = new Uri(_config["EventStore:Address"]);
             });
 
             services.AddDbContextPool<AccountDbContext>(optionsBuilder =>

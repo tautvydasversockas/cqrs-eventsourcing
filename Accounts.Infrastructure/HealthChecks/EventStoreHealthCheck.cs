@@ -26,7 +26,7 @@ namespace Accounts.Infrastructure.HealthChecks
             }
             catch (Exception e)
             {
-                return new(context.Registration.FailureStatus, exception: e);
+                return new HealthCheckResult(context.Registration.FailureStatus, exception: e);
             }
 
             return HealthCheckResult.Healthy();

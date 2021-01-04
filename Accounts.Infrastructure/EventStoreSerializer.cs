@@ -19,7 +19,7 @@ namespace Accounts.Infrastructure
             var eventType = @event.GetType().Name;
             var serializedEvent = Serialize(@event);
             var serializedMetadata = Serialize(metadata);
-            return new(eventId, eventType, serializedEvent, serializedMetadata);
+            return new EventData(eventId, eventType, serializedEvent, serializedMetadata);
         }
 
         public static (IEvent @event, EventMetadata metadata) Deserialize(EventRecord eventRecord)

@@ -18,7 +18,7 @@ namespace Accounts.Infrastructure.HealthChecks
         {
             return Task.FromResult(BackgroundServiceStatistics.LastProcessTime.Add(_timeout) > DateTime.Now
                 ? HealthCheckResult.Healthy()
-                : new(context.Registration.FailureStatus));
+                : new HealthCheckResult(context.Registration.FailureStatus));
         }
     }
 }
