@@ -4,7 +4,7 @@ using Accounts.Domain;
 
 namespace Accounts.Tests.Scenarios.Withdraw_from_an_account
 {
-    public sealed class Withdrawing_from_an_account_with_not_sufficient_balance : AccountSpecification<WithdrawFromAccount>
+    public sealed class Withdrawing_from_an_account_with_insufficient_balance : AccountSpecification<WithdrawFromAccount>
     {
         protected override IEnumerable<IEvent> Given()
         {
@@ -18,7 +18,7 @@ namespace Accounts.Tests.Scenarios.Withdraw_from_an_account
 
         protected override IEnumerable<IEvent> Then()
         {
-            throw new InvalidOperationException();
+            throw new InsufficientBalanceException();
         }
     }
 }

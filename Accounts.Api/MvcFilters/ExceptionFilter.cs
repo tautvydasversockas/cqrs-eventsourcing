@@ -1,6 +1,6 @@
-﻿using System;
-using System.Web.Http;
+﻿using System.Web.Http;
 using Accounts.Application.Common.Exceptions;
+using Accounts.Domain;
 using Accounts.Infrastructure.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -16,7 +16,7 @@ namespace Accounts.Api.MvcFilters
                 EntityNotFoundException e => new NotFoundObjectResult(e.Message),
                 DuplicateKeyException e => new ConflictObjectResult(e.Message),
                 DuplicateRequestException e => new ConflictObjectResult(e.Message),
-                InvalidOperationException e => new BadRequestObjectResult(e.Message),
+                DomainException e => new ConflictObjectResult(e.Message),
                 _ => new InternalServerErrorResult()
             };
         }

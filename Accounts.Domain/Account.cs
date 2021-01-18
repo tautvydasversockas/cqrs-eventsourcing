@@ -26,7 +26,7 @@ namespace Accounts.Domain
             decimal balance)
         {
             if (balance < 0)
-                throw new InvalidOperationException("Balance cannot be negative.");
+                throw new ArgumentOutOfRangeException(nameof(balance), "Balance cannot be negative.");
 
             var account = new Account();
             account.Raise(new AccountOpened(id, clientId, interestRate, balance));
@@ -36,13 +36,13 @@ namespace Accounts.Domain
         public void Withdraw(decimal amount)
         {
             if (amount <= 0)
-                throw new InvalidOperationException("Amount must be positive.");
+                throw new ArgumentOutOfRangeException(nameof(amount), "Amount must be positive.");
 
             if (_status is Frozen)
-                throw new InvalidOperationException("Cannot withdraw from frozen account.");
+                throw new FrozenAccountException();
 
             if (amount > _balance)
-                throw new InvalidOperationException("Cannot withdraw more than balance.");
+                throw new InsufficientBalanceException();
 
             Raise(new WithdrawnFromAccount(Id, amount));
         }
@@ -50,10 +50,10 @@ namespace Accounts.Domain
         public void Deposit(decimal amount)
         {
             if (amount <= 0)
-                throw new InvalidOperationException("Amount must be positive.");
+                throw new ArgumentOutOfRangeException(nameof(amount), "Amount must be positive.");
 
             if (_status is Frozen)
-                throw new InvalidOperationException("Cannot deposit to frozen account.");
+                throw new FrozenAccountException();
 
             Raise(new DepositedToAccount(Id, amount));
         }
@@ -61,7 +61,7 @@ namespace Accounts.Domain
         public void AddInterests()
         {
             if (_status is Frozen)
-                throw new InvalidOperationException("Cannot add interests to frozen account.");
+                throw new FrozenAccountException();
 
             var interests = _balance * _interestRate;
 

@@ -23,7 +23,7 @@ namespace Accounts.Api.Controllers
         private readonly IMediator _mediator;
         private readonly IAccountReadModel _readModel;
 
-        public AccountsController(Mediator mediator, IAccountReadModel readModel)
+        public AccountsController(IMediator mediator, IAccountReadModel readModel)
         {
             _mediator = mediator;
             _readModel = readModel;

@@ -19,7 +19,7 @@ namespace Accounts.Tests.Scenarios.Withdraw_from_an_account
 
         protected override IEnumerable<IEvent> Then()
         {
-            throw new InvalidOperationException();
+            throw new FrozenAccountException();
         }
     }
 }
