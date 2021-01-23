@@ -40,6 +40,8 @@ namespace Accounts.ReadModelSynchronizer
                     if (IsSystemEvent(eventRecord))
                         return;
 
+                    BackgroundServiceStatistics.SetLastProcessTime();
+
                     var (@event, _) = EventStoreSerializer.Deserialize(eventRecord);
 
                     switch (@event)
@@ -79,9 +81,12 @@ namespace Accounts.ReadModelSynchronizer
                                 await UpdateViewAsync(view => view.HandleAsync(accountUnfrozen, version, token));
                                 break;
                             }
+                        case AccountClosed accountClosed:
+                            {
+                                await UpdateViewAsync(view => view.HandleAsync(accountClosed, token));
+                                break;
+                            }
                     }
-
-                    BackgroundServiceStatistics.SetLastProcessTime();
                 },
                 subscriptionDropped: (subscription, reason, exception) =>
                 {

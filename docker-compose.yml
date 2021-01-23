@@ -30,4 +30,4 @@ services:
 volumes:
   eventstore-volume-data:
   eventstore-volume-logs:
-  mssql-volume-data:
+  mssql-volume:

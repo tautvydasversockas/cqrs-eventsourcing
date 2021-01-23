@@ -1,5 +1,4 @@
-﻿using System;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 using Accounts.Domain;
@@ -47,27 +46,57 @@ namespace Accounts.ReadModel
 
         public async Task HandleAsync(WithdrawnFromAccount @event, int version, CancellationToken token = default)
         {
-            await UpdateAsync(@event.AccountId, version, $"Balance -= {ParseDecimal(@event.Amount)}", token);
+            await _context.Database.ExecuteSqlRawAsync($@"
+                UPDATE Accounts 
+                SET Balance -= {ParseDecimal(@event.Amount)},
+                    Version = {version}
+                WHERE Id = '{@event.AccountId}'
+                  AND Version < {version}",
+                token);
         }
 
         public async Task HandleAsync(DepositedToAccount @event, int version, CancellationToken token = default)
         {
-            await UpdateAsync(@event.AccountId, version, $"Balance += {ParseDecimal(@event.Amount)}", token);
+            await _context.Database.ExecuteSqlRawAsync($@"
+                UPDATE Accounts 
+                SET Balance -= {ParseDecimal(@event.Amount)},
+                    Version = {version}
+                WHERE Id = '{@event.AccountId}'
+                  AND Version < {version}",
+                token);
         }
 
         public async Task HandleAsync(AddedInterestsToAccount @event, int version, CancellationToken token = default)
         {
-            await UpdateAsync(@event.AccountId, version, $"Balance += {ParseDecimal(@event.Interests)}", token);
+            await _context.Database.ExecuteSqlRawAsync($@"
+                UPDATE Accounts 
+                SET Balance += {ParseDecimal(@event.Interests)},
+                    Version = {version}
+                WHERE Id = '{@event.AccountId}'
+                  AND Version < {version}",
+                token);
         }
 
         public async Task HandleAsync(AccountFrozen @event, int version, CancellationToken token = default)
         {
-            await UpdateAsync(@event.AccountId, version, "IsFrozen = 1", token);
+            await _context.Database.ExecuteSqlRawAsync($@"
+                UPDATE Accounts 
+                SET IsFrozen = 1,
+                    Version = {version}
+                WHERE Id = '{@event.AccountId}'
+                  AND Version < {version}",
+                token);
         }
 
         public async Task HandleAsync(AccountUnfrozen @event, int version, CancellationToken token = default)
         {
-            await UpdateAsync(@event.AccountId, version, "IsFrozen = 0", token);
+            await _context.Database.ExecuteSqlRawAsync($@"
+                UPDATE Accounts 
+                SET IsFrozen = 0,
+                    Version = {version}
+                WHERE Id = '{@event.AccountId}'
+                  AND Version < {version}",
+                token);
         }
 
         public async Task HandleAsync(AccountClosed @event, CancellationToken token = default)
@@ -76,16 +105,6 @@ namespace Accounts.ReadModel
                 DELETE
                 FROM Accounts 
                 WHERE Id = '{@event.AccountId}'",
-                token);
-        }
-
-        private Task UpdateAsync(Guid id, int version, string updateSql, CancellationToken token)
-        {
-            return _context.Database.ExecuteSqlRawAsync($@"
-                UPDATE Accounts 
-                SET {updateSql} 
-                WHERE Id = '{id}' 
-                  AND Version < {version}",
                 token);
         }
 

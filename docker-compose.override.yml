@@ -41,7 +41,7 @@ services:
       - "1433:1433"
     volumes:
       - type: volume
-        source: mssql-volume-data
+        source: mssql-volume
         target: /var/opt/mssql
 
   eventstore.db:
