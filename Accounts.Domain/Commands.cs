@@ -26,4 +26,7 @@ namespace Accounts.Domain
 
     public sealed record UnfreezeAccount(
         Guid AccountId) : ICommand, IRequest;
+
+    public sealed record CloseAccount(
+        Guid AccountId) : ICommand, IRequest;
 }

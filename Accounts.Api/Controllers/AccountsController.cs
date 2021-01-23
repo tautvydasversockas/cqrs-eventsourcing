@@ -18,8 +18,6 @@ namespace Accounts.Api.Controllers
     [Route("api/v1/accounts")]
     public sealed class AccountsController : Controller
     {
-        public const string RequestId = "X-Request-ID";
-
         private readonly IMediator _mediator;
         private readonly IAccountReadModel _readModel;
 
@@ -43,14 +41,13 @@ namespace Accounts.Api.Controllers
         {
             var account = await _readModel.Accounts.SingleOrDefaultAsync(account => account.Id == id, token) ??
                 throw new EntityNotFoundException(nameof(Account), id);
-
             return Ok(account);
         }
 
-        [HttpPost("open")]
+        [HttpPost]
         [ProducesResponseType(typeof(Guid), (int)HttpStatusCode.Created)]
         public async Task<IActionResult> Open(
-            [FromHeader(Name = RequestId)] Guid requestId, OpenAccountDto request, CancellationToken token)
+            [FromHeader(Name = Headers.RequestId)] Guid requestId, OpenAccountDto request, CancellationToken token)
         {
             RequestContext.RequestId = requestId;
             RequestContext.CausationId = requestId;
@@ -64,7 +61,7 @@ namespace Accounts.Api.Controllers
         [HttpPost("{id}/deposit")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
         public async Task<IActionResult> Deposit(
-            [FromHeader(Name = RequestId)] Guid requestId, Guid id, DepositToAccountDto request, CancellationToken token)
+            [FromHeader(Name = Headers.RequestId)] Guid requestId, Guid id, DepositToAccountDto request, CancellationToken token)
         {
             RequestContext.RequestId = requestId;
             RequestContext.CausationId = requestId;
@@ -78,7 +75,7 @@ namespace Accounts.Api.Controllers
         [HttpPost("{id}/withdraw")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
         public async Task<IActionResult> Withdraw(
-            [FromHeader(Name = RequestId)] Guid requestId, Guid id, WithdrawFromAccountDto requestDto, CancellationToken token)
+            [FromHeader(Name = Headers.RequestId)] Guid requestId, Guid id, WithdrawFromAccountDto requestDto, CancellationToken token)
         {
             RequestContext.RequestId = requestId;
             RequestContext.CausationId = requestId;
@@ -92,7 +89,7 @@ namespace Accounts.Api.Controllers
         [HttpPost("{id}/add-interests")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
         public async Task<IActionResult> AddInterests(
-            [FromHeader(Name = RequestId)] Guid requestId, Guid id, CancellationToken token)
+            [FromHeader(Name = Headers.RequestId)] Guid requestId, Guid id, CancellationToken token)
         {
             RequestContext.RequestId = requestId;
             RequestContext.CausationId = requestId;
@@ -106,7 +103,7 @@ namespace Accounts.Api.Controllers
         [HttpPost("{id}/freeze")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
         public async Task<IActionResult> Freeze(
-            [FromHeader(Name = RequestId)] Guid requestId, Guid id, CancellationToken token)
+            [FromHeader(Name = Headers.RequestId)] Guid requestId, Guid id, CancellationToken token)
         {
             RequestContext.RequestId = requestId;
             RequestContext.CausationId = requestId;
@@ -120,13 +117,27 @@ namespace Accounts.Api.Controllers
         [HttpPost("{id}/unfreeze")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
         public async Task<IActionResult> Unfreeze(
-            [FromHeader(Name = RequestId)] Guid requestId, Guid id, CancellationToken token)
+            [FromHeader(Name = Headers.RequestId)] Guid requestId, Guid id, CancellationToken token)
         {
             RequestContext.RequestId = requestId;
             RequestContext.CausationId = requestId;
             RequestContext.CorrelationId = requestId;
 
             var command = new UnfreezeAccount(id);
+            await _mediator.Send(command, token);
+            return Ok();
+        }
+
+        [HttpDelete("{id}")]
+        [ProducesResponseType((int)HttpStatusCode.OK)]
+        public async Task<IActionResult> Close(
+            [FromHeader(Name = Headers.RequestId)] Guid requestId, Guid id, CancellationToken token)
+        {
+            RequestContext.RequestId = requestId;
+            RequestContext.CausationId = requestId;
+            RequestContext.CorrelationId = requestId;
+
+            var command = new CloseAccount(id);
             await _mediator.Send(command, token);
             return Ok();
         }

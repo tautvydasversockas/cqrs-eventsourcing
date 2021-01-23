@@ -13,7 +13,8 @@ namespace Accounts.Application.Handlers
         IRequestHandler<WithdrawFromAccount>,
         IRequestHandler<AddInterestsToAccount>,
         IRequestHandler<FreezeAccount>,
-        IRequestHandler<UnfreezeAccount>
+        IRequestHandler<UnfreezeAccount>,
+        IRequestHandler<CloseAccount>
     {
         private readonly IAccountRepository _repository;
 
@@ -60,6 +61,12 @@ namespace Accounts.Application.Handlers
         public async Task<Unit> Handle(UnfreezeAccount command, CancellationToken token = default)
         {
             await _repository.UpdateAsync(new AccountId(command.AccountId), account => account.Unfreeze(), token);
+            return Unit.Value;
+        }
+
+        public async Task<Unit> Handle(CloseAccount command, CancellationToken token = default)
+        {
+            await _repository.UpdateAsync(new AccountId(command.AccountId), account => account.Close(), token);
             return Unit.Value;
         }
     }

@@ -10,7 +10,8 @@ namespace Accounts.Domain
         public enum Status
         {
             Active,
-            Frozen
+            Frozen,
+            Closed
         }
 
         private Status _status;
@@ -38,6 +39,9 @@ namespace Accounts.Domain
             if (amount <= 0)
                 throw new ArgumentOutOfRangeException(nameof(amount), "Amount must be positive.");
 
+            if (_status is Closed)
+                throw new ClosedAccountException();
+
             if (_status is Frozen)
                 throw new FrozenAccountException();
 
@@ -52,6 +56,9 @@ namespace Accounts.Domain
             if (amount <= 0)
                 throw new ArgumentOutOfRangeException(nameof(amount), "Amount must be positive.");
 
+            if (_status is Closed)
+                throw new ClosedAccountException();
+
             if (_status is Frozen)
                 throw new FrozenAccountException();
 
@@ -60,6 +67,9 @@ namespace Accounts.Domain
 
         public void AddInterests()
         {
+            if (_status is Closed)
+                throw new ClosedAccountException();
+
             if (_status is Frozen)
                 throw new FrozenAccountException();
 
@@ -70,6 +80,9 @@ namespace Accounts.Domain
 
         public void Freeze()
         {
+            if (_status is Closed)
+                throw new ClosedAccountException();
+
             if (_status is Frozen)
                 return;
 
@@ -78,10 +91,21 @@ namespace Accounts.Domain
 
         public void Unfreeze()
         {
-            if (_status is not Frozen)
+            if (_status is Closed)
+                throw new ClosedAccountException();
+
+            if (_status is Active)
                 return;
 
             Raise(new AccountUnfrozen(Id));
+        }
+
+        public void Close()
+        {
+            if (_status is Closed)
+                return;
+
+            Raise(new AccountClosed(Id));
         }
 
         private void Apply(AccountOpened @event)
@@ -115,6 +139,11 @@ namespace Accounts.Domain
         private void Apply(AccountUnfrozen @event)
         {
             _status = Active;
+        }
+
+        private void Apply(AccountClosed @event)
+        {
+            _status = Closed;
         }
     }
 }

@@ -27,4 +27,7 @@ namespace Accounts.Domain
 
     public sealed record AccountUnfrozen(
         Guid AccountId) : IEvent;
+
+    public sealed record AccountClosed(
+        Guid AccountId) : IEvent;
 }

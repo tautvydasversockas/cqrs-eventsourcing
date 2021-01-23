@@ -31,7 +31,7 @@ namespace Accounts.ReadModel
                 InterestRate: @event.InterestRate,
                 Balance: @event.Balance,
                 IsFrozen: false);
-            
+
             _context.Accounts.Add(account);
 
             try
@@ -68,6 +68,15 @@ namespace Accounts.ReadModel
         public async Task HandleAsync(AccountUnfrozen @event, int version, CancellationToken token = default)
         {
             await UpdateAsync(@event.AccountId, version, "IsFrozen = 0", token);
+        }
+
+        public async Task HandleAsync(AccountClosed @event, CancellationToken token = default)
+        {
+            await _context.Database.ExecuteSqlRawAsync($@"
+                DELETE
+                FROM Accounts 
+                WHERE Id = '{@event.AccountId}'",
+                token);
         }
 
         private Task UpdateAsync(Guid id, int version, string updateSql, CancellationToken token)
