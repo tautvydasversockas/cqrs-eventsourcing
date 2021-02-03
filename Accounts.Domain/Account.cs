@@ -27,42 +27,36 @@ namespace Accounts.Domain
             decimal balance)
         {
             if (balance < 0)
-                throw new ArgumentOutOfRangeException(nameof(balance), "Balance cannot be negative.");
+                throw new ArgumentOutOfRangeException(nameof(balance), "Balance can't be negative.");
 
             var account = new Account();
             account.Raise(new AccountOpened(id, clientId, interestRate, balance));
             return account;
         }
 
-        public void Withdraw(decimal amount)
+        public void Withdraw(Money money)
         {
-            if (amount <= 0)
-                throw new ArgumentOutOfRangeException(nameof(amount), "Amount must be positive.");
-
             if (_status is Closed)
                 throw new ClosedAccountException();
 
             if (_status is Frozen)
                 throw new FrozenAccountException();
 
-            if (amount > _balance)
+            if (money > _balance)
                 throw new InsufficientBalanceException();
 
-            Raise(new WithdrawnFromAccount(Id, amount));
+            Raise(new WithdrawnFromAccount(Id, money));
         }
 
-        public void Deposit(decimal amount)
+        public void Deposit(Money money)
         {
-            if (amount <= 0)
-                throw new ArgumentOutOfRangeException(nameof(amount), "Amount must be positive.");
-
             if (_status is Closed)
                 throw new ClosedAccountException();
 
             if (_status is Frozen)
                 throw new FrozenAccountException();
 
-            Raise(new DepositedToAccount(Id, amount));
+            Raise(new DepositedToAccount(Id, money));
         }
 
         public void AddInterests()

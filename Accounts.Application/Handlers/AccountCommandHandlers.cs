@@ -36,37 +36,55 @@ namespace Accounts.Application.Handlers
 
         public async Task<Unit> Handle(DepositToAccount command, CancellationToken token = default)
         {
-            await _repository.UpdateAsync(new AccountId(command.AccountId), account => account.Deposit(command.Amount), token);
+            await _repository.UpdateAsync(
+                new AccountId(command.AccountId), 
+                account => account.Deposit(new Money(command.Amount)), 
+                token);
             return Unit.Value;
         }
 
         public async Task<Unit> Handle(WithdrawFromAccount command, CancellationToken token = default)
         {
-            await _repository.UpdateAsync(new AccountId(command.AccountId), account => account.Withdraw(command.Amount), token);
+            await _repository.UpdateAsync(
+                new AccountId(command.AccountId), 
+                account => account.Withdraw(new Money(command.Amount)), 
+                token);
             return Unit.Value;
         }
 
         public async Task<Unit> Handle(AddInterestsToAccount command, CancellationToken token = default)
         {
-            await _repository.UpdateAsync(new AccountId(command.AccountId), account => account.AddInterests(), token);
+            await _repository.UpdateAsync(
+                new AccountId(command.AccountId), 
+                account => account.AddInterests(), 
+                token);
             return Unit.Value;
         }
 
         public async Task<Unit> Handle(FreezeAccount command, CancellationToken token = default)
         {
-            await _repository.UpdateAsync(new AccountId(command.AccountId), account => account.Freeze(), token);
+            await _repository.UpdateAsync(
+                new AccountId(command.AccountId), 
+                account => account.Freeze(), 
+                token);
             return Unit.Value;
         }
 
         public async Task<Unit> Handle(UnfreezeAccount command, CancellationToken token = default)
         {
-            await _repository.UpdateAsync(new AccountId(command.AccountId), account => account.Unfreeze(), token);
+            await _repository.UpdateAsync(
+                new AccountId(command.AccountId), 
+                account => account.Unfreeze(), 
+                token);
             return Unit.Value;
         }
 
         public async Task<Unit> Handle(CloseAccount command, CancellationToken token = default)
         {
-            await _repository.UpdateAsync(new AccountId(command.AccountId), account => account.Close(), token);
+            await _repository.UpdateAsync(
+                new AccountId(command.AccountId),
+                account => account.Close(), 
+                token);
             return Unit.Value;
         }
     }
