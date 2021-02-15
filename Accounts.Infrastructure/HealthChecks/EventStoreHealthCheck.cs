@@ -1,9 +1,9 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using EventStore.Client;
+﻿using EventStore.Client;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using System.Linq;
 using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Accounts.Infrastructure.HealthChecks
 {

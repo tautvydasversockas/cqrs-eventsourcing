@@ -1,6 +1,3 @@
-using System;
-using System.Net;
-using System.Text.Json.Serialization;
 using Accounts.Api.Dto;
 using Accounts.Api.MvcFilters;
 using Accounts.Application.Handlers;
@@ -19,6 +16,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
+using System;
+using System.Net;
+using System.Text.Json.Serialization;
 
 namespace Accounts.Api
 {

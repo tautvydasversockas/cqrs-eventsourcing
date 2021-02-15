@@ -25,7 +25,7 @@ namespace Accounts.Tests
         public static ServiceCollection GetServices()
         {
             var services = new ServiceCollection();
-            
+
             foreach (var service in Services)
                 services.Add(service);
 

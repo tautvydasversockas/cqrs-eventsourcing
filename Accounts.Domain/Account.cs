@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Accounts.Domain.Common;
+using System;
 using System.Diagnostics.CodeAnalysis;
-using Accounts.Domain.Common;
 using static Accounts.Domain.Account.Status;
 
 namespace Accounts.Domain

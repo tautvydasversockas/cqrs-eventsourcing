@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
-using CSharpFunctionalExtensions;
+﻿using CSharpFunctionalExtensions;
 using ReflectionMagic;
+using System.Collections.Generic;
 
 namespace Accounts.Domain.Common
 {

@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Accounts.Domain;
+using EventStore.Client;
+using System;
 using System.Reflection;
 using System.Text.Json;
-using Accounts.Domain;
-using EventStore.Client;
 
 namespace Accounts.Infrastructure
 {
@@ -34,7 +34,7 @@ namespace Accounts.Infrastructure
 
             var @event = Deserialize<IEvent>(eventRecord.Data.Span, eventType);
             var metadata = Deserialize<EventMetadata>(eventRecord.Metadata.Span);
-            
+
             return (@event, metadata);
         }
 

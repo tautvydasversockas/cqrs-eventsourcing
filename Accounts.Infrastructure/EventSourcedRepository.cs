@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Accounts.Domain.Common;
+using Accounts.Infrastructure.Exceptions;
+using EventStore.Client;
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Accounts.Domain.Common;
-using Accounts.Infrastructure.Exceptions;
-using EventStore.Client;
 
 namespace Accounts.Infrastructure
 {

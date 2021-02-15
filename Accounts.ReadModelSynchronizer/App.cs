@@ -1,6 +1,3 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using Accounts.Domain;
 using Accounts.Infrastructure;
 using Accounts.Infrastructure.HealthChecks;
@@ -8,6 +5,9 @@ using Accounts.ReadModel;
 using EventStore.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Accounts.ReadModelSynchronizer
 {

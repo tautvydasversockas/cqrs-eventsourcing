@@ -1,9 +1,9 @@
-﻿using System.Web.Http;
-using Accounts.Application.Common.Exceptions;
+﻿using Accounts.Application.Common.Exceptions;
 using Accounts.Domain;
 using Accounts.Infrastructure.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using System.Web.Http;
 
 namespace Accounts.Api.MvcFilters
 {

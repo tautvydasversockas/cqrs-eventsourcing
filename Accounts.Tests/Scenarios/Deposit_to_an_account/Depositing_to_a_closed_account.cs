@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Accounts.Domain;
+using System;
 using System.Collections.Generic;
-using Accounts.Domain;
 
 namespace Accounts.Tests.Scenarios.Deposit_to_an_account
 {

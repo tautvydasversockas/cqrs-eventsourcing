@@ -1,9 +1,9 @@
-﻿using System.Globalization;
-using System.Threading;
-using System.Threading.Tasks;
-using Accounts.Domain;
+﻿using Accounts.Domain;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Accounts.ReadModel
 {

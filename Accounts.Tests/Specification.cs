@@ -1,14 +1,14 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Accounts.Domain;
 using Accounts.Domain.Common;
 using FluentAssertions;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Accounts.Tests
 {
@@ -23,7 +23,7 @@ namespace Accounts.Tests
         protected virtual IEnumerable<IEvent> Given() => Enumerable.Empty<IEvent>();
         protected abstract TCommand When();
         protected virtual IEnumerable<IEvent> Then() => Enumerable.Empty<IEvent>();
-        
+
         [Test]
         public async Task Run()
         {
@@ -69,7 +69,7 @@ namespace Accounts.Tests
                 return e is null || e.GetType() == expectedError.GetType();
             }
         }
-      
+
         public override string ToString()
         {
             var sb = new StringBuilder();

@@ -8,8 +8,8 @@ namespace Accounts.SpecGenerator
         {
             while (type != typeof(object) && type.BaseType is not null)
             {
-                var typeDefinition = type.IsGenericType 
-                    ? type.GetGenericTypeDefinition() 
+                var typeDefinition = type.IsGenericType
+                    ? type.GetGenericTypeDefinition()
                     : type;
 
                 if (typeDefinition == baseType)

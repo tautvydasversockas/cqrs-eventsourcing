@@ -6,7 +6,7 @@ namespace Accounts.Infrastructure.HealthChecks
     {
         private static readonly object LockObject = new();
         private static DateTime _lastProcessTime;
-        
+
         public static DateTime LastProcessTime
         {
             get

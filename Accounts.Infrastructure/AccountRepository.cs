@@ -1,7 +1,7 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using Accounts.Domain;
+﻿using Accounts.Domain;
 using Accounts.Domain.Common;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Accounts.Infrastructure
 {

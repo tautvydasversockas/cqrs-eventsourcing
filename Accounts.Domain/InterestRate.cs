@@ -1,5 +1,5 @@
-﻿using System;
-using CSharpFunctionalExtensions;
+﻿using CSharpFunctionalExtensions;
+using System;
 
 namespace Accounts.Domain
 {

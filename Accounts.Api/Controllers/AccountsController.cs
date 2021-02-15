@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
-using Accounts.Api.Dto;
+﻿using Accounts.Api.Dto;
 using Accounts.Application.Common.Exceptions;
 using Accounts.Domain;
 using Accounts.Infrastructure;
@@ -11,6 +6,11 @@ using Accounts.ReadModel;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Accounts.Api.Controllers
 {

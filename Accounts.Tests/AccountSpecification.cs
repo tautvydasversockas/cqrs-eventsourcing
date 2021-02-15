@@ -1,9 +1,9 @@
-using System;
-using System.Threading;
 using Accounts.Domain;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Moq;
+using System;
+using System.Threading;
 
 namespace Accounts.Tests
 {

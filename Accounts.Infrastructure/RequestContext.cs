@@ -11,7 +11,7 @@ namespace Accounts.Infrastructure
             get => RequestIdAsyncLocal.Value;
             set => RequestIdAsyncLocal.Value = value;
         }
-        public static Guid RequestIdNonNull => 
+        public static Guid RequestIdNonNull =>
             RequestId ?? throw new ArgumentNullException(nameof(RequestId));
 
         private static readonly AsyncLocal<Guid?> CausationIdAsyncLocal = new();

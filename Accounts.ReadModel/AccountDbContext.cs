@@ -1,7 +1,7 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using Accounts.ReadModel.Configurations;
+﻿using Accounts.ReadModel.Configurations;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 namespace Accounts.ReadModel
 {

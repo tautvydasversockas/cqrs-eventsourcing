@@ -1,13 +1,13 @@
-﻿using System;
+﻿using Accounts.SpecGenerator;
+using Accounts.Tests;
+using System;
 using System.IO;
 using System.Linq;
-using Accounts.SpecGenerator;
-using Accounts.Tests;
 
 var specifications = typeof(Specification<,,>).Assembly
     .GetTypes()
-    .Where(type => 
-        !type.IsAbstract && 
+    .Where(type =>
+        !type.IsAbstract &&
         type.IsSubclassOfRawGeneric(typeof(Specification<,,>)))
     .Select(type => Activator.CreateInstance(type)?.ToString());
 

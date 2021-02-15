@@ -1,9 +1,9 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Accounts.Application.Common;
+﻿using Accounts.Application.Common;
 using Accounts.Domain;
 using MediatR;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Accounts.Application.Handlers
 {
@@ -37,8 +37,8 @@ namespace Accounts.Application.Handlers
         public async Task<Unit> Handle(DepositToAccount command, CancellationToken token = default)
         {
             await _repository.UpdateAsync(
-                new AccountId(command.AccountId), 
-                account => account.Deposit(new Money(command.Amount)), 
+                new AccountId(command.AccountId),
+                account => account.Deposit(new Money(command.Amount)),
                 token);
             return Unit.Value;
         }
@@ -46,8 +46,8 @@ namespace Accounts.Application.Handlers
         public async Task<Unit> Handle(WithdrawFromAccount command, CancellationToken token = default)
         {
             await _repository.UpdateAsync(
-                new AccountId(command.AccountId), 
-                account => account.Withdraw(new Money(command.Amount)), 
+                new AccountId(command.AccountId),
+                account => account.Withdraw(new Money(command.Amount)),
                 token);
             return Unit.Value;
         }
@@ -55,8 +55,8 @@ namespace Accounts.Application.Handlers
         public async Task<Unit> Handle(AddInterestsToAccount command, CancellationToken token = default)
         {
             await _repository.UpdateAsync(
-                new AccountId(command.AccountId), 
-                account => account.AddInterests(), 
+                new AccountId(command.AccountId),
+                account => account.AddInterests(),
                 token);
             return Unit.Value;
         }
@@ -64,8 +64,8 @@ namespace Accounts.Application.Handlers
         public async Task<Unit> Handle(FreezeAccount command, CancellationToken token = default)
         {
             await _repository.UpdateAsync(
-                new AccountId(command.AccountId), 
-                account => account.Freeze(), 
+                new AccountId(command.AccountId),
+                account => account.Freeze(),
                 token);
             return Unit.Value;
         }
@@ -73,8 +73,8 @@ namespace Accounts.Application.Handlers
         public async Task<Unit> Handle(UnfreezeAccount command, CancellationToken token = default)
         {
             await _repository.UpdateAsync(
-                new AccountId(command.AccountId), 
-                account => account.Unfreeze(), 
+                new AccountId(command.AccountId),
+                account => account.Unfreeze(),
                 token);
             return Unit.Value;
         }
@@ -83,7 +83,7 @@ namespace Accounts.Application.Handlers
         {
             await _repository.UpdateAsync(
                 new AccountId(command.AccountId),
-                account => account.Close(), 
+                account => account.Close(),
                 token);
             return Unit.Value;
         }

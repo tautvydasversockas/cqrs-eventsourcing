@@ -1,4 +1,3 @@
-using System;
 using Accounts.Infrastructure.HealthChecks;
 using Accounts.ReadModel;
 using EventStore.Client;
@@ -6,6 +5,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 
 namespace Accounts.ReadModelSynchronizer
 {

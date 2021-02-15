@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Accounts.Application.Common.Exceptions;
+using Accounts.Domain.Common;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Accounts.Application.Common.Exceptions;
-using Accounts.Domain.Common;
 
 namespace Accounts.Application.Common
 {
@@ -10,8 +10,8 @@ namespace Accounts.Application.Common
     {
         public static async Task UpdateAsync<TEventSourcedAggregate, TId>(
             this IEventSourcedRepository<TEventSourcedAggregate, TId> repository,
-            TId id, 
-            Action<TEventSourcedAggregate> action, 
+            TId id,
+            Action<TEventSourcedAggregate> action,
             CancellationToken token = default)
             where TEventSourcedAggregate : EventSourcedAggregate<TId>
             where TId : notnull

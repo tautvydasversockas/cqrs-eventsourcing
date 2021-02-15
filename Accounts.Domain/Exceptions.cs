@@ -4,13 +4,13 @@ namespace Accounts.Domain
 {
     public abstract class DomainException : Exception
     {
-        protected DomainException(string message) 
+        protected DomainException(string message)
             : base(message) { }
     }
 
     public sealed class FrozenAccountException : DomainException
     {
-        public FrozenAccountException() 
+        public FrozenAccountException()
             : base("Account is frozen.") { }
     }
 

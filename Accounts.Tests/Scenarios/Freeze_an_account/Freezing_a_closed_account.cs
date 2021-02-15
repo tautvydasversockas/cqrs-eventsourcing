@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Accounts.Domain;
+using System;
 using System.Collections.Generic;
-using Accounts.Domain;
 
 namespace Accounts.Tests.Scenarios.Freeze_an_account
 {
