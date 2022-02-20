@@ -6,7 +6,7 @@ This is a simple application built using `CQRS` and `EventSourcing` patterns.
 
 You can find more information about `EventSourcing` at [thehonestcoder.com](https://thehonestcoder.com/the-promised-land-of-event-sourcing).
 
-## Atchitecture
+## Architecture
 
 ![image](https://user-images.githubusercontent.com/12632820/154841826-63091662-5c8f-4b61-88d6-e00384c75aa9.png)
 
