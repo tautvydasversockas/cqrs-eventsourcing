@@ -1,45 +1,69 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <UserSecretsId>07430697-0af1-457a-bc04-fc21706dff8d</UserSecretsId>
-    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<WarningsAsErrors>nullable</WarningsAsErrors>
+		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+		<DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
+		<UserSecretsId>c4de182c-d935-4278-bd93-2aa231f002a1</UserSecretsId>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="AspNetCore.HealthChecks.System" Version="3.1.2" />
-    <PackageReference Include="FluentValidation.AspNetCore" Version="9.3.0" />
-    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="9.3.0" />
-    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
-    <PackageReference Include="MicroElements.Swashbuckle.FluentValidation" Version="4.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.WebApiCompatShim" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="5.0.0" />
-    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.9" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="5.6.3" />
-    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="5.6.3" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="AspNetCore.HealthChecks.System" Version="6.0.1" />
+		<PackageReference Include="FluentValidation.AspNetCore" Version="9.3.0" />
+		<PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="10.0.1" />
+		<PackageReference Include="MicroElements.Swashbuckle.FluentValidation" Version="4.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.WebApiCompatShim" Version="2.2.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="6.0.2" />
+		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.14.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
+		<PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="6.2.3" />
+		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.2.3" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Accounts.Application\Accounts.Application.csproj" />
-    <ProjectReference Include="..\Accounts.Infrastructure\Accounts.Infrastructure.csproj" />
-    <ProjectReference Include="..\Accounts.ReadModel\Accounts.ReadModel.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Accounts.Application\Accounts.Application.csproj" />
+		<ProjectReference Include="..\Accounts.Infrastructure\Accounts.Infrastructure.csproj" />
+		<ProjectReference Include="..\Accounts.ReadModel\Accounts.ReadModel.csproj" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Content Update="appsettings.Development.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="appsettings.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
+	<ItemGroup>
+		<Content Update="appsettings.Development.json">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+		<Content Update="appsettings.json">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Using Include="MediatR" />
+		<Using Include="EventStore.Client" />
+		<Using Include="System.Net" />
+		<Using Include="System.Web.Http" />
+		<Using Include="System.Text.Json.Serialization" />
+		<Using Include="FluentMigrator.Runner" />
+		<Using Include="FluentValidation" />
+		<Using Include="FluentValidation.AspNetCore" />
+		<Using Include="MicroElements.Swashbuckle.FluentValidation" />
+		<Using Include="Microsoft.OpenApi.Models" />
+		<Using Include="Microsoft.AspNetCore.Mvc" />
+		<Using Include="Microsoft.AspNetCore.Mvc.Filters" />
+		<Using Include="Microsoft.Extensions.DependencyInjection" />
+		<Using Include="Accounts.Api" />
+		<Using Include="Accounts.Api.Dto" />
+		<Using Include="Accounts.Api.OpenApi" />
+		<Using Include="Accounts.Api.MvcFilters" />
+		<Using Include="Accounts.Infrastructure.HealthChecks" />
+		<Using Include="Accounts.ReadModel" />
+		<Using Include="Accounts.ReadModel.Migrations" />
+		<Using Include="Accounts.Application.Handlers" />
+		<Using Include="Accounts.Domain" />
+		<Using Include="Accounts.Domain.Common" />
+		<Using Include="Accounts.Infrastructure" />
+	</ItemGroup>
 
 </Project>

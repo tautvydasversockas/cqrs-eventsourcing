@@ -1,35 +1,28 @@
-using Accounts.Domain;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Moq;
-using System;
-using System.Threading;
+namespace Accounts.Tests;
 
-namespace Accounts.Tests
+public abstract class AccountSpecification<TCommand> : Specification<Account, AccountId, TCommand>
+    where TCommand : ICommand
 {
-    public abstract class AccountSpecification<TCommand> : Specification<Account, AccountId, TCommand>
-        where TCommand : ICommand
+    protected readonly AccountId AccountId = new(Guid.NewGuid());
+
+    protected override void ConfigureServices(ServiceCollection services)
     {
-        protected readonly AccountId AccountId = new(Guid.NewGuid());
+        var repositoryMock = new Mock<IAccountRepository>();
 
-        protected override void ConfigureServices(ServiceCollection services)
-        {
-            var accountRepositoryMock = new Mock<IAccountRepository>();
+        repositoryMock
+            .Setup(repository => repository.GetAsync(AccountId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(() => Aggregate);
 
-            accountRepositoryMock
-                .Setup(repository => repository.GetAsync(AccountId, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(() => Aggregate);
+        repositoryMock
+            .Setup(repository => repository.SaveAsync(It.IsAny<Account>(), It.IsAny<CancellationToken>()))
+            .Callback<Account, CancellationToken>((account, _) => Aggregate = account);
 
-            accountRepositoryMock
-                .Setup(repository => repository.SaveAsync(It.IsAny<Account>(), It.IsAny<CancellationToken>()))
-                .Callback<Account, CancellationToken>((account, _) => Aggregate = account);
+        repositoryMock
+            .Setup(repository => repository.GetNextId())
+            .Returns(AccountId);
 
-            accountRepositoryMock
-                .Setup(repository => repository.GetNextIdentity())
-                .Returns(AccountId);
+        services.Replace(new ServiceDescriptor(typeof(IAccountRepository), repositoryMock.Object));
 
-            services.Replace(new ServiceDescriptor(typeof(IAccountRepository), accountRepositoryMock.Object));
-            base.ConfigureServices(services);
-        }
+        base.ConfigureServices(services);
     }
 }

@@ -1,50 +1,50 @@
 version: '3.4'
 
 services:
-  accounts.api:
+  accounts_api:
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=https://+:443;http://+:80
-      - EVENTSTORE__ADDRESS=http://eventstore.db:2113
+      - ASPNETCORE_URLS=http://+:5000
+      - EVENTSTORE__ADDRESS=http://eventstore:2113
       - EVENTSTORE__USERNAME=${EVENTSTORE_USERNAME}
       - EVENTSTORE__PASSWORD=${EVENTSTORE_PASSWORD}
-      - SQL__CONNECTIONSTRING=Server=mssql.db;Database=Accounts;User=sa;Password=${SA_PASSWORD};
+      - MYSQL__CONNECTIONSTRING=Server=mysql;Port=3307;Database=accounts;Uid=${MYSQL_USER};Pwd=${MYSQL_PASSWORD};
       - LOGGING__LOGLEVEL__Default=Information
       - LOGGING__LOGLEVEL__Microsoft=Warning
       - LOGGING__LOGLEVEL__Microsoft.Hosting.Lifetime=Information
       - ALLOWEDHOSTS=*
     ports:
-      - "80"
-      - "443"
+      - "5000:5000"
     volumes:
-      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
 
-  accounts.readmodelsynchronizer:
+  accounts_readmodelsynchronizer:
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - EVENTSTORE__ADDRESS=http://eventstore.db:2113
+      - ASPNETCORE_URLS=http://+:5000
+      - EVENTSTORE__ADDRESS=http://eventstore:2113
       - EVENTSTORE__USERNAME=${EVENTSTORE_USERNAME}
       - EVENTSTORE__PASSWORD=${EVENTSTORE_PASSWORD}
-      - SQL__CONNECTIONSTRING=Server=mssql.db;Database=Accounts;User=sa;Password=${SA_PASSWORD};
+      - MYSQL__CONNECTIONSTRING=Server=mysql;Port=3307;Database=accounts;Uid=${MYSQL_USER};Pwd=${MYSQL_PASSWORD};
       - LOGGING__LOGLEVEL__Default=Information
       - LOGGING__LOGLEVEL__Microsoft=Warning
       - LOGGING__LOGLEVEL__Microsoft.Hosting.Lifetime=Information
     ports:
-      - "80"
-
-  mssql.db:
-    environment:
-      - SA_PASSWORD=${SA_PASSWORD}
-      - ACCEPT_EULA=Y
-    ports:
-      - "1433:1433"
+      - "5002:5000"
     volumes:
-      - type: volume
-        source: mssql-volume
-        target: /var/opt/mssql
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
 
-  eventstore.db:
+  mysql:
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=accounts
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_TCP_PORT=3307
+    ports:
+      - "3307:3307"
+    volumes:
+      - mysql_data:/var/lib/mysql_accounts
+
+  eventstore:
     environment:
       - EVENTSTORE_CLUSTER_SIZE=1
       - EVENTSTORE_RUN_PROJECTIONS=All
@@ -59,9 +59,8 @@ services:
       - "2113:2113"
     volumes:
       - type: volume
-        source: eventstore-volume-data
+        source: eventstore_volume_data
         target: /var/lib/eventstore
       - type: volume
-        source: eventstore-volume-logs
+        source: eventstore_volume_logs
         target: /var/log/eventstore
-

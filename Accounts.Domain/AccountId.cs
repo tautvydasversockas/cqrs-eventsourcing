@@ -1,11 +1,7 @@
-﻿using CSharpFunctionalExtensions;
-using System;
+﻿namespace Accounts.Domain;
 
-namespace Accounts.Domain
+public sealed class AccountId : SimpleValueObject<Guid>
 {
-    public sealed class AccountId : SimpleValueObject<Guid>
-    {
-        public AccountId(Guid value)
-            : base(value) { }
-    }
+    public AccountId(Guid value)
+        : base(value) { }
 }

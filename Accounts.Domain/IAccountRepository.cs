@@ -1,9 +1,6 @@
-﻿using Accounts.Domain.Common;
+﻿namespace Accounts.Domain;
 
-namespace Accounts.Domain
+public interface IAccountRepository : IEventSourcedRepository<Account, AccountId>
 {
-    public interface IAccountRepository : IEventSourcedRepository<Account, AccountId>
-    {
-        AccountId GetNextIdentity();
-    }
+    AccountId GetNextId();
 }

@@ -1,25 +1,22 @@
-﻿using System;
+﻿namespace Accounts.Infrastructure.HealthChecks;
 
-namespace Accounts.Infrastructure.HealthChecks
+public static class BackgroundServiceStatistics
 {
-    public static class BackgroundServiceStatistics
+    private static readonly object LockObject = new();
+    private static DateTimeOffset _lastProcessTime;
+
+    public static DateTimeOffset LastProcessTime
     {
-        private static readonly object LockObject = new();
-        private static DateTime _lastProcessTime;
-
-        public static DateTime LastProcessTime
-        {
-            get
-            {
-                lock (LockObject)
-                    return _lastProcessTime;
-            }
-        }
-
-        public static void SetLastProcessTime()
+        get
         {
             lock (LockObject)
-                _lastProcessTime = DateTime.UtcNow;
+                return _lastProcessTime;
         }
+    }
+
+    public static void SetLastProcessTime()
+    {
+        lock (LockObject)
+            _lastProcessTime = DateTimeOffset.Now;
     }
 }

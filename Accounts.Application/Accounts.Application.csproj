@@ -1,12 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<WarningsAsErrors>nullable</WarningsAsErrors>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Accounts.Domain\Accounts.Domain.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Accounts.Domain\Accounts.Domain.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Using Include="MediatR" />
+		<Using Include="Accounts.Application.Common" />
+		<Using Include="Accounts.Domain" />
+		<Using Include="Accounts.Domain.Common" />
+	</ItemGroup>
 
 </Project>

@@ -1,12 +1,11 @@
-﻿using System;
+﻿namespace Accounts.ReadModel;
 
-namespace Accounts.ReadModel
+public sealed class AccountDto
 {
-    public sealed record AccountDto(
-        Guid Id,
-        int Version,
-        Guid ClientId,
-        decimal InterestRate,
-        decimal Balance,
-        bool IsFrozen);
+    public Guid Id { get; set; }
+    public int Version { get; set; }
+    public Guid ClientId { get; set; }
+    public decimal InterestRate { get; set; }
+    public decimal Balance { get; set; }
+    public bool IsFrozen { get; set; }
 }

@@ -1,7 +1,6 @@
-﻿namespace Accounts.Api.Dto
+﻿namespace Accounts.Api.Dto;
+
+public static class Headers
 {
-    public static class Headers
-    {
-        public const string RequestId = "X-Request-ID";
-    }
+    public const string RequestId = "X-Request-ID";
 }

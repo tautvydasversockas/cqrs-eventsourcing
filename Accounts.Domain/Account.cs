@@ -1,143 +1,135 @@
-﻿using Accounts.Domain.Common;
-using System;
-using System.Diagnostics.CodeAnalysis;
-using static Accounts.Domain.Account.Status;
+﻿namespace Accounts.Domain;
 
-namespace Accounts.Domain
+public sealed class Account : EventSourcedAggregate<AccountId>
 {
-    public sealed class Account : EventSourcedAggregate<AccountId>
+    public enum Status
     {
-        public enum Status
-        {
-            Active,
-            Frozen,
-            Closed
-        }
+        Active,
+        Frozen,
+        Closed
+    }
 
-        private Status _status;
-        private decimal _balance;
-        [AllowNull] private InterestRate _interestRate;
+    private Status _status;
+    private decimal _balance;
+    private InterestRate _interestRate = null!;
 
-        private Account() { }
+    private Account() { }
 
-        public static Account Open(
-            AccountId id,
-            ClientId clientId,
-            InterestRate interestRate,
-            decimal balance)
-        {
-            if (balance < 0)
-                throw new ArgumentOutOfRangeException(nameof(balance), "Balance can't be negative.");
+    public static Account Open(
+        AccountId id,
+        ClientId clientId,
+        InterestRate interestRate,
+        decimal balance)
+    {
+        if (balance < 0)
+            throw new ArgumentOutOfRangeException(nameof(balance), "Balance can't be negative.");
 
-            var account = new Account();
-            account.Raise(new AccountOpened(id, clientId, interestRate, balance));
-            return account;
-        }
+        var account = new Account();
+        account.Raise(new AccountOpened(id, clientId, interestRate, balance));
+        return account;
+    }
 
-        public void Withdraw(Money money)
-        {
-            if (_status is Closed)
-                throw new ClosedAccountException();
+    public void Withdraw(Money money)
+    {
+        ThrowIfInactive();
 
-            if (_status is Frozen)
-                throw new FrozenAccountException();
+        if (money > _balance)
+            throw new InsufficientBalanceException();
 
-            if (money > _balance)
-                throw new InsufficientBalanceException();
+        Raise(new WithdrawnFromAccount(Id, money));
+    }
 
-            Raise(new WithdrawnFromAccount(Id, money));
-        }
+    public void Deposit(Money money)
+    {
+        ThrowIfInactive();
 
-        public void Deposit(Money money)
-        {
-            if (_status is Closed)
-                throw new ClosedAccountException();
+        Raise(new DepositedToAccount(Id, money));
+    }
 
-            if (_status is Frozen)
-                throw new FrozenAccountException();
+    public void AddInterests()
+    {
+        ThrowIfInactive();
 
-            Raise(new DepositedToAccount(Id, money));
-        }
+        var interests = _balance * _interestRate;
 
-        public void AddInterests()
-        {
-            if (_status is Closed)
-                throw new ClosedAccountException();
+        Raise(new AddedInterestsToAccount(Id, interests));
+    }
 
-            if (_status is Frozen)
-                throw new FrozenAccountException();
+    public void Freeze()
+    {
+        ThrowIfClosed();
 
-            var interests = _balance * _interestRate;
-
-            Raise(new AddedInterestsToAccount(Id, interests));
-        }
-
-        public void Freeze()
-        {
-            if (_status is Closed)
-                throw new ClosedAccountException();
-
-            if (_status is Frozen)
-                return;
-
+        if (_status is not Frozen)
             Raise(new AccountFrozen(Id));
-        }
+    }
 
-        public void Unfreeze()
-        {
-            if (_status is Closed)
-                throw new ClosedAccountException();
+    public void Unfreeze()
+    {
+        ThrowIfClosed();
 
-            if (_status is Active)
-                return;
-
+        if (_status is not Active)
             Raise(new AccountUnfrozen(Id));
-        }
+    }
 
-        public void Close()
-        {
-            if (_status is Closed)
-                return;
-
+    public void Close()
+    {
+        if (_status is not Closed)
             Raise(new AccountClosed(Id));
-        }
+    }
 
-        private void Apply(AccountOpened @event)
-        {
-            Id = new AccountId(@event.AccountId);
-            _status = Active;
-            _balance = @event.Balance;
-            _interestRate = new InterestRate(@event.InterestRate);
-        }
+    private void ThrowIfInactive()
+    {
+        ThrowIfClosed();
+        ThrowIfFrozen();
+    }
 
-        private void Apply(WithdrawnFromAccount @event)
-        {
-            _balance -= @event.Amount;
-        }
+    private void ThrowIfClosed()
+    {
+        if (_status is Closed)
+            throw new ClosedAccountException();
+    }
 
-        private void Apply(DepositedToAccount @event)
-        {
-            _balance += @event.Amount;
-        }
+    private void ThrowIfFrozen()
+    {
+        if (_status is Frozen)
+            throw new FrozenAccountException();
+    }
 
-        private void Apply(AddedInterestsToAccount @event)
-        {
-            _balance += @event.Interests;
-        }
+    private void Apply(AccountOpened @event)
+    {
+        Id = new AccountId(@event.AccountId);
+        _status = Active;
+        _balance = @event.Balance;
+        _interestRate = new InterestRate(@event.InterestRate);
+    }
 
-        private void Apply(AccountFrozen @event)
-        {
-            _status = Frozen;
-        }
+    private void Apply(WithdrawnFromAccount @event)
+    {
+        _balance -= @event.Amount;
+    }
 
-        private void Apply(AccountUnfrozen @event)
-        {
-            _status = Active;
-        }
+    private void Apply(DepositedToAccount @event)
+    {
+        _balance += @event.Amount;
+    }
 
-        private void Apply(AccountClosed @event)
-        {
-            _status = Closed;
-        }
+    private void Apply(AddedInterestsToAccount @event)
+    {
+        _balance += @event.Interests;
+    }
+
+    private void Apply(AccountFrozen @event)
+    {
+        _status = Frozen;
+    }
+
+    private void Apply(AccountUnfrozen @event)
+    {
+        _status = Active;
+    }
+
+    private void Apply(AccountClosed @event)
+    {
+        _status = Closed;
     }
 }

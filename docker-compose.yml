@@ -1,33 +1,34 @@
 version: '3.4'
 
 services:
-  accounts.api:
-    image: ${DOCKER_REGISTRY-}accountsapi
+  accounts_api:
+    image: ${DOCKER_REGISTRY-}accounts-api
     build:
       context: .
       dockerfile: Accounts.Api/Dockerfile
     depends_on:
-      - mssql.db
-      - eventstore.db
+      - mysql
+      - eventstore
 
-  accounts.readmodelsynchronizer:
-    image: ${DOCKER_REGISTRY-}accountsreadmodelsynchronizer
+  accounts_readmodelsynchronizer:
+    image: ${DOCKER_REGISTRY-}accounts-readmodelsynchronizer
     build:
       context: .
       dockerfile: Accounts.ReadModelSynchronizer/Dockerfile
     depends_on:
-      - mssql.db
-      - eventstore.db
+      - mysql
+      - eventstore
+      - accounts_api
 
-  mssql.db:
-    container_name: SQLServer
-    image: mcr.microsoft.com/mssql/server
+  mysql:
+    container_name: MySQL
+    image: mysql:5.7
 
-  eventstore.db:
+  eventstore:
     container_name: EventStoreDB
     image: eventstore/eventstore:20.6.1-buster-slim
 
 volumes:
-  eventstore-volume-data:
-  eventstore-volume-logs:
-  mssql-volume:
+  eventstore_volume_data:
+  eventstore_volume_logs:
+  mysql_data:

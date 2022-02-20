@@ -1,114 +1,129 @@
-﻿using Accounts.Domain;
-using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
-using System.Globalization;
-using System.Threading;
-using System.Threading.Tasks;
+﻿namespace Accounts.ReadModel;
 
-namespace Accounts.ReadModel
+public sealed class AccountView
 {
-    public sealed class AccountView
+    private readonly MySqlConnectionFactory _connectionFactory;
+
+    public AccountView(MySqlConnectionFactory connectionFactory)
     {
-        private static readonly NumberFormatInfo NumberFormat = new()
-        {
-            NumberDecimalSeparator = "."
-        };
+        _connectionFactory = connectionFactory;
+    }
 
-        private readonly AccountDbContext _context;
+    public async Task HandleAsync(AccountOpened @event)
+    {
+        await using var connection = _connectionFactory.Create();
 
-        public AccountView(AccountDbContext context)
+        try
         {
-            _context = context;
+            await connection.ExecuteAsync(@"
+                INSERT INTO Accounts
+                (
+                    Id,
+                    Version,
+                    ClientId,
+                    InterestRate,
+                    Balance,
+                    IsFrozen
+                )
+                VALUES
+                (
+                    @Id,
+                    @Version,
+                    @ClientId,
+                    @InterestRate,
+                    @Balance,
+                    @IsFrozen
+                )",
+                new AccountDto
+                {
+                    Id = @event.AccountId,
+                    Version = 0,
+                    ClientId = @event.ClientId,
+                    InterestRate = @event.InterestRate,
+                    Balance = @event.Balance,
+                    IsFrozen = false
+                });
         }
-
-        public async Task HandleAsync(AccountOpened @event, CancellationToken token = default)
+        catch (MySqlException e)
+            when (e.Number is 2627 or 2601)
         {
-            var account = new AccountDto(
-                Id: @event.AccountId,
-                Version: 0,
-                ClientId: @event.ClientId,
-                InterestRate: @event.InterestRate,
-                Balance: @event.Balance,
-                IsFrozen: false);
+            // Ignore duplicate key.
+        }
+    }
 
-            _context.Accounts.Add(account);
+    public async Task HandleAsync(WithdrawnFromAccount @event, int version)
+    {
+        await UpdateBalanceAsync(@event.AccountId, -@event.Amount, version);
+    }
 
-            try
+    public async Task HandleAsync(DepositedToAccount @event, int version)
+    {
+        await UpdateBalanceAsync(@event.AccountId, @event.Amount, version);
+    }
+
+    public async Task HandleAsync(AddedInterestsToAccount @event, int version)
+    {
+        await UpdateBalanceAsync(@event.AccountId, @event.Interests, version);
+    }
+
+    public async Task HandleAsync(AccountFrozen @event, int version)
+    {
+        await UpdateFrozenFlagAsync(@event.AccountId, true, version);
+    }
+
+    public async Task HandleAsync(AccountUnfrozen @event, int version)
+    {
+        await UpdateFrozenFlagAsync(@event.AccountId, false, version);
+    }
+
+    public async Task HandleAsync(AccountClosed @event)
+    {
+        await using var connection = _connectionFactory.Create();
+        await connection.ExecuteAsync(@"
+            DELETE
+            FROM Accounts 
+            WHERE Id = @Id",
+            new
             {
-                await _context.SaveChangesAsync(token);
-            }
-            catch (DbUpdateException e)
-                when (e.GetBaseException() is SqlException sqlEx && sqlEx.Number is 2627 or 2601)
+                Id = @event.AccountId
+            });
+    }
+
+    private async Task UpdateBalanceAsync(Guid accountId, decimal balanceDelta, int version)
+    {
+        await using var connection = _connectionFactory.Create();
+        await connection.ExecuteAsync(@"
+            UPDATE Accounts 
+            SET 
+                Balance = Balance + @BalanceDelta,
+                Version = @Version
+            WHERE 
+                Id = @Id AND 
+                Version < @Version",
+            new
             {
-                // Ignore duplicate key.
-            }
-        }
+                Id = accountId,
+                BalanceDelta = balanceDelta,
+                Version = version
+            });
+    }
 
-        public async Task HandleAsync(WithdrawnFromAccount @event, int version, CancellationToken token = default)
-        {
-            await _context.Database.ExecuteSqlRawAsync($@"
-                UPDATE Accounts 
-                SET Balance -= {ParseDecimal(@event.Amount)},
-                    Version = {version}
-                WHERE Id = '{@event.AccountId}'
-                  AND Version < {version}",
-                token);
-        }
-
-        public async Task HandleAsync(DepositedToAccount @event, int version, CancellationToken token = default)
-        {
-            await _context.Database.ExecuteSqlRawAsync($@"
-                UPDATE Accounts 
-                SET Balance -= {ParseDecimal(@event.Amount)},
-                    Version = {version}
-                WHERE Id = '{@event.AccountId}'
-                  AND Version < {version}",
-                token);
-        }
-
-        public async Task HandleAsync(AddedInterestsToAccount @event, int version, CancellationToken token = default)
-        {
-            await _context.Database.ExecuteSqlRawAsync($@"
-                UPDATE Accounts 
-                SET Balance += {ParseDecimal(@event.Interests)},
-                    Version = {version}
-                WHERE Id = '{@event.AccountId}'
-                  AND Version < {version}",
-                token);
-        }
-
-        public async Task HandleAsync(AccountFrozen @event, int version, CancellationToken token = default)
-        {
-            await _context.Database.ExecuteSqlRawAsync($@"
-                UPDATE Accounts 
-                SET IsFrozen = 1,
-                    Version = {version}
-                WHERE Id = '{@event.AccountId}'
-                  AND Version < {version}",
-                token);
-        }
-
-        public async Task HandleAsync(AccountUnfrozen @event, int version, CancellationToken token = default)
-        {
-            await _context.Database.ExecuteSqlRawAsync($@"
-                UPDATE Accounts 
-                SET IsFrozen = 0,
-                    Version = {version}
-                WHERE Id = '{@event.AccountId}'
-                  AND Version < {version}",
-                token);
-        }
-
-        public async Task HandleAsync(AccountClosed @event, CancellationToken token = default)
-        {
-            await _context.Database.ExecuteSqlRawAsync($@"
-                DELETE
-                FROM Accounts 
-                WHERE Id = '{@event.AccountId}'",
-                token);
-        }
-
-        private static string ParseDecimal(decimal value) =>
-            value.ToString(NumberFormat);
+    private async Task UpdateFrozenFlagAsync(Guid accountId, bool isFrozen, int version)
+    {
+        await using var connection = _connectionFactory.Create();
+        await connection.ExecuteAsync(@"
+            UPDATE Accounts 
+            SET 
+                IsFrozen = @IsFrozen,
+                Version = @Version
+            WHERE 
+                Id = @Id AND 
+                Version < @Version",
+            new
+            {
+                Id = accountId,
+                IsFrozen = isFrozen,
+                Version = version
+            });
     }
 }

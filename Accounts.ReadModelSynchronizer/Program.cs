@@ -1,15 +1,51 @@
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
+var builder = WebApplication.CreateBuilder(args);
 
-namespace Accounts.ReadModelSynchronizer
+builder.Host.UseDefaultServiceProvider(opt =>
 {
-    public class Program
-    {
-        public static void Main(string[] args) =>
-            CreateHostBuilder(args).Build().Run();
+    opt.ValidateOnBuild = true;
+    opt.ValidateScopes = true;
+});
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder => webBuilder.UseStartup<Startup>());
-    }
-}
+var mySqlConnectionString = builder.Configuration["MySql:ConnectionString"];
+
+builder.Services
+    .AddHealthChecks()
+    .AddCheck(
+        instance: new BackgroundServiceHealthCheck(
+            timeout: TimeSpan.FromMinutes(5)),
+        name: "Processing",
+        tags: new[] { HealthCheckTag.Liveness })
+    .AddMySql(
+        name: "MySql",
+        connectionString: mySqlConnectionString,
+        tags: new[] { HealthCheckTag.Readiness });
+
+builder.Services.AddEventStorePersistentSubscriptionsClient(settings =>
+{
+    settings.ConnectionName = "Accounts.ReadModelSynchronizer";
+
+    settings.DefaultCredentials = new UserCredentials(
+        builder.Configuration["EventStore:Username"],
+        builder.Configuration["EventStore:Password"]);
+
+    settings.ConnectivitySettings.Address = new Uri(
+        builder.Configuration["EventStore:Address"]);
+});
+
+builder.Services.AddSingleton(new MySqlConnectionFactory(mySqlConnectionString));
+
+builder.Services.AddSingleton<AccountView>();
+
+builder.Services.AddSingleton<AccountReadModel>();
+
+builder.Services.AddHostedService<App>();
+
+await using var app = builder.Build();
+
+app.UseHttpsRedirection();
+
+app.UseHealthChecks();
+
+app.UseRouting();
+
+await app.RunAsync();

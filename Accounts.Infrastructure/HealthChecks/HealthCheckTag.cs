@@ -1,8 +1,7 @@
-﻿namespace Accounts.Infrastructure.HealthChecks
+﻿namespace Accounts.Infrastructure.HealthChecks;
+
+public static class HealthCheckTag
 {
-    public static class HealthCheckTag
-    {
-        public const string Readiness = "ready";
-        public const string Liveness = "live";
-    }
+    public const string Readiness = "r";
+    public const string Liveness = "l";
 }

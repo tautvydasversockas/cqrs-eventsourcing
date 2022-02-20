@@ -1,24 +1,16 @@
-﻿using Accounts.Application.Common.Exceptions;
-using Accounts.Domain;
-using Accounts.Infrastructure.Exceptions;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Filters;
-using System.Web.Http;
+﻿namespace Accounts.Api.MvcFilters;
 
-namespace Accounts.Api.MvcFilters
+public sealed class ExceptionFilter : IExceptionFilter
 {
-    public sealed class ExceptionFilter : IExceptionFilter
+    public void OnException(ExceptionContext context)
     {
-        public void OnException(ExceptionContext context)
+        context.Result = context.Exception switch
         {
-            context.Result = context.Exception switch
-            {
-                EntityNotFoundException e => new NotFoundObjectResult(e.Message),
-                DuplicateKeyException e => new ConflictObjectResult(e.Message),
-                DuplicateRequestException e => new ConflictObjectResult(e.Message),
-                DomainException e => new ConflictObjectResult(e.Message),
-                _ => new InternalServerErrorResult()
-            };
-        }
+            EntityNotFoundException e => new NotFoundObjectResult(e.Message),
+            Infrastructure.DuplicateKeyException e => new ConflictObjectResult(e.Message),
+            DuplicateRequestException e => new ConflictObjectResult(e.Message),
+            DomainException e => new ConflictObjectResult(e.Message),
+            _ => new InternalServerErrorResult()
+        };
     }
 }

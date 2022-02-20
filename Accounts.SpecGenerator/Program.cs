@@ -1,10 +1,4 @@
-﻿using Accounts.SpecGenerator;
-using Accounts.Tests;
-using System;
-using System.IO;
-using System.Linq;
-
-var specifications = typeof(Specification<,,>).Assembly
+﻿var specifications = typeof(Specification<,,>).Assembly
     .GetTypes()
     .Where(type =>
         !type.IsAbstract &&

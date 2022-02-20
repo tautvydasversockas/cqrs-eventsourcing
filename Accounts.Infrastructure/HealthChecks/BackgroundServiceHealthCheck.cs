@@ -1,24 +1,25 @@
-﻿using Microsoft.Extensions.Diagnostics.HealthChecks;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
+﻿namespace Accounts.Infrastructure.HealthChecks;
 
-namespace Accounts.Infrastructure.HealthChecks
+public sealed class BackgroundServiceHealthCheck : IHealthCheck
 {
-    public sealed class BackgroundServiceHealthCheck : IHealthCheck
+    private readonly TimeSpan _timeout;
+
+    public BackgroundServiceHealthCheck(TimeSpan timeout)
     {
-        private readonly TimeSpan _timeout;
+        _timeout = timeout;
+    }
 
-        public BackgroundServiceHealthCheck(TimeSpan timeout)
-        {
-            _timeout = timeout;
-        }
+    public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken token = default)
+    {
+        var result = IsTimedOut()
+            ? HealthCheckResult.Unhealthy()
+            : HealthCheckResult.Healthy();
 
-        public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken token = default)
-        {
-            return Task.FromResult(BackgroundServiceStatistics.LastProcessTime.Add(_timeout) > DateTime.Now
-                ? HealthCheckResult.Healthy()
-                : new HealthCheckResult(context.Registration.FailureStatus));
-        }
+        return Task.FromResult(result);
+    }
+
+    private bool IsTimedOut()
+    {
+        return BackgroundServiceStatistics.LastProcessTime.Add(_timeout) < DateTimeOffset.Now;
     }
 }

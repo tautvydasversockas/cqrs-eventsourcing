@@ -1,25 +1,20 @@
-﻿using Accounts.Domain;
-using System;
-using System.Collections.Generic;
+﻿namespace Accounts.Tests.Scenarios.Deposit_to_an_account;
 
-namespace Accounts.Tests.Scenarios.Deposit_to_an_account
+public sealed class Depositing_to_a_frozen_account : AccountSpecification<DepositToAccount>
 {
-    public sealed class Depositing_to_a_frozen_account : AccountSpecification<DepositToAccount>
+    protected override IEnumerable<IEvent> Given()
     {
-        protected override IEnumerable<IEvent> Given()
-        {
-            yield return new AccountOpened(AccountId, Guid.NewGuid(), 0, 0);
-            yield return new AccountFrozen(AccountId);
-        }
+        yield return new AccountOpened(AccountId, Guid.NewGuid(), 0, 0);
+        yield return new AccountFrozen(AccountId);
+    }
 
-        protected override DepositToAccount When()
-        {
-            return new(AccountId, 100);
-        }
+    protected override DepositToAccount When()
+    {
+        return new(AccountId, 100);
+    }
 
-        protected override IEnumerable<IEvent> Then()
-        {
-            throw new FrozenAccountException();
-        }
+    protected override IEnumerable<IEvent> Then()
+    {
+        throw new FrozenAccountException();
     }
 }

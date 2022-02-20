@@ -1,15 +1,27 @@
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
+var builder = WebApplication.CreateBuilder(args);
 
-namespace Accounts.Api
+builder.Host.UseDefaultServiceProvider(opt =>
 {
-    public class Program
-    {
-        public static void Main(string[] args) =>
-            CreateHostBuilder(args).Build().Run();
+    opt.ValidateOnBuild = true;
+    opt.ValidateScopes = true;
+});
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder => webBuilder.UseStartup<Startup>());
-    }
+builder.Services.SetupServices(builder.Configuration);
+
+await using var app = builder.Build();
+
+await using (var scope = app.Services.CreateAsyncScope())
+{
+    var runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
+    runner.MigrateUp();
 }
+
+app.UseHealthChecks();
+
+app.UseRouting();
+
+app.UseEndpoints(routeBuilder => routeBuilder.MapControllers());
+
+app.UseOpenApi();
+
+await app.RunAsync();

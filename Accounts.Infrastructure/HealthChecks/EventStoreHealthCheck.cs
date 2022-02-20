@@ -1,35 +1,27 @@
-﻿using EventStore.Client;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+﻿namespace Accounts.Infrastructure.HealthChecks;
 
-namespace Accounts.Infrastructure.HealthChecks
+public sealed class EventStoreHealthCheck : IHealthCheck
 {
-    public sealed class EventStoreHealthCheck : IHealthCheck
+    private readonly EventStoreClient _client;
+
+    public EventStoreHealthCheck(EventStoreClient client)
     {
-        private readonly EventStoreClient _client;
+        _client = client;
+    }
 
-        public EventStoreHealthCheck(EventStoreClient client)
+    public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken token = default)
+    {
+        try
         {
-            _client = client;
+            await _client
+                .ReadAllAsync(Direction.Forwards, Position.Start, maxCount: 1, cancellationToken: token)
+                .FirstOrDefaultAsync(token);
+        }
+        catch (Exception e)
+        {
+            return HealthCheckResult.Unhealthy(exception: e);
         }
 
-        public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken token = default)
-        {
-            try
-            {
-                await _client
-                    .ReadAllAsync(Direction.Forwards, Position.Start, maxCount: 1, cancellationToken: token)
-                    .FirstOrDefaultAsync(token);
-            }
-            catch (Exception e)
-            {
-                return new HealthCheckResult(context.Registration.FailureStatus, exception: e);
-            }
-
-            return HealthCheckResult.Healthy();
-        }
+        return HealthCheckResult.Healthy();
     }
 }
