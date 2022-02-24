@@ -23,11 +23,10 @@
             services
                 .AddControllers(opt =>
                 {
-                    opt.Filters.Add(new ExceptionFilter());
-                    opt.Filters.Add(new ProducesResponseTypeAttribute(typeof(string), (int)HttpStatusCode.BadRequest));
-                    opt.Filters.Add(new ProducesResponseTypeAttribute(typeof(string), (int)HttpStatusCode.Conflict));
-                    opt.Filters.Add(new ProducesResponseTypeAttribute(typeof(string), (int)HttpStatusCode.NotFound));
-                    opt.Filters.Add(new ProducesResponseTypeAttribute(typeof(string), (int)HttpStatusCode.InternalServerError));
+                    opt.Filters.Add(new ProducesResponseTypeAttribute(typeof(string), StatusCodes.Status400BadRequest));
+                    opt.Filters.Add(new ProducesResponseTypeAttribute(typeof(string), StatusCodes.Status409Conflict));
+                    opt.Filters.Add(new ProducesResponseTypeAttribute(typeof(string), StatusCodes.Status404NotFound));
+                    opt.Filters.Add(new ProducesResponseTypeAttribute(typeof(string), StatusCodes.Status500InternalServerError));
                 })
                 .AddJsonOptions(opt => opt.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()))
                 .AddFluentValidation(cfg => cfg.RegisterValidatorsFromAssemblyContaining<OpenAccountDto.Validator>());

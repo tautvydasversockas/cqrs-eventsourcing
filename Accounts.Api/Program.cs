@@ -16,6 +16,8 @@ await using (var scope = app.Services.CreateAsyncScope())
     runner.MigrateUp();
 }
 
+app.UseMiddleware<ExceptionMiddleware>();
+
 app.UseHealthChecks();
 
 app.UseRouting();

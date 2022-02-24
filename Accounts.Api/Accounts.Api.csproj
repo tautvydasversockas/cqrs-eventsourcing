@@ -14,14 +14,11 @@
 		<PackageReference Include="AspNetCore.HealthChecks.System" Version="6.0.1" />
 		<PackageReference Include="FluentValidation.AspNetCore" Version="9.3.0" />
 		<PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="10.0.1" />
-		<PackageReference Include="MicroElements.Swashbuckle.FluentValidation" Version="4.0.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Mvc.WebApiCompatShim" Version="2.2.0" />
+		<PackageReference Include="MicroElements.Swashbuckle.FluentValidation" Version="5.4.0" />
 		<PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="6.0.2" />
 		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.14.0" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
-		<PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="6.2.3" />
-		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.2.3" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -43,7 +40,7 @@
 		<Using Include="MediatR" />
 		<Using Include="EventStore.Client" />
 		<Using Include="System.Net" />
-		<Using Include="System.Web.Http" />
+		<Using Include="System.Net.Mime" />
 		<Using Include="System.Text.Json.Serialization" />
 		<Using Include="FluentMigrator.Runner" />
 		<Using Include="FluentValidation" />
@@ -51,12 +48,11 @@
 		<Using Include="MicroElements.Swashbuckle.FluentValidation" />
 		<Using Include="Microsoft.OpenApi.Models" />
 		<Using Include="Microsoft.AspNetCore.Mvc" />
-		<Using Include="Microsoft.AspNetCore.Mvc.Filters" />
 		<Using Include="Microsoft.Extensions.DependencyInjection" />
 		<Using Include="Accounts.Api" />
 		<Using Include="Accounts.Api.Dto" />
 		<Using Include="Accounts.Api.OpenApi" />
-		<Using Include="Accounts.Api.MvcFilters" />
+		<Using Include="Accounts.Api.Middleware" />
 		<Using Include="Accounts.Infrastructure.HealthChecks" />
 		<Using Include="Accounts.ReadModel" />
 		<Using Include="Accounts.ReadModel.Migrations" />
