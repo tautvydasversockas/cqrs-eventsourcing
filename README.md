@@ -8,7 +8,7 @@ You can find more information about `EventSourcing` at [thehonestcoder.com](http
 
 ## Architecture
 
-![image](https://user-images.githubusercontent.com/12632820/154841826-63091662-5c8f-4b61-88d6-e00384c75aa9.png)
+![image](https://user-images.githubusercontent.com/12632820/155589702-2624ea0c-9f54-4f1c-b529-037eb9510955.png)
 
 ## Testing
 
