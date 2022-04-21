@@ -2,30 +2,24 @@
 
 public sealed class Account : EventSourcedAggregate<AccountId>
 {
-    public enum Status
-    {
-        Active,
-        Frozen,
-        Closed
-    }
-
-    private Status _status;
+    private AccountStatus _status;
     private decimal _balance;
-    private InterestRate _interestRate = null!;
+    private InterestRate _interestRate;
 
-    private Account() { }
+    private Account() 
+    {
+        _status = null!;
+        _balance = 0;
+        _interestRate = null!;
+    }
 
     public static Account Open(
         AccountId id,
         ClientId clientId,
-        InterestRate interestRate,
-        decimal balance)
+        InterestRate interestRate)
     {
-        if (balance < 0)
-            throw new ArgumentOutOfRangeException(nameof(balance), "Balance can't be negative.");
-
         var account = new Account();
-        account.Raise(new AccountOpened(id, clientId, interestRate, balance));
+        account.Raise(new AccountOpened(id, clientId, interestRate));
         return account;
     }
 
@@ -59,7 +53,7 @@ public sealed class Account : EventSourcedAggregate<AccountId>
     {
         ThrowIfClosed();
 
-        if (_status is not Frozen)
+        if (_status != Frozen)
             Raise(new AccountFrozen(Id));
     }
 
@@ -67,13 +61,13 @@ public sealed class Account : EventSourcedAggregate<AccountId>
     {
         ThrowIfClosed();
 
-        if (_status is not Active)
+        if (_status != Active)
             Raise(new AccountUnfrozen(Id));
     }
 
     public void Close()
     {
-        if (_status is not Closed)
+        if (_status != Closed)
             Raise(new AccountClosed(Id));
     }
 
@@ -85,13 +79,13 @@ public sealed class Account : EventSourcedAggregate<AccountId>
 
     private void ThrowIfClosed()
     {
-        if (_status is Closed)
+        if (_status == Closed)
             throw new ClosedAccountException();
     }
 
     private void ThrowIfFrozen()
     {
-        if (_status is Frozen)
+        if (_status == Frozen)
             throw new FrozenAccountException();
     }
 
@@ -99,7 +93,7 @@ public sealed class Account : EventSourcedAggregate<AccountId>
     {
         Id = new AccountId(@event.AccountId);
         _status = Active;
-        _balance = @event.Balance;
+        _balance = 0;
         _interestRate = new InterestRate(@event.InterestRate);
     }
 

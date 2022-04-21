@@ -40,7 +40,7 @@ public sealed class AccountView
                     Version = 0,
                     ClientId = @event.ClientId,
                     InterestRate = @event.InterestRate,
-                    Balance = @event.Balance,
+                    Balance = 0,
                     IsFrozen = false
                 });
         }

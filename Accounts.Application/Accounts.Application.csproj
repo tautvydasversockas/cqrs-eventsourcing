@@ -8,12 +8,17 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="MediatR" Version="10.0.1" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<ProjectReference Include="..\Accounts.Domain\Accounts.Domain.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<Using Include="MediatR" />
 		<Using Include="Accounts.Application.Common" />
+		<Using Include="Accounts.Application.Commands" />
 		<Using Include="Accounts.Domain" />
 		<Using Include="Accounts.Domain.Common" />
 	</ItemGroup>

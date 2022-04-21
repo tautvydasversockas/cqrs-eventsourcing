@@ -2,16 +2,14 @@
 
 public sealed record OpenAccountDto(
     Guid ClientId,
-    decimal InterestRate,
-    decimal Balance)
+    decimal InterestRate)
 {
     public sealed class Validator : AbstractValidator<OpenAccountDto>
     {
         public Validator()
         {
-            RuleFor(dto => dto.ClientId).NotEmpty();
-            RuleFor(dto => dto.InterestRate).InclusiveBetween(0, 1);
-            RuleFor(dto => dto.Balance).GreaterThanOrEqualTo(0);
+            RuleFor(dto => dto.ClientId).ValidClientId();
+            RuleFor(dto => dto.InterestRate).ValidInterestRate();
         }
     }
 }
@@ -23,7 +21,7 @@ public sealed record DepositToAccountDto(
     {
         public Validator()
         {
-            RuleFor(dto => dto.Amount).GreaterThan(0);
+            RuleFor(dto => dto.Amount).ValidMoney();
         }
     }
 }
@@ -35,7 +33,7 @@ public sealed record WithdrawFromAccountDto(
     {
         public Validator()
         {
-            RuleFor(dto => dto.Amount).GreaterThan(0);
+            RuleFor(dto => dto.Amount).ValidMoney();
         }
     }
 }

@@ -4,7 +4,7 @@ public sealed class Freezing_an_active_account : AccountSpecification<FreezeAcco
 {
     protected override IEnumerable<IEvent> Given()
     {
-        yield return new AccountOpened(AccountId, Guid.NewGuid(), 0, 0);
+        yield return new AccountOpened(AccountId, Guid.NewGuid(), 0);
     }
 
     protected override FreezeAccount When()

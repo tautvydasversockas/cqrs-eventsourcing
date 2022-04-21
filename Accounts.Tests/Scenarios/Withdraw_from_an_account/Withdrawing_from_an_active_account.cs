@@ -4,12 +4,13 @@ public sealed class Withdrawing_from_an_active_account : AccountSpecification<Wi
 {
     protected override IEnumerable<IEvent> Given()
     {
-        yield return new AccountOpened(AccountId, Guid.NewGuid(), 0, 200);
+        yield return new AccountOpened(AccountId, Guid.NewGuid(), 0);
+        yield return new DepositedToAccount(AccountId, 200);
     }
 
     protected override WithdrawFromAccount When()
     {
-        return new(AccountId, 100);
+        return new(AccountId, new Money(100));
     }
 
     protected override IEnumerable<IEvent> Then()

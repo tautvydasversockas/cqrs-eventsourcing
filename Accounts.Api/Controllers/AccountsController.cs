@@ -40,9 +40,12 @@ public sealed class AccountsController : Controller
         RequestContext.CausationId = requestId;
         RequestContext.CorrelationId = requestId;
 
-        var command = new OpenAccount(request.ClientId, request.InterestRate, request.Balance);
+        var command = new OpenAccount(
+            new ClientId(request.ClientId), 
+            new InterestRate(request.InterestRate));
+
         var id = await _sender.Send(command, token);
-        return CreatedAtRoute(nameof(Get), new { id }, id);
+        return CreatedAtRoute(nameof(Get), new { id.Value }, id.Value);
     }
 
     [HttpPost("{id}/deposit")]
@@ -54,7 +57,10 @@ public sealed class AccountsController : Controller
         RequestContext.CausationId = requestId;
         RequestContext.CorrelationId = requestId;
 
-        var command = new DepositToAccount(id, request.Amount);
+        var command = new DepositToAccount(
+            new AccountId(id), 
+            new Money(request.Amount));
+
         await _sender.Send(command, token);
         return Ok();
     }
@@ -62,13 +68,16 @@ public sealed class AccountsController : Controller
     [HttpPost("{id}/withdraw")]
     [ProducesResponseType((int)HttpStatusCode.OK)]
     public async Task<IActionResult> Withdraw(
-        [FromHeader(Name = Headers.RequestId)] Guid requestId, Guid id, WithdrawFromAccountDto requestDto, CancellationToken token)
+        [FromHeader(Name = Headers.RequestId)] Guid requestId, Guid id, WithdrawFromAccountDto request, CancellationToken token)
     {
         RequestContext.RequestId = requestId;
         RequestContext.CausationId = requestId;
         RequestContext.CorrelationId = requestId;
 
-        var command = new WithdrawFromAccount(id, requestDto.Amount);
+        var command = new WithdrawFromAccount(
+            new AccountId(id),
+            new Money(request.Amount));
+
         await _sender.Send(command, token);
         return Ok();
     }
@@ -82,7 +91,9 @@ public sealed class AccountsController : Controller
         RequestContext.CausationId = requestId;
         RequestContext.CorrelationId = requestId;
 
-        var command = new AddInterestsToAccount(id);
+        var command = new AddInterestsToAccount(
+            new AccountId(id));
+
         await _sender.Send(command, token);
         return Ok();
     }
@@ -96,7 +107,9 @@ public sealed class AccountsController : Controller
         RequestContext.CausationId = requestId;
         RequestContext.CorrelationId = requestId;
 
-        var command = new FreezeAccount(id);
+        var command = new FreezeAccount(
+            new AccountId(id));
+
         await _sender.Send(command, token);
         return Ok();
     }
@@ -110,7 +123,9 @@ public sealed class AccountsController : Controller
         RequestContext.CausationId = requestId;
         RequestContext.CorrelationId = requestId;
 
-        var command = new UnfreezeAccount(id);
+        var command = new UnfreezeAccount(
+            new AccountId(id));
+
         await _sender.Send(command, token);
         return Ok();
     }
@@ -124,7 +139,9 @@ public sealed class AccountsController : Controller
         RequestContext.CausationId = requestId;
         RequestContext.CorrelationId = requestId;
 
-        var command = new CloseAccount(id);
+        var command = new CloseAccount(
+            new AccountId(id));
+
         await _sender.Send(command, token);
         return Ok();
     }

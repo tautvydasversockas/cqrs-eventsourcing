@@ -1,35 +1,32 @@
-﻿namespace Accounts.Domain;
-
-public interface ICommand { }
+﻿namespace Accounts.Application.Commands;
 
 public sealed record OpenAccount(
-    Guid ClientId,
-    decimal InterestRate,
-    decimal Balance) 
-    : ICommand, IRequest<Guid>;
+    ClientId ClientId,
+    InterestRate InterestRate)
+    : ICommand, IRequest<AccountId>;
 
 public sealed record AddInterestsToAccount(
-    Guid AccountId) 
+    AccountId AccountId)
     : ICommand, IRequest;
 
 public sealed record DepositToAccount(
-    Guid AccountId,
-    decimal Amount) 
+    AccountId AccountId,
+    Money Money)
     : ICommand, IRequest;
 
 public sealed record WithdrawFromAccount(
-    Guid AccountId,
-    decimal Amount) 
+    AccountId AccountId,
+    Money Money)
     : ICommand, IRequest;
 
 public sealed record FreezeAccount(
-    Guid AccountId) 
+    AccountId AccountId)
     : ICommand, IRequest;
 
 public sealed record UnfreezeAccount(
-    Guid AccountId) 
+    AccountId AccountId)
     : ICommand, IRequest;
 
 public sealed record CloseAccount(
-    Guid AccountId) 
+    AccountId AccountId)
     : ICommand, IRequest;

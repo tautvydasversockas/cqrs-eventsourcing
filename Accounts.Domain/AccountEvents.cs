@@ -1,12 +1,9 @@
 ﻿namespace Accounts.Domain;
 
-public interface IEvent { }
-
 public sealed record AccountOpened(
     Guid AccountId,
     Guid ClientId,
-    decimal InterestRate,
-    decimal Balance)
+    decimal InterestRate)
     : IEvent;
 
 public sealed record AddedInterestsToAccount(

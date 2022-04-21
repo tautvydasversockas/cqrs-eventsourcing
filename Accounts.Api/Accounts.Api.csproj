@@ -37,6 +37,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Using Include="CSharpFunctionalExtensions" />
 		<Using Include="MediatR" />
 		<Using Include="EventStore.Client" />
 		<Using Include="System.Net" />
@@ -45,6 +46,7 @@
 		<Using Include="FluentMigrator.Runner" />
 		<Using Include="FluentValidation" />
 		<Using Include="FluentValidation.AspNetCore" />
+		<Using Include="FluentValidation.Results" />
 		<Using Include="MicroElements.Swashbuckle.FluentValidation" />
 		<Using Include="Microsoft.OpenApi.Models" />
 		<Using Include="Microsoft.AspNetCore.Mvc" />
@@ -56,6 +58,7 @@
 		<Using Include="Accounts.Infrastructure.HealthChecks" />
 		<Using Include="Accounts.ReadModel" />
 		<Using Include="Accounts.ReadModel.Migrations" />
+		<Using Include="Accounts.Application.Commands" />
 		<Using Include="Accounts.Application.Handlers" />
 		<Using Include="Accounts.Domain" />
 		<Using Include="Accounts.Domain.Common" />

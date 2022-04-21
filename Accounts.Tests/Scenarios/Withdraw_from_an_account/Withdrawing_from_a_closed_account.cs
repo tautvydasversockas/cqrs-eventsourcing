@@ -4,13 +4,13 @@ public sealed class Withdrawing_from_a_closed_account : AccountSpecification<Wit
 {
     protected override IEnumerable<IEvent> Given()
     {
-        yield return new AccountOpened(AccountId, Guid.NewGuid(), 0, 200);
+        yield return new AccountOpened(AccountId, Guid.NewGuid(), 0);
         yield return new AccountClosed(AccountId);
     }
 
     protected override WithdrawFromAccount When()
     {
-        return new(AccountId, 100);
+        return new(AccountId, new Money(100));
     }
 
     protected override IEnumerable<IEvent> Then()

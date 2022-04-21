@@ -2,6 +2,6 @@
 
 public static class HealthCheckTag
 {
-    public const string Readiness = "r";
-    public const string Liveness = "l";
+    public const string Readiness = "R";
+    public const string Liveness = "L";
 }

@@ -1,17 +1,5 @@
 ﻿namespace Accounts.Domain;
 
-public abstract class DomainException : Exception
-{
-    protected DomainException(string message)
-        : base(message) { }
-}
-
-public sealed class EntityNotFoundException : DomainException
-{
-    public EntityNotFoundException(string name, object key)
-        : base($"Entity '{name}' ({key}) was not found.") { }
-}
-
 public sealed class FrozenAccountException : DomainException
 {
     public FrozenAccountException()

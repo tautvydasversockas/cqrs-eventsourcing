@@ -9,15 +9,13 @@
 
 	<ItemGroup>
 		<PackageReference Include="CSharpFunctionalExtensions" Version="2.28.0" />
-		<PackageReference Include="MediatR" Version="10.0.1" />
 		<PackageReference Include="ReflectionMagic" Version="4.1.0" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<Using Include="CSharpFunctionalExtensions" />
 		<Using Include="ReflectionMagic" />
-		<Using Include="MediatR" />
-		<Using Include="Accounts.Domain.Account.Status" Static="true" />
+		<Using Include="Accounts.Domain.AccountStatus" Static="true" />
 		<Using Include="Accounts.Domain.Common" />
 	</ItemGroup>
 

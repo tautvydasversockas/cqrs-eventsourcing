@@ -4,7 +4,7 @@ public sealed class Adding_interests_to_a_closed_account : AccountSpecification<
 {
     protected override IEnumerable<IEvent> Given()
     {
-        yield return new AccountOpened(AccountId, Guid.NewGuid(), 0, 0);
+        yield return new AccountOpened(AccountId, Guid.NewGuid(), 0);
         yield return new AccountClosed(AccountId);
     }
 

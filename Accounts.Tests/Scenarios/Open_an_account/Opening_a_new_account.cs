@@ -2,15 +2,15 @@
 
 public sealed class Opening_a_new_account : AccountSpecification<OpenAccount>
 {
-    private readonly Guid _clientId = Guid.NewGuid();
+    private readonly ClientId _clientId = new(Guid.NewGuid());
 
     protected override OpenAccount When()
     {
-        return new(_clientId, 0, 0);
+        return new(_clientId, new InterestRate(0));
     }
 
     protected override IEnumerable<IEvent> Then()
     {
-        yield return new AccountOpened(AccountId, _clientId, 0, 0);
+        yield return new AccountOpened(AccountId, _clientId, 0);
     }
 }

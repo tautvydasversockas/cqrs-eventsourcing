@@ -4,13 +4,13 @@ public sealed class Depositing_to_a_frozen_account : AccountSpecification<Deposi
 {
     protected override IEnumerable<IEvent> Given()
     {
-        yield return new AccountOpened(AccountId, Guid.NewGuid(), 0, 0);
+        yield return new AccountOpened(AccountId, Guid.NewGuid(), 0);
         yield return new AccountFrozen(AccountId);
     }
 
     protected override DepositToAccount When()
     {
-        return new(AccountId, 100);
+        return new(AccountId, new Money(100));
     }
 
     protected override IEnumerable<IEvent> Then()

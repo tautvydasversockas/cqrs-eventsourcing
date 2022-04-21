@@ -37,6 +37,7 @@
 		<Using Include="Microsoft.Extensions.DependencyInjection" />
 		<Using Include="Microsoft.Extensions.DependencyInjection.Extensions" />
 		<Using Include="Accounts.Api" />
+		<Using Include="Accounts.Application.Commands" />
 		<Using Include="Accounts.Application.Handlers" />
 		<Using Include="Accounts.Domain" />
 		<Using Include="Accounts.Domain.Common" />

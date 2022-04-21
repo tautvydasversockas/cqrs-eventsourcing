@@ -4,12 +4,12 @@ public sealed class Depositing_to_an_active_account : AccountSpecification<Depos
 {
     protected override IEnumerable<IEvent> Given()
     {
-        yield return new AccountOpened(AccountId, Guid.NewGuid(), 0, 0);
+        yield return new AccountOpened(AccountId, Guid.NewGuid(), 0);
     }
 
     protected override DepositToAccount When()
     {
-        return new(AccountId, 100);
+        return new(AccountId, new Money(100));
     }
 
     protected override IEnumerable<IEvent> Then()

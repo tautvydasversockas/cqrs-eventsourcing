@@ -4,7 +4,8 @@ public sealed class Adding_interests_to_an_active_account : AccountSpecification
 {
     protected override IEnumerable<IEvent> Given()
     {
-        yield return new AccountOpened(AccountId, Guid.NewGuid(), 0.1m, 100);
+        yield return new AccountOpened(AccountId, Guid.NewGuid(), 0.1m);
+        yield return new DepositedToAccount(AccountId, 100);
     }
 
     protected override AddInterestsToAccount When()
