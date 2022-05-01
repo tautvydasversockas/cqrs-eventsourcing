@@ -2,12 +2,8 @@
 
 public sealed class BackgroundServiceHealthCheck : IHealthCheck
 {
-    private readonly TimeSpan _timeout;
-
-    public BackgroundServiceHealthCheck(TimeSpan timeout)
-    {
-        _timeout = timeout;
-    }
+    public TimeSpan Timeout { get; set; } = TimeSpan.FromHours(1);
+    public Func<DateTimeOffset, bool> WorkingHours { get; set; } = _ => true;
 
     public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken token = default)
     {
@@ -20,6 +16,11 @@ public sealed class BackgroundServiceHealthCheck : IHealthCheck
 
     private bool IsTimedOut()
     {
-        return BackgroundServiceStatistics.LastProcessTime.Add(_timeout) < DateTimeOffset.Now;
+        var now = DateTimeOffset.UtcNow;
+        if (!WorkingHours(now))
+            return false;
+
+        var lastProcessTime = BackgroundServiceStatistics.LastProcessTime;
+        return lastProcessTime.Add(Timeout) < DateTimeOffset.UtcNow;
     }
 }

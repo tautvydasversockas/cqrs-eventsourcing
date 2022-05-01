@@ -3,7 +3,7 @@
 public static class BackgroundServiceStatistics
 {
     private static readonly object LockObject = new();
-    private static DateTimeOffset _lastProcessTime;
+    private static DateTimeOffset _lastProcessTime = DateTimeOffset.UtcNow;
 
     public static DateTimeOffset LastProcessTime
     {
@@ -17,6 +17,6 @@ public static class BackgroundServiceStatistics
     public static void SetLastProcessTime()
     {
         lock (LockObject)
-            _lastProcessTime = DateTimeOffset.Now;
+            _lastProcessTime = DateTimeOffset.UtcNow;
     }
 }

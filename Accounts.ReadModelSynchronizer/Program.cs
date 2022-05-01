@@ -10,9 +10,7 @@ var mySqlConnectionString = builder.Configuration["MySql:ConnectionString"];
 
 builder.Services
     .AddHealthChecks()
-    .AddCheck(
-        instance: new BackgroundServiceHealthCheck(
-            timeout: TimeSpan.FromMinutes(5)),
+    .AddCheck<BackgroundServiceHealthCheck>(
         name: "Processing",
         tags: new[] { HealthCheckTag.Liveness })
     .AddMySql(
