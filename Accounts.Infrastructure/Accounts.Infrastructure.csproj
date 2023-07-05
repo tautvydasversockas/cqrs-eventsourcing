@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
@@ -10,7 +10,7 @@
 	<ItemGroup>
 		<PackageReference Include="AspNetCore.HealthChecks.MySql" Version="6.0.1" />
 		<PackageReference Include="EventStore.Client.Grpc.Streams" Version="20.10.0" />
-		<PackageReference Include="Grpc.Net.Client" Version="2.42.0" />
+		<PackageReference Include="Grpc.Net.Client" Version="2.52.0" />
 		<PackageReference Include="System.Linq.Async" Version="6.0.1" />
 		<PackageReference Include="Microsoft.AspNetCore.Diagnostics.HealthChecks" Version="2.2.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
